@@ -17,4 +17,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/register/step-2', function () {
+    return view('auth.register-step2');
+})->name('register.step2');
+
+Route::get('/register/step-3', function () {
+    return view('auth.register-step3');
+})->name('register.step3');
+
+Route::get('/register/welcome', function () {
+    return view('auth.welcome-setup');
+})->name('register.welcome');
+
 require __DIR__.'/auth.php';

@@ -128,8 +128,8 @@
 </div>
 <div class="hidden md:flex items-center gap-xs space-x-8"><a class="text-slate-600 font-medium hover:text-primary-container transition-colors duration-200" href="#features">Funcionalidades</a><a class="text-slate-600 font-medium hover:text-primary-container transition-colors duration-200" href="#how-it-works">Cómo Funciona</a></div>
 <div class="flex items-center gap-sm">
-<button class="hidden lg:block text-slate-600 font-semibold px-4 py-2">Iniciar Sesión</button>
-<button class="bg-primary-container text-white font-semibold px-6 py-2.5 rounded-lg shadow-lg shadow-orange-500/20 active:scale-95 transition-all">Registrarse Gratis</button>
+<a href="{{ route('login') }}" class="hidden lg:block text-slate-600 font-semibold px-4 py-2">Iniciar Sesión</a>
+<a href="{{ route('register') }}" class="bg-primary-container text-white font-semibold px-6 py-2.5 rounded-lg shadow-lg shadow-orange-500/20 active:scale-95 transition-all inline-block">Registrarse Gratis</a>
 </div>
 </div>
 </nav>
@@ -148,7 +148,7 @@
                     GoToEat es la herramienta administrativa gratuita que centraliza tu operación, optimiza tus costos y potencia tus ventas.
                 </p>
 <div class="flex flex-wrap gap-sm pt-xs">
-<button class="bg-primary-container text-on-primary font-semibold px-8 py-4 rounded-xl text-body-lg shadow-xl shadow-primary-container/30 hover:translate-y-[-2px] active:scale-95 transition-all">Empieza Gratis</button>
+<a href="{{ route('register') }}" class="bg-primary-container text-on-primary font-semibold px-8 py-4 rounded-xl text-body-lg shadow-xl shadow-primary-container/30 hover:translate-y-[-2px] active:scale-95 transition-all inline-block">Empieza Gratis</a>
 </div>
 </div>
 <div class="relative perspective-3d flex justify-center items-center">
@@ -219,7 +219,7 @@
 </li>
 </ul>
 </div>
-<button class="mt-xl bg-white text-primary-container font-bold px-8 py-4 rounded-xl text-body-lg hover:scale-105 active:scale-95 transition-all">Empieza Gratis Ahora</button>
+<a href="{{ route('register') }}" class="mt-xl bg-white text-primary-container font-bold px-8 py-4 rounded-xl text-body-lg hover:scale-105 active:scale-95 transition-all inline-block">Empieza Gratis Ahora</a>
 </div>
 </div>
 </section>
@@ -320,7 +320,7 @@
 <h2 class="font-h1 text-h1 mb-md">Únete a la revolución gastronómica</h2>
 <p class="text-body-lg opacity-90 max-w-2xl mx-auto mb-xl">Empieza hoy mismo a profesionalizar tu restaurante sin gastar un solo centavo. El futuro de tu negocio comienza aquí.</p>
 <div class="flex flex-wrap justify-center gap-md">
-<button class="bg-white text-primary-container font-bold px-10 py-5 rounded-xl text-body-lg shadow-2xl hover:scale-105 active:scale-95 transition-all">Empieza Gratis</button>
+<a href="{{ route('register') }}" class="bg-white text-primary-container font-bold px-10 py-5 rounded-xl text-body-lg shadow-2xl hover:scale-105 active:scale-95 transition-all inline-block">Empieza Gratis</a>
 <button class="border-2 border-white text-white font-bold px-10 py-5 rounded-xl text-body-lg hover:bg-white/10 transition-colors">Saber más</button>
 </div>
 </div>
