@@ -10,7 +10,7 @@ Route::get('/', function () {
 
 // Dashboard: redirige al panel correspondiente según el rol del usuario
 Route::get('/dashboard', DashboardController::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
