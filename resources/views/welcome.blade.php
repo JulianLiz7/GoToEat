@@ -148,7 +148,12 @@
                     GoToEat es la herramienta administrativa gratuita que centraliza tu operación, optimiza tus costos y potencia tus ventas.
                 </p>
 <div class="flex flex-wrap gap-sm pt-xs">
-<a href="{{ route('register') }}" class="bg-primary-container text-on-primary font-semibold px-8 py-4 rounded-xl text-body-lg shadow-xl shadow-primary-container/30 hover:translate-y-[-2px] active:scale-95 transition-all inline-block">Empieza Gratis</a>
+<a href="{{ route('register') }}" class="bg-primary-container text-on-primary font-semibold px-8 py-4 rounded-xl text-body-lg shadow-xl shadow-primary-container/30 hover:translate-y-[-2px] active:scale-95 transition-all inline-block flex items-center gap-2">
+    <span class="material-symbols-outlined">store</span> Registrar mi restaurante
+</a>
+<a href="{{ route('register') }}" class="bg-white text-secondary border-2 border-secondary font-semibold px-8 py-4 rounded-xl text-body-lg hover:bg-green-50 active:scale-95 transition-all inline-block flex items-center gap-2">
+    <span class="material-symbols-outlined">explore</span> Buscar restaurantes
+</a>
 </div>
 </div>
 <div class="relative perspective-3d flex justify-center items-center">
@@ -161,6 +166,78 @@
 </div>
 </div>
 </header>
+
+<!-- ── Dual-Path Section: Administrador vs Cliente ─────────────────── -->
+<section class="py-16 px-6 md:px-12 bg-white border-b border-slate-100">
+<div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+        <p class="text-label-caps font-label-caps text-primary-container uppercase tracking-widest mb-2">Para todos</p>
+        <h2 class="font-h2 text-h2 text-on-background">¿Cómo quieres usar GoToEat?</h2>
+        <p class="text-body-md text-on-surface-variant mt-2 max-w-xl mx-auto">
+            Tanto si gestionas un restaurante como si buscas dónde comer, GoToEat tiene lo que necesitas.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {{-- Card Administrador --}}
+        <div class="group relative rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white p-8 hover:border-primary-container hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-primary-container/10 rounded-2xl flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-3xl text-primary-container">store</span>
+            </div>
+            <h3 class="font-h3 text-h3 text-on-background mb-2">Soy dueño de restaurante</h3>
+            <p class="text-body-sm text-on-surface-variant mb-6">
+                Gestiona tu operación completa: menú, mesas, personal y finanzas desde un solo panel.
+            </p>
+            <ul class="space-y-2 mb-8 text-body-sm text-on-surface-variant">
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary-container">check_circle</span> Control de pedidos en tiempo real</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary-container">check_circle</span> Gestión de inventario y personal</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary-container">check_circle</span> Reportes financieros automáticos</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-primary-container">check_circle</span> Generación de QR para mesas</li>
+            </ul>
+            <a href="{{ route('register') }}"
+               class="inline-flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-orange-500/20">
+                <span class="material-symbols-outlined text-lg">rocket_launch</span>
+                Registrar mi restaurante
+            </a>
+            @auth
+                @if(auth()->user()->hasRole('admin'))
+                <a href="{{ route('dashboard') }}" class="ml-3 text-sm text-primary-container font-medium hover:underline">Ir a mi panel →</a>
+                @endif
+            @endauth
+        </div>
+
+        {{-- Card Cliente --}}
+        <div class="group relative rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-white p-8 hover:border-secondary hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-3xl text-secondary">explore</span>
+            </div>
+            <h3 class="font-h3 text-h3 text-on-background mb-2">Busco dónde comer</h3>
+            <p class="text-body-sm text-on-surface-variant mb-6">
+                Encuentra restaurantes por tipo de cocina, especialidades y precio. Próximamente con sugerencias de IA.
+            </p>
+            <ul class="space-y-2 mb-8 text-body-sm text-on-surface-variant">
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary">check_circle</span> Catálogo de restaurantes verificados</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary">check_circle</span> Filtros por cocina y especialidad</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary">check_circle</span> Escanear QR de mesa</li>
+                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary">check_circle</span> IA de sugerencias <span class="ml-1 text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded-full">Próximamente</span></li>
+            </ul>
+            <a href="{{ route('register') }}"
+               class="inline-flex items-center gap-2 bg-secondary text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-green-500/20">
+                <span class="material-symbols-outlined text-lg">restaurant_menu</span>
+                Explorar restaurantes
+            </a>
+            @auth
+                @if(auth()->user()->hasRole('cliente'))
+                <a href="{{ route('dashboard') }}" class="ml-3 text-sm text-secondary font-medium hover:underline">Ir a mi panel →</a>
+                @endif
+            @endauth
+        </div>
+
+    </div>
+</div>
+</section>
+
 <!-- Problem/Solution Section -->
 <section class="py-xl bg-surface-container-low px-6 md:px-12">
 <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-xl items-stretch">
