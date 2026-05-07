@@ -1,16 +1,11 @@
 <x-app-layout>
 
 @if(!$restaurant)
-    {{-- ── Sin restaurante: mostrar formulario de creación ─────── --}}
-    <div class="max-w-2xl mx-auto">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-primary-container/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-3xl text-primary-container">add_business</span>
-            </div>
-            <h1 class="text-2xl font-bold font-heading text-on-background">Crea tu restaurante</h1>
-            <p class="text-on-surface-variant mt-1">Configura tu establecimiento para comenzar a gestionar tu negocio.</p>
-        </div>
-        <livewire:restaurant.create-restaurant-form />
+    {{-- El DashboardController redirige al onboarding antes de llegar aquí --}}
+    <div class="flex items-center justify-center py-20">
+        <a href="{{ route('onboarding.step1') }}" class="inline-flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined">add_business</span> Configurar mi restaurante
+        </a>
     </div>
 @else
     {{-- ── Dashboard del administrador ──────────────────────────── --}}

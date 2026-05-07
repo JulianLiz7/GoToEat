@@ -19,7 +19,13 @@ class DashboardController extends Controller
     private function adminView($user)
     {
         $restaurant = $user->ownedRestaurants()->first();
-        $rid        = $restaurant?->id;
+
+        // Sin restaurante: iniciar onboarding
+        if (!$restaurant) {
+            return redirect()->route('onboarding.step1');
+        }
+
+        $rid = $restaurant->id;
 
         $stats = [
             'todayOrders'    => DB::table('orders')->where('restaurant_id', $rid)->whereDate('created_at', today())->count(),
