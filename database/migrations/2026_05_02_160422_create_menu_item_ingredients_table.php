@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('menu_item_ingredients', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('menu_item_id')->constrained()->onDelete('cascade');
+            $table->foreignId('inventory_item_id')->constrained()->onDelete('cascade');
+            $table->decimal('quantity_required', 8, 2);
             $table->timestamps();
         });
     }

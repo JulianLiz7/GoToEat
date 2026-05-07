@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('tips', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('order_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('employee_id')->nullable()->constrained()->onDelete('set null');
+            $table->decimal('amount', 10, 2);
+            $table->date('date');
+            $table->string('payment_method')->default('cash');
             $table->timestamps();
         });
     }

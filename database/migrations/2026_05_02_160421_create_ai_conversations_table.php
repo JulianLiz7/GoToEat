@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('ai_conversations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+            $table->text('prompt');
+            $table->text('response');
             $table->timestamps();
         });
     }
