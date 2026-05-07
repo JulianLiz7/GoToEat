@@ -1,5 +1,9 @@
 
 services:
+
+  # ── Aplicación PHP-FPM ──────────────────────────────────────
+  # Ejecuta el código Laravel. Habla FastCGI (puerto 9000).
+  # Nginx recibe el request HTTP y lo delega aquí.
   app:
     build:
       context: ..
@@ -9,7 +13,30 @@ services:
       - ..:/var/www
     depends_on:
       - db
+    restart: on-failure
 
+  # ── Queue Worker ─────────────────────────────────────────────
+  # Procesa los Jobs en background (QUEUE_CONNECTION=database).
+  # Es el MISMO contenedor que "app" pero con comando diferente.
+  # Sin este servicio los Jobs quedan en la tabla "jobs" para siempre.
+  queue:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: laravel_queue
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    volumes:
+      - ..:/var/www
+    depends_on:
+      - app
+      - db
+    restart: on-failure
+
+  # ── Nginx (Reverse Proxy) ─────────────────────────────────────
+  # Punto de entrada único de todo el tráfico HTTP.
+  # Sirve assets estáticos directamente (sin pasar por PHP).
+  # Enruta /api/ y el resto a php_fpm via FastCGI.
+  # En el futuro enrutará sub-paths a microservicios HTTP separados.
   nginx:
     image: nginx:latest
     container_name: laravel_nginx
@@ -20,7 +47,9 @@ services:
       - ./nginx:/etc/nginx/conf.d
     depends_on:
       - app
+    restart: on-failure
 
+  # ── Base de datos MySQL ───────────────────────────────────────
   db:
     image: mysql:8
     container_name: laravel_db
@@ -35,6 +64,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+  # ── phpMyAdmin ───────────────────────────────────────────────
+  # Interfaz web para administrar la BD. Solo para desarrollo.
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: laravel_phpmyadmin
@@ -44,6 +75,30 @@ services:
       PMA_HOST: db
     depends_on:
       - db
+
+  # ── Microservicio IA (comentado hasta que se implemente) ──────
+  # ai_service:
+  #   build:
+  #     context: ../services/ai
+  #     dockerfile: Dockerfile
+  #   container_name: gotoeat_ai
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
+  #   restart: on-failure
+
+  # ── Microservicio Notificaciones / WebSockets (comentado) ─────
+  # notif_service:
+  #   image: node:20-alpine
+  #   container_name: gotoeat_notif
+  #   working_dir: /app
+  #   command: node server.js
+  #   volumes:
+  #     - ../services/notifications:/app
+  #   ports:
+  #     - "6001:6001"
+  #   restart: on-failure
 
 volumes:
   db_data:

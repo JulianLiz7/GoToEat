@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(docker compose *)",
-      "Bash(docker exec *)"
+      "Bash(docker exec *)",
+      "Bash(grep -r \"namespace App\\\\\\\\Domains\" \"c:\\\\Users\\\\TomasPro\\\\Documents\\\\GoToEat\\\\app\" --include=\"*.php\")"
     ]
   }
 }
