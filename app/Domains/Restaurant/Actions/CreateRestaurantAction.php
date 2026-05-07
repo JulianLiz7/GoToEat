@@ -24,12 +24,16 @@ class CreateRestaurantAction
             'status' => 'active',
         ]);
 
-        // Automatically add the owner to the restaurant_user pivot table as 'owner'
         $restaurant->users()->attach($user->id, [
-            'role' => 'owner',
-            'status' => 'active',
+            'role'      => 'owner',
+            'status'    => 'active',
             'joined_at' => now(),
         ]);
+
+        // Escalate user to admin role when they become a restaurant owner
+        if (! $user->hasRole('admin')) {
+            $user->assignRole('admin');
+        }
 
         return $restaurant;
     }
