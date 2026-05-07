@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Domains\Auth\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
