@@ -25,6 +25,7 @@ class RegisteredUserController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role'     => ['required', 'in:comensal,restaurante'],
         ]);
 
         $user = User::create([
@@ -33,11 +34,19 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->assignRole('cliente');
+        if ($request->role === 'restaurante') {
+            $user->assignRole('admin');
+        } else {
+            $user->assignRole('cliente');
+        }
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($request->role === 'comensal') {
+            return redirect()->route('welcome.comensal');
+        }
 
         return redirect(route('dashboard', absolute: false));
     }
