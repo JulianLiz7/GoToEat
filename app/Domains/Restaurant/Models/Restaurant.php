@@ -4,6 +4,15 @@ namespace App\Domains\Restaurant\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Domains\Auth\Models\User;
+use App\Domains\Staff\Models\Employee;
+use App\Domains\Menu\Models\MenuItem;
+use App\Domains\Tables\Models\RestaurantTable;
+use App\Domains\Orders\Models\Order;
+use App\Domains\Finance\Models\Expense;
+use App\Domains\Finance\Models\Tip;
+use App\Domains\Inventory\Models\InventoryItem;
+use App\Domains\AI\Models\AIConversation;
 
 class Restaurant extends Model
 {
@@ -14,46 +23,55 @@ class Restaurant extends Model
         'category', 'cuisine_type', 'address', 'phone', 'email', 'status',
     ];
 
-    public function owner()
+    public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(\App\Domains\Auth\Models\User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function users()
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(
-            \App\Domains\Auth\Models\User::class,
-            'restaurant_user'
-        )->withPivot('role', 'status', 'joined_at')->withTimestamps();
+        return $this->belongsToMany(User::class, 'restaurant_user')
+            ->withPivot('role', 'status', 'joined_at')
+            ->withTimestamps();
     }
 
-    public function employees()
+    public function employees(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Employee::class);
+        return $this->hasMany(Employee::class);
     }
 
-    public function menuItems()
+    public function menuItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\MenuItem::class);
+        return $this->hasMany(MenuItem::class);
     }
 
-    public function tables()
+    public function inventoryItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Table::class);
+        return $this->hasMany(InventoryItem::class);
     }
 
-    public function orders()
+    public function tables(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Order::class);
+        return $this->hasMany(RestaurantTable::class);
     }
 
-    public function expenses()
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Expense::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function tips()
+    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Tip::class);
+        return $this->hasMany(Expense::class);
+    }
+
+    public function tips(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Tip::class);
+    }
+
+    public function aiConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AIConversation::class);
     }
 }
