@@ -3,18 +3,22 @@
 use App\Domains\Auth\Controllers\Web\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminMenuController;
+use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\Admin\AdminTablesController;
+use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminAIController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => view('welcome'));
 
 // Dashboard: enruta al panel según el rol
 Route::get('/dashboard', DashboardController::class)
     ->middleware('auth')
     ->name('dashboard');
 
-// Onboarding de restaurante (solo admins autenticados sin restaurante)
+// ── Onboarding de restaurante ─────────────────────────────────────
 Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(function () {
     Route::get('/step-1',  [OnboardingController::class, 'step1'])->name('step1');
     Route::post('/step-1', [OnboardingController::class, 'storeStep1'])->name('step1.store');
@@ -25,19 +29,24 @@ Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(func
     Route::get('/welcome', [OnboardingController::class, 'welcome'])->name('welcome');
 });
 
+// ── Panel de administrador del local ─────────────────────────────
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
+    Route::get('/menu',      [AdminMenuController::class, 'index'])->name('menu');
+    Route::get('/staff',     [AdminStaffController::class, 'index'])->name('staff');
+    Route::get('/staff/new', [AdminStaffController::class, 'create'])->name('staff.create');
+    Route::get('/tables',    [AdminTablesController::class, 'index'])->name('tables');
+    Route::get('/tables/new',[AdminTablesController::class, 'create'])->name('tables.create');
+    Route::get('/finance',   [AdminFinanceController::class, 'index'])->name('finance');
+    Route::get('/ai',        [AdminAIController::class, 'index'])->name('ai');
+    Route::post('/ai/ask',   [AdminAIController::class, 'ask'])->name('ai.ask');
+});
+
+// ── Perfil y zona de cliente ──────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    Route::get('/welcome-comensal', function () {
-        return view('welcome-comensal');
-    })->name('welcome.comensal');
-
-    Route::get('/reservas', function () {
-        return view('cliente.reservas');
-    })->name('reservas');
-
-    Route::get('/perfil', function () {
-        return view('cliente.perfil');
-    })->name('perfil');
-
+    Route::get('/welcome-comensal', fn () => view('welcome-comensal'))->name('welcome.comensal');
+    Route::get('/reservas',         fn () => view('cliente.reservas'))->name('reservas');
+    Route::get('/perfil',           fn () => view('cliente.perfil'))->name('perfil');
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
