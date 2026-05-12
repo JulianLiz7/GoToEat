@@ -1,79 +1,65 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Domains\Staff\Controllers\Api\EmployeeController;
+use App\Domains\Menu\Controllers\Api\MenuItemController;
+use App\Domains\Inventory\Controllers\Api\InventoryController;
+use App\Domains\Tables\Controllers\Api\TableController;
+use App\Domains\Orders\Controllers\Api\OrderController;
+use App\Domains\Finance\Controllers\Api\ExpenseController;
+use App\Domains\Finance\Controllers\Api\TipController;
+use App\Domains\AI\Controllers\Api\AIController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes — GoToEat v1
 |--------------------------------------------------------------------------
-|
-| All API routes are prefixed with /api/v1 and use Sanctum for
-| authentication. Each domain registers its own routes below.
-|
 */
 
 Route::prefix('v1')->group(function () {
 
-    // ── Public routes (no auth required) ──────────────────────────
-    Route::get('/health', function () {
-        return response()->json([
-            'status' => 'ok',
-            'version' => 'v1',
-            'timestamp' => now()->toIso8601String(),
-        ]);
-    })->name('api.health');
+    // ── Public ────────────────────────────────────────────────────────
+    Route::get('/health', fn () => response()->json([
+        'status'    => 'ok',
+        'version'   => 'v1',
+        'timestamp' => now()->toIso8601String(),
+    ]))->name('api.health');
 
-    // ── Auth routes ───────────────────────────────────────────────
-    Route::prefix('auth')->group(function () {
-        // Future: login, register, logout API endpoints
-    });
-
-    // ── Protected routes (require Sanctum token) ──────────────────
+    // ── Protected (Sanctum) ───────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
 
-        // User profile
-        Route::get('/user', function (\Illuminate\Http\Request $request) {
-            return $request->user();
-        })->name('api.user');
+        Route::get('/user', fn (\Illuminate\Http\Request $r) => $r->user())->name('api.user');
 
-        // ── Restaurant domain ─────────────────────────────────────
-        Route::prefix('restaurants')->group(function () {
-            // Future: RestaurantController CRUD
-        });
+        // ── Staff ─────────────────────────────────────────────────────
+        Route::apiResource('staff', EmployeeController::class);
 
-        // ── Menu domain ───────────────────────────────────────────
-        Route::prefix('menu-items')->group(function () {
-            // Future: MenuItemController CRUD
-        });
+        // ── Menu ──────────────────────────────────────────────────────
+        Route::apiResource('menu-items', MenuItemController::class);
+        Route::patch('menu-items/{id}/toggle', [MenuItemController::class, 'toggleAvailability'])
+            ->name('menu-items.toggle');
 
-        // ── Orders domain ─────────────────────────────────────────
-        Route::prefix('orders')->group(function () {
-            // Future: OrderController CRUD
-        });
+        // ── Inventory ─────────────────────────────────────────────────
+        Route::apiResource('inventory', InventoryController::class);
+        Route::get('inventory/alerts/low-stock', [InventoryController::class, 'lowStock'])
+            ->name('inventory.low-stock');
 
-        // ── Inventory domain ──────────────────────────────────────
-        Route::prefix('inventory')->group(function () {
-            // Future: InventoryController CRUD
-        });
+        // ── Tables ────────────────────────────────────────────────────
+        Route::apiResource('tables', TableController::class);
+        Route::patch('tables/{id}/status/{status}', [TableController::class, 'updateStatus'])
+            ->name('tables.status');
 
-        // ── Staff domain ──────────────────────────────────────────
-        Route::prefix('staff')->group(function () {
-            // Future: EmployeeController CRUD
-        });
+        // ── Orders ────────────────────────────────────────────────────
+        Route::apiResource('orders', OrderController::class);
 
-        // ── Tables domain ─────────────────────────────────────────
-        Route::prefix('tables')->group(function () {
-            // Future: TableController CRUD
-        });
+        // ── Finance ───────────────────────────────────────────────────
+        Route::apiResource('expenses', ExpenseController::class);
+        Route::get('tips', [TipController::class, 'index'])->name('tips.index');
+        Route::get('tips/liquidation', [TipController::class, 'liquidation'])->name('tips.liquidation');
 
-        // ── Finance domain ────────────────────────────────────────
-        Route::prefix('finance')->group(function () {
-            // Future: ExpenseController, TipController CRUD
-        });
-
-        // ── AI domain ─────────────────────────────────────────────
-        Route::prefix('ai')->group(function () {
-            // Future: AIController endpoints
-        });
+        // ── AI ────────────────────────────────────────────────────────
+        Route::get('ai/conversations', [AIController::class, 'index'])->name('ai.index');
+        Route::post('ai/ask', [AIController::class, 'ask'])->name('ai.ask');
+        Route::get('ai/conversations/{id}', [AIController::class, 'show'])->name('ai.show');
+        Route::get('ai/alerts', [AIController::class, 'alerts'])->name('ai.alerts');
     });
 });
