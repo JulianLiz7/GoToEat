@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class AdminMenuController extends Controller
 {
@@ -29,12 +30,18 @@ class AdminMenuController extends Controller
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
             'prep_time'   => 'nullable|integer|min:1',
-            'available'   => 'boolean',
-            'is_featured' => 'boolean',
+            'tags'        => 'nullable|string|max:255',
+            'image'       => 'nullable|image|max:2048',
         ]);
 
-        $data['available']   = $request->boolean('available', true);
+        // El radio de disponibilidad se envía como "available_radio"
+        $data['available']   = $request->input('available_radio', '1') === '1';
         $data['is_featured'] = $request->boolean('is_featured', false);
+
+        // Guardar imagen en storage/public/menu
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('menu', 'public');
+        }
 
         $restaurant->menuItems()->create($data);
 

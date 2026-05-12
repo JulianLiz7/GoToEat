@@ -21,8 +21,8 @@
 
 {{-- ══ KPI Bento ══════════════════════════════════════════════════ --}}
 @php
-$totalValue = $items->sum(fn($i) => ($i->quantity ?? 0) * ($i->cost_price ?? 0));
-$lowCount   = $lowStockItems->count();
+$lowCount = $lowStockItems->count();
+// $totalValue viene del controller
 @endphp
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-50 flex flex-col justify-between">
@@ -74,7 +74,7 @@ $lowCount   = $lowStockItems->count();
         <div>
             <p class="text-gray-500 text-sm font-medium">Categorías</p>
             <p class="text-3xl font-black font-heading mt-1">
-                {{ $items->pluck('category')->filter()->unique()->count() }}
+                {{ $items->getCollection()->pluck('category')->filter()->unique()->count() }}
             </p>
         </div>
     </div>
