@@ -1,6 +1,5 @@
 <x-admin-layout :restaurant="$restaurant">
 <x-slot name="title">Menú</x-slot>
-@php use Illuminate\Support\Facades\Storage; @endphp
 
 {{-- ══ Encabezado ════════════════════════════════════════════════ --}}
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -46,7 +45,7 @@ $allCategories = $itemsByCategory->keys()->filter()->values();
             {{-- Imagen --}}
             <div class="relative h-56 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
                 @if($item->image)
-                <img src="{{ str_starts_with($item->image, 'http') ? $item->image : Storage::url($item->image) }}"
+                <img src="{{ str_starts_with($item->image, 'http') ? $item->image : \Illuminate\Support\Facades\Storage::url($item->image) }}"
                      alt="{{ $item->name }}"
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
                 @else
