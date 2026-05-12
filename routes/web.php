@@ -35,10 +35,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
     Route::get('/menu',      [AdminMenuController::class, 'index'])->name('menu');
     Route::post('/menu',     [AdminMenuController::class, 'store'])->name('menu.store');
-    Route::get('/staff',     [AdminStaffController::class, 'index'])->name('staff');
-    Route::get('/staff/new', [AdminStaffController::class, 'create'])->name('staff.create');
-    Route::get('/tables',    [AdminTablesController::class, 'index'])->name('tables');
-    Route::get('/tables/new',[AdminTablesController::class, 'create'])->name('tables.create');
+    Route::get('/staff',      [AdminStaffController::class,  'index'])->name('staff');
+    Route::get('/staff/new',  [AdminStaffController::class,  'create'])->name('staff.create');
+    Route::post('/staff',     [AdminStaffController::class,  'store'])->name('staff.store');
+    Route::get('/tables',     [AdminTablesController::class, 'index'])->name('tables');
+    Route::get('/tables/new', [AdminTablesController::class, 'create'])->name('tables.create');
+    Route::post('/tables',    [AdminTablesController::class, 'store'])->name('tables.store');
     Route::get('/finance',   [AdminFinanceController::class, 'index'])->name('finance');
     Route::get('/ai',        [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask',   [AdminAIController::class, 'ask'])->name('ai.ask');
