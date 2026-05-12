@@ -31,8 +31,10 @@ Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(func
 
 // ── Panel de administrador del local ─────────────────────────────
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory',  [AdminInventoryController::class, 'index'])->name('inventory');
+    Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
     Route::get('/menu',      [AdminMenuController::class, 'index'])->name('menu');
+    Route::post('/menu',     [AdminMenuController::class, 'store'])->name('menu.store');
     Route::get('/staff',     [AdminStaffController::class, 'index'])->name('staff');
     Route::get('/staff/new', [AdminStaffController::class, 'create'])->name('staff.create');
     Route::get('/tables',    [AdminTablesController::class, 'index'])->name('tables');
