@@ -1,21 +1,26 @@
-/* Fuentes — cargadas via CSS para evitar bloqueo de render */
+/* Sora + Inter — una sola request combinada */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+/*
+ * Material Symbols Outlined — variable font completo.
+ * Se importa desde Google Fonts con todos los ejes (FILL, wght, GRAD, opsz).
+ * NOTA: NO usar @font-face con URL estática — esas son subsets sin los ejes
+ * de variación y los iconos se renderizan como texto plano ("badge","groups").
+ */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Material Symbols — cargado como layer para no bloquear render */
 @layer base {
-    @font-face {
-        font-family: 'Material Symbols Outlined';
-        font-style: normal;
-        font-weight: 100 700;
-        src: url('https://fonts.gstatic.com/s/materialsymbolsoutlined/v229/kJEhBvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oFsI.woff2') format('woff2');
-        font-display: swap;
-    }
+    html { @apply antialiased; }
+    body { @apply bg-background text-on-background; }
+    [x-cloak] { display: none !important; }
 
+    /* Configuración de variación por defecto para todos los iconos */
     .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         font-family: 'Material Symbols Outlined';
         font-weight: normal;
         font-style: normal;
@@ -27,15 +32,9 @@
         white-space: nowrap;
         word-wrap: normal;
         direction: ltr;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
     }
-}
-
-@layer base {
-    html { @apply antialiased; }
-    body { @apply bg-background text-on-background; }
-    [x-cloak] { display: none !important; }
 }
 
 @layer utilities {
