@@ -331,33 +331,47 @@
      MODALES
 ══════════════════════════════════════════════════════════════ --}}
 
-{{-- ── Modal: Agregar ítem ─────────────────────────────────────── --}}
-<div id="modalAgregar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-orange-50/30">
+{{-- ══ MODAL: Agregar ítem ═══════════════════════════════════════════
+     Estructura: header fijo + cuerpo scrollable + footer fijo
+     Así los botones nunca quedan cortados sin importar el tamaño de pantalla --}}
+<div id="modalAgregar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl flex flex-col" style="max-height:90vh">
+
+        {{-- Header fijo --}}
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between
+                    bg-gradient-to-r from-white to-orange-50/40 rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">add_box</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg font-heading">Agregar nuevo ítem</h2>
+                    <h2 class="font-bold text-lg font-heading leading-tight">Agregar nuevo ítem</h2>
                     <p class="text-xs text-gray-400">Registra un ingrediente o materia prima</p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalAgregar')" class="p-2 hover:bg-gray-100 rounded-full">
-                <span class="material-symbols-outlined text-gray-400">close</span>
+            <button onclick="cerrarModal('modalAgregar')"
+                    class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
+                <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form method="POST" action="{{ route('admin.inventory.store') }}" class="p-7 space-y-4">
+
+        {{-- Cuerpo scrollable --}}
+        <form method="POST" action="{{ route('admin.inventory.store') }}" class="flex flex-col flex-1 overflow-hidden">
             @csrf
-            @include('admin.partials.inventory-form', ['modo' => 'agregar'])
-            <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+            <div class="flex-1 overflow-y-auto px-7 py-6">
+                @include('admin.partials.inventory-form', ['modo' => 'agregar'])
+            </div>
+
+            {{-- Footer fijo --}}
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalAgregar')"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-6 py-2.5 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 active:scale-95 shadow-sm shadow-orange-200 flex items-center gap-2">
+                        class="px-6 py-2.5 rounded-xl bg-orange-500 text-white text-sm font-bold
+                               hover:bg-orange-600 active:scale-95 shadow-sm shadow-orange-200
+                               transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">save</span>
                     Guardar ítem
                 </button>
@@ -366,34 +380,45 @@
     </div>
 </div>
 
-{{-- ── Modal: Editar ítem ───────────────────────────────────────── --}}
-<div id="modalEditar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-amber-50/30">
+{{-- ══ MODAL: Editar ítem ════════════════════════════════════════════ --}}
+<div id="modalEditar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl flex flex-col" style="max-height:90vh">
+
+        {{-- Header fijo --}}
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between
+                    bg-gradient-to-r from-white to-amber-50/40 rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">edit</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg font-heading">Editar ítem</h2>
-                    <p id="editarSubtitulo" class="text-xs text-gray-400"></p>
+                    <h2 class="font-bold text-lg font-heading leading-tight">Editar ítem</h2>
+                    <p id="editarSubtitulo" class="text-xs text-gray-400 truncate max-w-[240px]"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalEditar')" class="p-2 hover:bg-gray-100 rounded-full">
-                <span class="material-symbols-outlined text-gray-400">close</span>
+            <button onclick="cerrarModal('modalEditar')"
+                    class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
+                <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form id="formEditar" method="POST" action="" class="p-7 space-y-4">
-            @csrf
-            @method('PUT')
-            @include('admin.partials.inventory-form', ['modo' => 'editar'])
-            <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+
+        {{-- Cuerpo scrollable --}}
+        <form id="formEditar" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
+            @csrf @method('PUT')
+            <div class="flex-1 overflow-y-auto px-7 py-6">
+                @include('admin.partials.inventory-form', ['modo' => 'editar'])
+            </div>
+
+            {{-- Footer fijo --}}
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalEditar')"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 active:scale-95 shadow-sm shadow-amber-200 flex items-center gap-2">
+                        class="px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold
+                               hover:bg-amber-600 active:scale-95 shadow-sm shadow-amber-200
+                               transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">save</span>
                     Guardar cambios
                 </button>
@@ -402,112 +427,104 @@
     </div>
 </div>
 
-{{-- ── Modal: Ajustar stock ─────────────────────────────────────── --}}
-<div id="modalAjuste" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
+{{-- ══ MODAL: Ajustar stock ══════════════════════════════════════════ --}}
+<div id="modalAjuste" class="hidden fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col" style="max-height:90vh">
 
-        {{-- Header --}}
-        <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
+        {{-- Header fijo --}}
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between rounded-t-3xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">tune</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg font-heading leading-none">Ajustar stock</h2>
-                    <p id="ajusteSubtitulo" class="text-sm text-gray-400 mt-0.5 truncate max-w-[180px]"></p>
+                    <h2 class="font-bold text-lg font-heading leading-tight">Ajustar stock</h2>
+                    <p id="ajusteSubtitulo" class="text-xs text-gray-400 truncate max-w-[180px]"></p>
                 </div>
             </div>
             <button onclick="cerrarModal('modalAjuste')"
-                    class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 shrink-0">
+                    class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
 
-        <form id="formAjuste" method="POST" action="" class="px-8 py-7 space-y-7">
-            @csrf
-            @method('PATCH')
+        {{-- Cuerpo scrollable --}}
+        <form id="formAjuste" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
+            @csrf @method('PATCH')
 
-            {{-- Stock actual --}}
-            <div class="bg-gray-50 rounded-2xl py-5 px-6 text-center border border-gray-100">
-                <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold mb-2">Stock actual</p>
-                <p class="text-4xl font-black font-heading text-on-surface" id="stockActualTexto">—</p>
-            </div>
+            <div class="flex-1 overflow-y-auto px-7 py-6 space-y-5">
+                {{-- Stock actual --}}
+                <div class="bg-gray-50 rounded-2xl py-4 px-5 text-center border border-gray-100">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Stock actual</p>
+                    <p class="text-4xl font-black font-heading text-on-surface" id="stockActualTexto">—</p>
+                </div>
 
-            {{-- Tipo de ajuste --}}
-            <div class="space-y-3">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Tipo de ajuste
-                </label>
-                <div class="grid grid-cols-3 gap-3">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="tipo" value="agregar" class="peer hidden" checked>
-                        <div class="py-4 rounded-2xl border-2 border-gray-200
-                                    peer-checked:border-emerald-500 peer-checked:bg-emerald-50
-                                    text-center transition-all text-gray-400 hover:border-gray-300
-                                    peer-checked:text-emerald-700">
-                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">add_circle</span>
-                            <span class="text-xs font-bold block">Agregar</span>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="tipo" value="retirar" class="peer hidden">
-                        <div class="py-4 rounded-2xl border-2 border-gray-200
-                                    peer-checked:border-red-500 peer-checked:bg-red-50
-                                    text-center transition-all text-gray-400 hover:border-gray-300
-                                    peer-checked:text-red-700">
-                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">remove_circle</span>
-                            <span class="text-xs font-bold block">Retirar</span>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="tipo" value="fijar" class="peer hidden">
-                        <div class="py-4 rounded-2xl border-2 border-gray-200
-                                    peer-checked:border-blue-500 peer-checked:bg-blue-50
-                                    text-center transition-all text-gray-400 hover:border-gray-300
-                                    peer-checked:text-blue-700">
-                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">edit_square</span>
-                            <span class="text-xs font-bold block">Fijar</span>
-                        </div>
-                    </label>
+                {{-- Tipo de ajuste --}}
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tipo de ajuste</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tipo" value="agregar" class="peer hidden" checked>
+                            <div class="py-3.5 rounded-2xl border-2 border-gray-200 text-center transition-all
+                                        text-gray-400 hover:border-gray-300
+                                        peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700">
+                                <span class="material-symbols-outlined text-[20px] block mx-auto mb-1">add_circle</span>
+                                <span class="text-xs font-bold">Agregar</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tipo" value="retirar" class="peer hidden">
+                            <div class="py-3.5 rounded-2xl border-2 border-gray-200 text-center transition-all
+                                        text-gray-400 hover:border-gray-300
+                                        peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700">
+                                <span class="material-symbols-outlined text-[20px] block mx-auto mb-1">remove_circle</span>
+                                <span class="text-xs font-bold">Retirar</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tipo" value="fijar" class="peer hidden">
+                            <div class="py-3.5 rounded-2xl border-2 border-gray-200 text-center transition-all
+                                        text-gray-400 hover:border-gray-300
+                                        peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700">
+                                <span class="material-symbols-outlined text-[20px] block mx-auto mb-1">edit_square</span>
+                                <span class="text-xs font-bold">Fijar</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Cantidad --}}
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                        Cantidad
+                        <span id="ajusteUnidad" class="normal-case font-normal text-gray-400 ml-1"></span>
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="cambiarCantidad(-1)"
+                                class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-red-100 hover:text-red-600
+                                       flex items-center justify-center text-2xl font-bold
+                                       transition-all active:scale-90 shrink-0 select-none text-gray-600">
+                            −
+                        </button>
+                        <input type="number" name="cantidad" id="inputCantidad"
+                               step="0.01" min="0.01" value="1" required
+                               class="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200
+                                      text-center text-2xl font-black outline-none transition-all
+                                      focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"/>
+                        <button type="button" onclick="cambiarCantidad(1)"
+                                class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-emerald-100 hover:text-emerald-600
+                                       flex items-center justify-center text-2xl font-bold
+                                       transition-all active:scale-90 shrink-0 select-none text-gray-600">
+                            +
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {{-- Cantidad --}}
-            <div class="space-y-3">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Cantidad
-                    <span id="ajusteUnidad" class="normal-case font-normal text-gray-400 ml-1"></span>
-                </label>
-                <div class="flex items-center gap-4">
-                    <button type="button"
-                            onclick="cambiarCantidad(-1)"
-                            class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-red-100 hover:text-red-600
-                                   flex items-center justify-center text-gray-600 text-2xl font-bold
-                                   transition-all active:scale-90 shrink-0 select-none">
-                        −
-                    </button>
-                    <input type="number" name="cantidad" id="inputCantidad"
-                           step="0.01" min="0.01" value="1" required
-                           class="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200
-                                  text-center text-2xl font-black
-                                  focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
-                                  outline-none transition-all"/>
-                    <button type="button"
-                            onclick="cambiarCantidad(1)"
-                            class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-emerald-100 hover:text-emerald-600
-                                   flex items-center justify-center text-gray-600 text-2xl font-bold
-                                   transition-all active:scale-90 shrink-0 select-none">
-                        +
-                    </button>
-                </div>
-            </div>
-
-            {{-- Acciones --}}
-            <div class="flex gap-3 pt-1">
-                <button type="button"
-                        onclick="cerrarModal('modalAjuste')"
-                        class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500
-                               bg-gray-100 hover:bg-gray-200 transition-all">
+            {{-- Footer fijo --}}
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex gap-3 bg-white rounded-b-3xl">
+                <button type="button" onclick="cerrarModal('modalAjuste')"
+                        class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
                     Cancelar
                 </button>
                 <button type="submit"
@@ -536,18 +553,37 @@ function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); 
 });
 
 // ── Editar ítem ─────────────────────────────────────────────────
+// setSelect: asigna el valor a un <select>. Si el valor no existe
+// como opción (ej. datos en inglés de versiones anteriores),
+// lo añade dinámicamente para que siempre se vea pre-llenado.
+function setSelect(form, name, value) {
+    const sel = form.querySelector(`[name="${name}"]`);
+    if (!sel || value === null || value === undefined) return;
+    sel.value = value;
+    if (sel.value !== String(value) && value !== '') {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = value;
+        sel.prepend(opt);
+        sel.value = value;
+    }
+}
+
 function abrirEditar(id, nombre, categoria, cantidad, unidad, minStock, costoPrecio, estado) {
     const form = document.getElementById('formEditar');
     form.action = `/admin/inventory/${id}`;
     document.getElementById('editarSubtitulo').textContent = nombre;
 
     form.querySelector('[name="name"]').value       = nombre;
-    form.querySelector('[name="category"]').value   = categoria;
     form.querySelector('[name="quantity"]').value   = cantidad;
-    form.querySelector('[name="unit"]').value       = unidad;
     form.querySelector('[name="min_stock"]').value  = minStock;
     form.querySelector('[name="cost_price"]').value = costoPrecio;
-    form.querySelector('[name="status"]').value     = estado;
+
+    // Selects: usa setSelect para garantizar pre-llenado aunque el valor
+    // venga de datos guardados con opciones antiguas (ej. inglés)
+    setSelect(form, 'category', categoria);
+    setSelect(form, 'unit',     unidad);
+    setSelect(form, 'status',   estado);
 
     abrirModal('modalEditar');
 }
