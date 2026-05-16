@@ -7,7 +7,8 @@
     <title>{{ $title ?? 'Panel' }} — GoToEat Admin</title>
     @include('partials.head-assets')
     @livewireStyles
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    {{-- Chart.js: solo en páginas que lo usan, cargado con defer para no bloquear render --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="bg-background font-body text-on-background antialiased">
 

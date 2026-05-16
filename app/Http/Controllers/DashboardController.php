@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -25,106 +26,137 @@ class DashboardController extends Controller
             return redirect()->route('onboarding.step1');
         }
 
-        $rid   = $restaurant->id;
-        $now   = now();
-        $month = $now->month;
-        $year  = $now->year;
+        $rid = $restaurant->id;
 
-        // ── KPI financieros del mes ───────────────────────────────────
-        $monthRevenue  = DB::table('orders')
-            ->where('restaurant_id', $rid)
-            ->whereMonth('created_at', $month)->whereYear('created_at', $year)
-            ->sum('total') ?? 0;
+        // ── Stats cacheadas 2 minutos (evita 41 queries en cada recarga) ──
+        $stats = Cache::remember("dashboard_stats_{$rid}", 120, function () use ($rid) {
 
-        $monthExpenses = DB::table('expenses')
-            ->where('restaurant_id', $rid)
-            ->whereMonth('expense_date', $month)->whereYear('expense_date', $year)
-            ->sum('amount') ?? 0;
+            $now   = now();
+            $month = $now->month;
+            $year  = $now->year;
 
-        $monthTips = DB::table('tips')
-            ->where('restaurant_id', $rid)
-            ->whereMonth('date', $month)->whereYear('date', $year)
-            ->sum('amount') ?? 0;
-
-        $netProfit = $monthRevenue - $monthExpenses;
-
-        // ── Tendencias mes anterior ───────────────────────────────────
-        $prevMonth   = $now->copy()->subMonth();
-        $prevRevenue = DB::table('orders')
-            ->where('restaurant_id', $rid)
-            ->whereMonth('created_at', $prevMonth->month)->whereYear('created_at', $prevMonth->year)
-            ->sum('total') ?? 0;
-
-        $revenueTrend = $prevRevenue > 0
-            ? round((($monthRevenue - $prevRevenue) / $prevRevenue) * 100, 1)
-            : 0;
-
-        // ── Datos del día ─────────────────────────────────────────────
-        $todayOrders  = DB::table('orders')
-            ->where('restaurant_id', $rid)->whereDate('created_at', today())->count();
-        $todayRevenue = DB::table('orders')
-            ->where('restaurant_id', $rid)->whereDate('created_at', today())->sum('total') ?? 0;
-
-        // ── Mesas, personal, menú ─────────────────────────────────────
-        $totalTables     = DB::table('tables')->where('restaurant_id', $rid)->count();
-        $activeTables    = DB::table('tables')->where('restaurant_id', $rid)->where('status', 'ocupada')->count();
-        $availableTables = DB::table('tables')->where('restaurant_id', $rid)->where('status', 'disponible')->count();
-        $activeStaff     = DB::table('employees')->where('restaurant_id', $rid)->where('status', 'active')->count();
-        $shiftStaff      = DB::table('employees')->where('restaurant_id', $rid)->where('status', 'active')->count();
-        $totalMenuItems  = DB::table('menu_items')->where('restaurant_id', $rid)->where('available', true)->count();
-        $lowStockCount   = DB::table('inventory_items')
-            ->where('restaurant_id', $rid)
-            ->whereColumn('quantity', '<=', 'min_stock')
-            ->where('status', 'active')
-            ->count();
-
-        // ── Gráfica de barras: últimos 7 días (ingresos vs egresos) ───
-        $weekDays = collect(range(6, 0))->map(fn ($d) => $now->copy()->subDays($d));
-
-        $weeklyRevenue = $weekDays->map(fn ($day) =>
-            (float) (DB::table('orders')
+            // ── Query 1: KPIs de órdenes en una sola pasada ───────────
+            $orderKpis = DB::table('orders')
                 ->where('restaurant_id', $rid)
-                ->whereDate('created_at', $day->toDateString())
-                ->sum('total') ?? 0)
-        );
+                ->selectRaw("
+                    SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ?
+                             THEN total ELSE 0 END) AS month_revenue,
+                    SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ?
+                             THEN total ELSE 0 END) AS prev_revenue,
+                    SUM(CASE WHEN DATE(created_at) = CURDATE() THEN total ELSE 0 END) AS today_revenue,
+                    COUNT(CASE WHEN DATE(created_at) = CURDATE() THEN 1 END) AS today_orders
+                ", [$month, $year, $now->copy()->subMonth()->month, $now->copy()->subMonth()->year])
+                ->first();
 
-        $weeklyExpenses = $weekDays->map(fn ($day) =>
-            (float) (DB::table('expenses')
+            $monthRevenue = (float) ($orderKpis->month_revenue ?? 0);
+            $prevRevenue  = (float) ($orderKpis->prev_revenue  ?? 0);
+            $todayRevenue = (float) ($orderKpis->today_revenue ?? 0);
+            $todayOrders  = (int)   ($orderKpis->today_orders  ?? 0);
+            $revenueTrend = $prevRevenue > 0
+                ? round((($monthRevenue - $prevRevenue) / $prevRevenue) * 100, 1)
+                : 0;
+
+            // ── Query 2: Egresos y propinas del mes ───────────────────
+            $monthExpenses = (float) DB::table('expenses')
                 ->where('restaurant_id', $rid)
-                ->where('expense_date', $day->toDateString())
-                ->sum('amount') ?? 0)
-        );
+                ->whereMonth('expense_date', $month)->whereYear('expense_date', $year)
+                ->sum('amount');
 
-        $weekLabels = $weekDays->map(fn ($day) => mb_strtoupper($day->locale('es')->dayName))->map(fn ($n) => mb_substr($n, 0, 3));
-
-        // ── Gráfica de línea: órdenes por día (últimos 13 días) ───────
-        $chartDays = collect(range(12, 0))->map(fn ($d) => $now->copy()->subDays($d));
-
-        $dailyOrders = $chartDays->map(fn ($day) =>
-            DB::table('orders')
+            $monthTips = (float) DB::table('tips')
                 ->where('restaurant_id', $rid)
-                ->whereDate('created_at', $day->toDateString())
-                ->count()
-        );
+                ->whereMonth('date', $month)->whereYear('date', $year)
+                ->sum('amount');
 
-        $chartLabels = $chartDays->map(fn ($day) => $day->format('d M'));
+            // ── Query 3: Conteos de mesas en una sola pasada ──────────
+            $tableCounts = DB::table('tables')
+                ->where('restaurant_id', $rid)
+                ->selectRaw("
+                    COUNT(*) AS total,
+                    SUM(status = 'ocupada')     AS occupied,
+                    SUM(status = 'disponible')  AS available
+                ")
+                ->first();
 
-        // ── Pedidos recientes ─────────────────────────────────────────
-        $recentOrders = DB::table('orders')
-            ->where('restaurant_id', $rid)
-            ->latest()
-            ->take(5)
-            ->get();
+            // ── Query 4: Conteo de empleados ──────────────────────────
+            $staffCount = DB::table('employees')
+                ->where('restaurant_id', $rid)
+                ->where('status', 'active')
+                ->count();
 
-        $stats = compact(
-            'monthRevenue', 'monthExpenses', 'monthTips', 'netProfit', 'revenueTrend',
-            'todayOrders', 'todayRevenue',
-            'totalTables', 'activeTables', 'availableTables',
-            'activeStaff', 'shiftStaff', 'totalMenuItems', 'lowStockCount',
-            'weeklyRevenue', 'weeklyExpenses', 'weekLabels',
-            'dailyOrders', 'chartLabels',
-            'recentOrders'
-        );
+            // ── Query 5: Menú e inventario bajo stock ─────────────────
+            $menuCount = DB::table('menu_items')
+                ->where('restaurant_id', $rid)->where('available', true)->count();
+
+            $lowStockCount = DB::table('inventory_items')
+                ->where('restaurant_id', $rid)
+                ->whereColumn('quantity', '<=', 'min_stock')
+                ->where('status', 'active')
+                ->count();
+
+            // ── Query 6: Gráfica de barras — últimos 7 días ───────────
+            // Una sola query GROUP BY en lugar de 14 queries individuales
+            $sevenDaysAgo = $now->copy()->subDays(6)->startOfDay();
+
+            $weeklyOrdersRaw = DB::table('orders')
+                ->where('restaurant_id', $rid)
+                ->where('created_at', '>=', $sevenDaysAgo)
+                ->selectRaw('DATE(created_at) AS day, SUM(total) AS revenue')
+                ->groupBy('day')
+                ->pluck('revenue', 'day');
+
+            $weeklyExpensesRaw = DB::table('expenses')
+                ->where('restaurant_id', $rid)
+                ->where('expense_date', '>=', $sevenDaysAgo->toDateString())
+                ->selectRaw('expense_date AS day, SUM(amount) AS total')
+                ->groupBy('day')
+                ->pluck('total', 'day');
+
+            // Rellenar todos los 7 días (aunque no haya datos ese día → 0)
+            $weekDays       = collect(range(6, 0))->map(fn ($d) => $now->copy()->subDays($d));
+            $weeklyRevenue  = $weekDays->map(fn ($d) => (float) ($weeklyOrdersRaw[$d->toDateString()] ?? 0));
+            $weeklyExpenses = $weekDays->map(fn ($d) => (float) ($weeklyExpensesRaw[$d->toDateString()] ?? 0));
+            $weekLabels     = $weekDays->map(fn ($d) => mb_strtoupper(mb_substr($d->locale('es')->dayName, 0, 3)));
+
+            // ── Query 7: Gráfica de línea — últimos 13 días ───────────
+            // Una sola query GROUP BY en lugar de 13 queries individuales
+            $thirteenDaysAgo = $now->copy()->subDays(12)->startOfDay();
+
+            $dailyOrdersRaw = DB::table('orders')
+                ->where('restaurant_id', $rid)
+                ->where('created_at', '>=', $thirteenDaysAgo)
+                ->selectRaw('DATE(created_at) AS day, COUNT(*) AS orders')
+                ->groupBy('day')
+                ->pluck('orders', 'day');
+
+            $chartDays   = collect(range(12, 0))->map(fn ($d) => $now->copy()->subDays($d));
+            $dailyOrders = $chartDays->map(fn ($d) => (int) ($dailyOrdersRaw[$d->toDateString()] ?? 0));
+            $chartLabels = $chartDays->map(fn ($d) => $d->format('d M'));
+
+            // ── Query 8: Últimos 5 pedidos ────────────────────────────
+            $recentOrders = DB::table('orders')
+                ->where('restaurant_id', $rid)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            return compact(
+                'monthRevenue', 'monthExpenses', 'monthTips',
+                'revenueTrend', 'todayOrders', 'todayRevenue',
+                'tableCounts', 'staffCount', 'menuCount', 'lowStockCount',
+                'weeklyRevenue', 'weeklyExpenses', 'weekLabels',
+                'dailyOrders', 'chartLabels', 'recentOrders'
+            );
+        });
+
+        // Extraer conteos de mesas del objeto stdClass
+        $tc = $stats['tableCounts'];
+        $stats['totalTables']     = (int) ($tc->total    ?? 0);
+        $stats['activeTables']    = (int) ($tc->occupied  ?? 0);
+        $stats['availableTables'] = (int) ($tc->available ?? 0);
+        $stats['activeStaff']     = $stats['staffCount'];
+        $stats['shiftStaff']      = $stats['staffCount'];
+        $stats['totalMenuItems']  = $stats['menuCount'];
+        $stats['netProfit']       = $stats['monthRevenue'] - $stats['monthExpenses'];
 
         return view('admin.dashboard', compact('restaurant', 'stats'));
     }
