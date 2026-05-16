@@ -1,13 +1,5 @@
-/* Sora + Inter — una sola request combinada */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
-
-/*
- * Material Symbols Outlined — variable font completo.
- * Se importa desde Google Fonts con todos los ejes (FILL, wght, GRAD, opsz).
- * NOTA: NO usar @font-face con URL estática — esas son subsets sin los ejes
- * de variación y los iconos se renderizan como texto plano ("badge","groups").
- */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+/* Las fuentes (Sora, Inter, Material Symbols) se cargan vía <link> en head-assets.blade.php
+   en paralelo con este CSS, no de forma secuencial (@import bloquea el render). */
 
 @tailwind base;
 @tailwind components;
@@ -15,13 +7,11 @@
 
 @layer base {
     html { @apply antialiased; }
-    body { @apply bg-background text-on-background; }
     [x-cloak] { display: none !important; }
 
-    /* Configuración de variación por defecto para todos los iconos */
     .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         font-family: 'Material Symbols Outlined';
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         font-weight: normal;
         font-style: normal;
         font-size: 24px;
@@ -33,7 +23,6 @@
         word-wrap: normal;
         direction: ltr;
         -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
     }
 }
 
@@ -41,13 +30,6 @@
     .glass-nav {
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-    }
-    .perspective-card {
-        transform: perspective(1000px) rotateX(2deg);
-        transition: transform 0.3s ease;
-    }
-    .perspective-card:hover {
-        transform: perspective(1000px) rotateX(0deg) translateY(-4px);
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
