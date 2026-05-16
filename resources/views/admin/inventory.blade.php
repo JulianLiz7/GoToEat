@@ -1,155 +1,210 @@
 <x-admin-layout :restaurant="$restaurant" :stats="['lowStockCount' => $lowStockCount]">
 <x-slot name="title">Inventario</x-slot>
 
-{{-- ══ Breadcrumb + Header ════════════════════════════════════════ --}}
-<div class="flex justify-between items-end mb-8">
+{{-- ══ Encabezado ════════════════════════════════════════════════ --}}
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
     <div>
         <nav class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-            <span>Management</span>
+            <span>Administración</span>
             <span class="material-symbols-outlined text-xs">chevron_right</span>
-            <span class="text-orange-500">Inventory</span>
+            <span class="text-orange-500">Inventario</span>
         </nav>
-        <h1 class="text-5xl font-black font-heading text-on-surface">Inventory Management</h1>
-        <p class="text-gray-500 mt-2 text-lg">Track your kitchen stock and optimize procurement with real-time analytics.</p>
+        <h1 class="text-4xl font-black font-heading text-on-surface">Gestión de Inventario</h1>
+        <p class="text-gray-500 mt-1">Controla el stock de ingredientes y materias primas en tiempo real.</p>
     </div>
-    <button onclick="document.getElementById('modalAddItem').classList.remove('hidden')"
-            class="flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all active:scale-[0.98] shadow-lg shadow-orange-200">
+    <button onclick="abrirModal('modalAgregar')"
+            class="flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-orange-200 shrink-0">
         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">add_circle</span>
-        Add New Item
+        Agregar ítem
     </button>
 </div>
 
-{{-- ══ KPI Bento ══════════════════════════════════════════════════ --}}
-@php
-$lowCount = $lowStockItems->count();
-// $totalValue viene del controller
-@endphp
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-50 flex flex-col justify-between">
-        <div class="flex justify-between items-start mb-4">
+{{-- Flash de éxito --}}
+@if(session('success'))
+<div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-sm font-medium">
+    <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings:'FILL' 1">check_circle</span>
+    {{ session('success') }}
+</div>
+@endif
+
+{{-- ══ KPIs ══════════════════════════════════════════════════════ --}}
+@php $lowCount = $lowStockItems->count(); @endphp
+<div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
+        <div class="flex justify-between items-start mb-3">
             <div class="bg-orange-50 p-2 rounded-xl">
                 <span class="material-symbols-outlined text-orange-500">inventory</span>
             </div>
-            <span class="text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-full">Activos</span>
+            <span class="text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-full">Activos</span>
         </div>
-        <div>
-            <p class="text-gray-500 text-sm font-medium">Total Items</p>
-            <p class="text-3xl font-black font-heading mt-1">{{ $items->count() }}</p>
-        </div>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total ítems</p>
+        <p class="text-3xl font-black font-heading mt-1">{{ $items->total() }}</p>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-50 border-l-4 border-l-red-400">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-l-red-400 border border-gray-50">
+        <div class="flex justify-between items-start mb-3">
             <div class="bg-red-50 p-2 rounded-xl">
                 <span class="material-symbols-outlined text-red-500">warning</span>
             </div>
         </div>
-        <div>
-            <p class="text-gray-500 text-sm font-medium">Low Stock Alerts</p>
-            <p class="text-3xl font-black font-heading mt-1">
-                {{ $lowCount }}
-                <span class="text-sm font-normal text-gray-400 ml-1">Items</span>
-            </p>
-        </div>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Stock bajo</p>
+        <p class="text-3xl font-black font-heading mt-1 {{ $lowCount > 0 ? 'text-red-600' : '' }}">
+            {{ $lowCount }}
+            <span class="text-sm font-normal text-gray-400 ml-1">ítems</span>
+        </p>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-50">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
+        <div class="flex justify-between items-start mb-3">
             <div class="bg-blue-50 p-2 rounded-xl">
                 <span class="material-symbols-outlined text-blue-500">payments</span>
             </div>
         </div>
-        <div>
-            <p class="text-gray-500 text-sm font-medium">Inventory Value</p>
-            <p class="text-3xl font-black font-heading mt-1">${{ number_format($totalValue, 0) }}</p>
-        </div>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Valor total</p>
+        <p class="text-3xl font-black font-heading mt-1">${{ number_format($totalValue, 0) }}</p>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-50">
-        <div class="flex justify-between items-start mb-4">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
+        <div class="flex justify-between items-start mb-3">
             <div class="bg-purple-50 p-2 rounded-xl">
                 <span class="material-symbols-outlined text-purple-500">category</span>
             </div>
         </div>
-        <div>
-            <p class="text-gray-500 text-sm font-medium">Categorías</p>
-            <p class="text-3xl font-black font-heading mt-1">
-                {{ $items->getCollection()->pluck('category')->filter()->unique()->count() }}
-            </p>
-        </div>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Categorías</p>
+        <p class="text-3xl font-black font-heading mt-1">{{ $categorias->count() }}</p>
     </div>
 </div>
 
-{{-- ══ Tabla de inventario ══════════════════════════════════════ --}}
-<div class="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden mb-8">
-
-    {{-- Filtros --}}
-    <div class="p-6 border-b border-gray-50 flex flex-wrap items-center justify-between gap-4 bg-white/50">
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors">
-                <span class="material-symbols-outlined text-sm">filter_list</span>
-                Filter by Category
-            </div>
-            <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors">
-                <span class="material-symbols-outlined text-sm">sort</span>
-                Sort: Stock Level
-            </div>
+{{-- ══ Alertas de stock bajo ══════════════════════════════════════ --}}
+@if($lowStockItems->isNotEmpty())
+<div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+    <span class="material-symbols-outlined text-amber-600 shrink-0 mt-0.5">warning</span>
+    <div>
+        <p class="font-semibold text-amber-800 text-sm mb-2">{{ $lowCount }} ítem(s) necesitan reabastecimiento</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($lowStockItems as $low)
+            <span class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">
+                {{ $low->name }} — {{ $low->quantity }} {{ $low->unit }} (mín. {{ $low->min_stock }})
+            </span>
+            @endforeach
         </div>
-        <span class="text-sm text-gray-400">{{ $items->count() }} items totales</span>
     </div>
+</div>
+@endif
 
+{{-- ══ Tabla ══════════════════════════════════════════════════════ --}}
+<div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+
+    {{-- Barra de filtros --}}
+    <form method="GET" action="{{ route('admin.inventory') }}"
+          class="p-5 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-gray-50/30">
+        {{-- Búsqueda --}}
+        <div class="relative flex-1 min-w-[200px]">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
+            <input type="text" name="buscar" value="{{ request('buscar') }}"
+                   placeholder="Buscar ítem..."
+                   class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none"/>
+        </div>
+
+        {{-- Filtro categoría --}}
+        <select name="categoria"
+                class="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:border-orange-500 outline-none bg-white min-w-[160px]">
+            <option value="">Todas las categorías</option>
+            @foreach($categorias as $cat)
+            <option value="{{ $cat }}" {{ request('categoria') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+            @endforeach
+        </select>
+
+        {{-- Solo stock bajo --}}
+        <label class="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer select-none">
+            <input type="checkbox" name="solo_bajo_stock" value="1"
+                   {{ request('solo_bajo_stock') ? 'checked' : '' }}
+                   class="rounded text-orange-500 focus:ring-orange-500">
+            Solo stock bajo
+        </label>
+
+        <button type="submit"
+                class="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition-all active:scale-95">
+            Filtrar
+        </button>
+
+        @if(request()->hasAny(['buscar','categoria','solo_bajo_stock']))
+        <a href="{{ route('admin.inventory') }}"
+           class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-all">
+            Limpiar
+        </a>
+        @endif
+
+        <span class="ml-auto text-xs text-gray-400">{{ $items->total() }} ítem(s)</span>
+    </form>
+
+    {{-- Tabla vacía --}}
     @if($items->isEmpty())
     <div class="flex flex-col items-center justify-center py-20 text-center">
         <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">inventory_2</span>
-        <p class="text-gray-400 font-medium">Sin ítems en inventario</p>
-        <button onclick="document.getElementById('modalAddItem').classList.remove('hidden')"
-                class="mt-4 text-orange-500 font-semibold text-sm hover:underline">Agregar el primero</button>
+        <p class="text-gray-400 font-medium text-lg">
+            {{ request()->hasAny(['buscar','categoria','solo_bajo_stock']) ? 'Sin resultados para ese filtro' : 'Sin ítems en inventario' }}
+        </p>
+        @if(!request()->hasAny(['buscar','categoria','solo_bajo_stock']))
+        <button onclick="abrirModal('modalAgregar')"
+                class="mt-4 text-orange-500 font-semibold text-sm hover:underline">
+            Agregar el primer ítem
+        </button>
+        @endif
     </div>
     @else
+
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
-                <tr class="bg-gray-50/50 text-gray-400 text-xs font-bold uppercase tracking-wider">
-                    <th class="px-6 py-4">Item Details</th>
-                    <th class="px-6 py-4">Category</th>
-                    <th class="px-6 py-4 text-center">Stock Level</th>
-                    <th class="px-6 py-4">Cost / Unit</th>
-                    <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4">Actions</th>
+                <tr class="bg-gray-50/70 text-gray-400 text-[11px] font-bold uppercase tracking-wider">
+                    <th class="px-6 py-4">Producto</th>
+                    <th class="px-6 py-4">Categoría</th>
+                    <th class="px-6 py-4 text-center">Nivel de stock</th>
+                    <th class="px-6 py-4">Costo / Unidad</th>
+                    <th class="px-6 py-4 text-center">Estado</th>
+                    <th class="px-6 py-4 text-right">Acciones</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @foreach($items as $item)
                 @php
-                $stockPct = $item->min_stock > 0
-                    ? min(100, round(($item->quantity / ($item->min_stock * 3)) * 100))
-                    : ($item->quantity > 0 ? 75 : 0);
-                $barColor = $stockPct < 20 ? 'bg-red-400' : ($stockPct < 50 ? 'bg-orange-400' : 'bg-emerald-400');
+                $maxRef   = $item->min_stock > 0 ? $item->min_stock * 3 : ($item->quantity > 0 ? $item->quantity : 1);
+                $stockPct = min(100, round(($item->quantity / $maxRef) * 100));
+                $barColor = $stockPct < 20 ? 'bg-red-400' : ($stockPct < 50 ? 'bg-amber-400' : 'bg-emerald-400');
                 $isLow    = $item->isLowStock();
                 @endphp
                 <tr class="hover:bg-orange-50/10 transition-colors group">
-                    {{-- Item details --}}
-                    <td class="px-6 py-5">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-orange-400 text-2xl">kitchen</span>
+
+                    {{-- Producto --}}
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-orange-400 text-xl">kitchen</span>
                             </div>
                             <div>
-                                <p class="font-bold text-on-surface">{{ $item->name }}</p>
-                                <p class="text-xs text-gray-400">{{ $item->unit ? $item->unit : '—' }}</p>
+                                <p class="font-semibold text-on-surface text-sm">{{ $item->name }}</p>
+                                <p class="text-xs text-gray-400">{{ $item->unit ?: '—' }}</p>
                             </div>
                         </div>
                     </td>
+
                     {{-- Categoría --}}
-                    <td class="px-6 py-5">
-                        <span class="text-sm text-gray-600">{{ $item->category ?? '—' }}</span>
+                    <td class="px-6 py-4">
+                        <span class="text-sm text-gray-600">{{ $item->category ?: '—' }}</span>
                     </td>
-                    {{-- Stock con barra de progreso --}}
-                    <td class="px-6 py-5">
-                        <div class="w-full max-w-[140px] mx-auto">
+
+                    {{-- Nivel de stock --}}
+                    <td class="px-6 py-4">
+                        <div class="w-36 mx-auto">
                             <div class="flex justify-between text-xs font-semibold mb-1">
-                                <span class="{{ $isLow ? 'text-red-500' : 'text-on-surface' }}">{{ $stockPct }}%</span>
-                                <span class="text-gray-400">{{ $item->quantity }} {{ $item->unit }}</span>
+                                <span class="{{ $isLow ? 'text-red-500' : 'text-gray-700' }}">
+                                    {{ number_format($item->quantity, 2) }} {{ $item->unit }}
+                                </span>
+                                @if($item->min_stock > 0)
+                                <span class="text-gray-400">mín. {{ $item->min_stock }}</span>
+                                @endif
                             </div>
                             <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                                 <div class="{{ $barColor }} h-full rounded-full transition-all duration-500"
@@ -157,33 +212,71 @@ $lowCount = $lowStockItems->count();
                             </div>
                         </div>
                     </td>
-                    {{-- Precio --}}
-                    <td class="px-6 py-5">
-                        <span class="font-semibold text-on-surface">
-                            {{ $item->cost_price ? '$' . number_format($item->cost_price, 2) . ' / ' . ($item->unit ?? 'u') : '—' }}
-                        </span>
+
+                    {{-- Costo --}}
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-700">
+                        {{ $item->cost_price ? '$' . number_format($item->cost_price, 2) . ' / ' . ($item->unit ?: 'u') : '—' }}
                     </td>
+
                     {{-- Estado --}}
-                    <td class="px-6 py-5">
+                    <td class="px-6 py-4 text-center">
                         @if($isLow)
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-100">
-                            Low Stock
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-100">
+                            Stock bajo
                         </span>
                         @elseif($item->status === 'active')
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            {{ $stockPct > 60 ? 'Optimal' : 'Stable' }}
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            {{ $stockPct > 60 ? 'Óptimo' : 'Estable' }}
                         </span>
                         @else
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-100">
-                            Inactive
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-100">
+                            Inactivo
                         </span>
                         @endif
                     </td>
+
                     {{-- Acciones --}}
-                    <td class="px-6 py-5 text-right">
-                        <button class="text-gray-400 hover:text-orange-500 transition-colors">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-end gap-1">
+
+                            {{-- Ajustar stock --}}
+                            <button type="button"
+                                    title="Ajustar cantidad"
+                                    onclick="abrirAjuste({{ $item->id }}, '{{ addslashes($item->name) }}', {{ $item->quantity }}, '{{ $item->unit }}')"
+                                    class="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                                <span class="material-symbols-outlined text-[20px]">tune</span>
+                            </button>
+
+                            {{-- Editar --}}
+                            <button type="button"
+                                    title="Editar ítem"
+                                    onclick="abrirEditar(
+                                        {{ $item->id }},
+                                        '{{ addslashes($item->name) }}',
+                                        '{{ addslashes($item->category ?? '') }}',
+                                        {{ $item->quantity }},
+                                        '{{ $item->unit ?? '' }}',
+                                        {{ $item->min_stock ?? 0 }},
+                                        {{ $item->cost_price ?? 0 }},
+                                        '{{ $item->status }}'
+                                    )"
+                                    class="p-2 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                            </button>
+
+                            {{-- Eliminar --}}
+                            <form method="POST"
+                                  action="{{ route('admin.inventory.destroy', $item->id) }}"
+                                  onsubmit="return confirm('¿Eliminar \"{{ addslashes($item->name) }}\"? Esta acción no se puede deshacer.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        title="Eliminar ítem"
+                                        class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @endforeach
@@ -192,40 +285,38 @@ $lowCount = $lowStockItems->count();
     </div>
 
     {{-- Paginación --}}
-    <div class="p-6 border-t border-gray-50 flex items-center justify-between">
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-xs text-gray-400">
+            Mostrando {{ $items->firstItem() }}–{{ $items->lastItem() }} de {{ $items->total() }} ítems
+        </p>
         {{ $items->links() }}
     </div>
     @endif
 </div>
 
-{{-- ══ Banner IA Procurement ══════════════════════════════════════ --}}
-<div class="mt-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl">
+{{-- ══ Banner IA ═══════════════════════════════════════════════════ --}}
+<div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl">
     <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
         <div class="max-w-xl">
             <div class="flex items-center gap-2 text-orange-200 text-xs font-bold uppercase tracking-widest mb-4">
                 <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">auto_awesome</span>
-                AI Procurement Engine
+                Motor de Compras IA
             </div>
-            <h2 class="text-3xl font-black font-heading leading-tight">
-                Optimiza tus compras con IA
-            </h2>
-            <p class="text-orange-100 text-base mt-4 font-medium opacity-90">
-                Basado en tu inventario actual, la IA recomienda cuándo y cuánto comprar para reducir mermas y maximizar márgenes.
+            <h2 class="text-3xl font-black font-heading leading-tight">Optimiza tus compras con inteligencia artificial</h2>
+            <p class="text-orange-100 text-base mt-4 leading-relaxed">
+                La IA analiza tu inventario, historial de ventas y mermas para recomendarte cuándo y cuánto comprar.
             </p>
-            <div class="flex gap-4 mt-8">
-                <button class="bg-white text-orange-600 px-8 py-3 rounded-xl font-bold hover:bg-orange-50 transition-all active:scale-95 shadow-lg text-sm">
-                    View Recommendations
-                </button>
-            </div>
+            <a href="{{ route('admin.ai') }}"
+               class="inline-flex items-center gap-2 mt-6 bg-white text-orange-600 px-6 py-3 rounded-xl font-bold hover:bg-orange-50 transition-all active:scale-95 shadow-lg text-sm">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+                Consultar al asistente IA
+            </a>
         </div>
-        <div class="hidden lg:block w-64 h-44 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 rotate-3 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <span class="text-xs font-bold uppercase text-white/70">Price Index</span>
-                <span class="material-symbols-outlined text-emerald-400 text-sm">trending_down</span>
-            </div>
+        <div class="hidden lg:block w-64 h-40 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-5 rotate-3 shadow-2xl">
+            <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-4">Índice de precios</p>
             <div class="space-y-3">
                 @foreach([70, 45, 90] as $w)
-                <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                     <div class="h-full bg-white rounded-full" style="width:{{ $w }}%"></div>
                 </div>
                 @endforeach
@@ -236,94 +327,223 @@ $lowCount = $lowStockItems->count();
     <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-orange-400/20 rounded-full blur-3xl"></div>
 </div>
 
-{{-- ══ Modal: Agregar ítem ════════════════════════════════════════ --}}
-<div id="modalAddItem" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
-        <div class="p-6 border-b border-gray-50 flex items-center justify-between bg-gradient-to-r from-white to-orange-50/30">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
-                    <span class="material-symbols-outlined text-2xl">add_box</span>
+{{-- ══════════════════════════════════════════════════════════════
+     MODALES
+══════════════════════════════════════════════════════════════ --}}
+
+{{-- ── Modal: Agregar ítem ─────────────────────────────────────── --}}
+<div id="modalAgregar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-orange-50/30">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">add_box</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-xl font-heading">Add New Item</h2>
-                    <p class="text-sm text-gray-400">Register a new product to your inventory system</p>
+                    <h2 class="font-bold text-lg font-heading">Agregar nuevo ítem</h2>
+                    <p class="text-xs text-gray-400">Registra un ingrediente o materia prima</p>
                 </div>
             </div>
-            <button onclick="document.getElementById('modalAddItem').classList.add('hidden')"
-                    class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <span class="material-symbols-outlined">close</span>
+            <button onclick="cerrarModal('modalAgregar')" class="p-2 hover:bg-gray-100 rounded-full">
+                <span class="material-symbols-outlined text-gray-400">close</span>
             </button>
         </div>
-
-        <form method="POST" action="{{ route('admin.inventory.store') }}" class="p-8 space-y-5">
+        <form method="POST" action="{{ route('admin.inventory.store') }}" class="p-7 space-y-4">
             @csrf
-            <div class="grid grid-cols-2 gap-5">
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Item Name</label>
-                    <input type="text" name="name" required placeholder="ej. Extra Virgin Olive Oil"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Category</label>
-                    <select name="category" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white">
-                        <option value="">Select Category</option>
-                        <option>Produce</option><option>Dairy</option><option>Meat</option>
-                        <option>Seafood</option><option>Bakery</option><option>Beverages</option><option>Cleaning</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Unit</label>
-                    <select name="unit" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white">
-                        <option value="kg">kg</option><option value="L">Litros</option>
-                        <option value="units">Unidades</option><option value="boxes">Cajas</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Initial Stock</label>
-                    <input type="number" name="quantity" step="0.01" min="0" placeholder="0.00" required
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Low Stock Alert</label>
-                    <input type="number" name="min_stock" step="0.01" min="0" placeholder="Mínimo"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Cost per Unit</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                        <input type="number" name="cost_price" step="0.01" min="0" placeholder="0.00"
-                               class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm"/>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Guías --}}
-            <div class="grid grid-cols-2 gap-4 pt-2">
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
-                    <span class="material-symbols-outlined text-blue-500 text-[20px] shrink-0">info</span>
-                    <p class="text-xs text-blue-700">El stock mínimo activa alertas y el pipeline de IA para recomendaciones de compra.</p>
-                </div>
-                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex gap-3">
-                    <span class="material-symbols-outlined text-emerald-500 text-[20px] shrink-0">verified_user</span>
-                    <p class="text-xs text-emerald-700">El escandallo descuenta ingredientes automáticamente al completar órdenes.</p>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2 border-t border-gray-50">
-                <button type="button"
-                        onclick="document.getElementById('modalAddItem').classList.add('hidden')"
-                        class="px-6 py-3 rounded-xl font-semibold text-gray-500 hover:bg-gray-50 transition-colors text-sm">
-                    Cancel
+            @include('admin.partials.inventory-form', ['modo' => 'agregar'])
+            <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                <button type="button" onclick="cerrarModal('modalAgregar')"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+                    Cancelar
                 </button>
                 <button type="submit"
-                        class="px-8 py-3 rounded-xl bg-orange-500 text-white font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 active:scale-95 transition-all flex items-center gap-2 text-sm">
+                        class="px-6 py-2.5 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 active:scale-95 shadow-sm shadow-orange-200 flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">save</span>
-                    Confirm &amp; Add Item
+                    Guardar ítem
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+{{-- ── Modal: Editar ítem ───────────────────────────────────────── --}}
+<div id="modalEditar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-amber-50/30">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">edit</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg font-heading">Editar ítem</h2>
+                    <p id="editarSubtitulo" class="text-xs text-gray-400"></p>
+                </div>
+            </div>
+            <button onclick="cerrarModal('modalEditar')" class="p-2 hover:bg-gray-100 rounded-full">
+                <span class="material-symbols-outlined text-gray-400">close</span>
+            </button>
+        </div>
+        <form id="formEditar" method="POST" action="" class="p-7 space-y-4">
+            @csrf
+            @method('PUT')
+            @include('admin.partials.inventory-form', ['modo' => 'editar'])
+            <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                <button type="button" onclick="cerrarModal('modalEditar')"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 active:scale-95 shadow-sm shadow-amber-200 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── Modal: Ajustar stock ─────────────────────────────────────── --}}
+<div id="modalAjuste" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-blue-50/30">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">tune</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg font-heading">Ajustar stock</h2>
+                    <p id="ajusteSubtitulo" class="text-xs text-gray-400"></p>
+                </div>
+            </div>
+            <button onclick="cerrarModal('modalAjuste')" class="p-2 hover:bg-gray-100 rounded-full">
+                <span class="material-symbols-outlined text-gray-400">close</span>
+            </button>
+        </div>
+
+        <form id="formAjuste" method="POST" action="" class="p-7 space-y-5">
+            @csrf
+            @method('PATCH')
+
+            {{-- Stock actual --}}
+            <div class="bg-gray-50 rounded-2xl p-4 text-center">
+                <p class="text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Stock actual</p>
+                <p class="text-3xl font-black font-heading text-on-surface" id="stockActualTexto">—</p>
+            </div>
+
+            {{-- Tipo de ajuste --}}
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo de ajuste</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="tipo" value="agregar" class="peer hidden" checked>
+                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
+                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">add</span>
+                            Agregar
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="tipo" value="retirar" class="peer hidden">
+                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
+                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">remove</span>
+                            Retirar
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="tipo" value="fijar" class="peer hidden">
+                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
+                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">edit_note</span>
+                            Fijar
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {{-- Cantidad --}}
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Cantidad <span id="ajusteUnidad" class="normal-case font-normal text-gray-400"></span>
+                </label>
+                <div class="flex items-center gap-3">
+                    <button type="button"
+                            onclick="cambiarCantidad(-1)"
+                            class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl transition-all active:scale-90">
+                        −
+                    </button>
+                    <input type="number" name="cantidad" id="inputCantidad"
+                           step="0.01" min="0.01" value="1" required
+                           class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-center text-lg font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
+                    <button type="button"
+                            onclick="cambiarCantidad(1)"
+                            class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl transition-all active:scale-90">
+                        +
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2 border-t border-gray-100">
+                <button type="button" onclick="cerrarModal('modalAjuste')"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-6 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-bold hover:bg-blue-600 active:scale-95 shadow-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">check</span>
+                    Confirmar ajuste
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── Scripts de los modales ───────────────────────────────────── --}}
+@push('scripts')
+<script>
+function abrirModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// Cerrar al hacer clic fuera del modal
+['modalAgregar','modalEditar','modalAjuste'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) cerrarModal(id);
+    });
+});
+
+// ── Editar ítem ─────────────────────────────────────────────────
+function abrirEditar(id, nombre, categoria, cantidad, unidad, minStock, costoPrecio, estado) {
+    const form = document.getElementById('formEditar');
+    form.action = `/admin/inventory/${id}`;
+    document.getElementById('editarSubtitulo').textContent = nombre;
+
+    form.querySelector('[name="name"]').value       = nombre;
+    form.querySelector('[name="category"]').value   = categoria;
+    form.querySelector('[name="quantity"]').value   = cantidad;
+    form.querySelector('[name="unit"]').value       = unidad;
+    form.querySelector('[name="min_stock"]').value  = minStock;
+    form.querySelector('[name="cost_price"]').value = costoPrecio;
+    form.querySelector('[name="status"]').value     = estado;
+
+    abrirModal('modalEditar');
+}
+
+// ── Ajustar stock ────────────────────────────────────────────────
+function abrirAjuste(id, nombre, cantidadActual, unidad) {
+    const form = document.getElementById('formAjuste');
+    form.action = `/admin/inventory/${id}/stock`;
+
+    document.getElementById('ajusteSubtitulo').textContent = nombre;
+    document.getElementById('stockActualTexto').textContent = cantidadActual + ' ' + unidad;
+    document.getElementById('ajusteUnidad').textContent     = unidad ? `(${unidad})` : '';
+    document.getElementById('inputCantidad').value          = 1;
+
+    abrirModal('modalAjuste');
+}
+
+function cambiarCantidad(delta) {
+    const input = document.getElementById('inputCantidad');
+    const nuevo = Math.max(0.01, parseFloat(input.value || 0) + delta);
+    input.value = parseFloat(nuevo.toFixed(2));
+}
+</script>
+@endpush
 
 </x-admin-layout>
