@@ -139,12 +139,82 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
+            // ── Query 9: Distribución de ventas por categoría ─────────
+            // Intenta calcular desde órdenes completadas con items.
+            // Fallback: distribución por cantidad de ítems en el menú.
+            $categoryDistribution = collect();
+
+            $ordersWithItems = DB::table('orders')
+                ->where('restaurant_id', $rid)
+                ->whereIn('status', ['completed'])
+                ->whereNotNull('items')
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
+                ->get(['items']);
+
+            if ($ordersWithItems->isNotEmpty()) {
+                $revenueByCategory = [];
+                $allMenuItemIds    = [];
+
+                foreach ($ordersWithItems as $ord) {
+                    $items = json_decode($ord->items, true) ?? [];
+                    foreach ($items as $it) {
+                        if (!empty($it['menu_item_id'])) {
+                            $allMenuItemIds[] = (int) $it['menu_item_id'];
+                        }
+                    }
+                }
+
+                if (!empty($allMenuItemIds)) {
+                    $categories = DB::table('menu_items')
+                        ->whereIn('id', array_unique($allMenuItemIds))
+                        ->pluck('category', 'id');
+
+                    foreach ($ordersWithItems as $ord) {
+                        $items = json_decode($ord->items, true) ?? [];
+                        foreach ($items as $it) {
+                            $mid   = (int) ($it['menu_item_id'] ?? 0);
+                            $cat   = $categories[$mid] ?? 'Sin categoría';
+                            $total = (float) ($it['unit_price'] ?? 0) * (int) ($it['quantity'] ?? 1);
+                            $revenueByCategory[$cat] = ($revenueByCategory[$cat] ?? 0) + $total;
+                        }
+                    }
+
+                    arsort($revenueByCategory);
+                    $totalRev = array_sum($revenueByCategory);
+
+                    if ($totalRev > 0) {
+                        $categoryDistribution = collect($revenueByCategory)
+                            ->map(fn ($v) => round(($v / $totalRev) * 100, 1));
+                    }
+                }
+            }
+
+            // Fallback: distribución por cantidad de ítems disponibles en el menú
+            if ($categoryDistribution->isEmpty()) {
+                $menuByCategory = DB::table('menu_items')
+                    ->where('restaurant_id', $rid)
+                    ->where('available', true)
+                    ->whereNotNull('category')
+                    ->selectRaw('category, COUNT(*) as qty')
+                    ->groupBy('category')
+                    ->orderByDesc('qty')
+                    ->pluck('qty', 'category');
+
+                $totalItems = $menuByCategory->sum();
+                if ($totalItems > 0) {
+                    $categoryDistribution = $menuByCategory
+                        ->map(fn ($v) => round(($v / $totalItems) * 100, 1));
+                }
+            }
+
             return compact(
                 'monthRevenue', 'monthExpenses', 'monthTips',
                 'revenueTrend', 'todayOrders', 'todayRevenue',
                 'tableCounts', 'staffCount', 'menuCount', 'lowStockCount',
                 'weeklyRevenue', 'weeklyExpenses', 'weekLabels',
-                'dailyOrders', 'chartLabels', 'recentOrders'
+                'dailyOrders', 'chartLabels', 'recentOrders',
+                'categoryDistribution'
             );
         });
 

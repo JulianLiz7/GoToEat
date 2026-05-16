@@ -110,7 +110,7 @@
 </div>
 
 {{-- ── Fila inferior ────────────────────────────────────────────── --}}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
     {{-- Productos activos --}}
     <div class="bg-white p-6 rounded-2xl shadow-sm flex items-center gap-5 group hover:shadow-md transition-shadow">
@@ -157,6 +157,49 @@
             </div>
             @endif
         </div>
+    </div>
+
+    {{-- Distribución de ventas --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Distribución</p>
+
+        @php
+        $distribution = $stats['categoryDistribution'] ?? collect();
+        $chartColors  = ['#f97316','#006398','#006c49','#a855f7','#f59e0b','#ec4899','#0ea5e9','#84cc16'];
+        @endphp
+
+        @if($distribution->isNotEmpty())
+        {{-- Donut chart --}}
+        <div class="relative flex items-center justify-center mb-4">
+            <canvas id="donutChart" width="120" height="120" style="max-width:120px;max-height:120px"></canvas>
+            <div class="absolute text-center pointer-events-none">
+                <p class="text-xl font-black font-heading text-on-surface leading-none">100%</p>
+                <p class="text-[10px] text-gray-400 font-semibold mt-0.5">Ventas</p>
+            </div>
+        </div>
+
+        {{-- Leyenda --}}
+        <div class="space-y-2">
+            @foreach($distribution->take(4) as $cat => $pct)
+            @php $color = $chartColors[$loop->index % count($chartColors)]; @endphp
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:{{ $color }}"></span>
+                    <span class="text-xs text-gray-600 truncate">{{ $cat }}</span>
+                </div>
+                <span class="text-xs font-bold text-gray-700 shrink-0 ml-2">{{ $pct }}%</span>
+            </div>
+            @endforeach
+            @if($distribution->count() > 4)
+            <p class="text-[10px] text-gray-400 text-center">+{{ $distribution->count() - 4 }} más</p>
+            @endif
+        </div>
+        @else
+        <div class="flex flex-col items-center justify-center h-32 text-center">
+            <span class="material-symbols-outlined text-3xl text-gray-200 mb-2">donut_large</span>
+            <p class="text-xs text-gray-400">Sin datos de distribución aún</p>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -301,6 +344,51 @@ new Chart(lineCtx, {
         }
     }
 });
+
+// ── Donut Chart: Distribución por categoría ───────────────────────
+@php
+$distribution = $stats['categoryDistribution'] ?? collect();
+$chartColors  = ['#f97316','#006398','#006c49','#a855f7','#f59e0b','#ec4899','#0ea5e9','#84cc16'];
+@endphp
+
+@if($distribution->isNotEmpty())
+const donutCtx = document.getElementById('donutChart');
+if (donutCtx) {
+    new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($distribution->keys()->values()),
+            datasets: [{
+                data:            @json($distribution->values()->values()),
+                backgroundColor: @json(array_values(array_slice($chartColors, 0, $distribution->count()))),
+                borderWidth:     3,
+                borderColor:     '#ffffff',
+                hoverBorderWidth: 4,
+                hoverOffset:     6,
+            }]
+        },
+        options: {
+            responsive:          false,
+            cutout:              '72%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
+                    }
+                }
+            },
+            animation: {
+                // Animación de entrada: el donut se dibuja desde 0 con ease-out
+                animateRotate:  true,
+                animateScale:   false,
+                duration:       1000,
+                easing:         'easeOutQuart',
+            },
+        }
+    });
+}
+@endif
 </script>
 @endpush
 
