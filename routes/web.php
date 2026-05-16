@@ -44,9 +44,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/staff',      [AdminStaffController::class,  'index'])->name('staff');
     Route::get('/staff/new',  [AdminStaffController::class,  'create'])->name('staff.create');
     Route::post('/staff',     [AdminStaffController::class,  'store'])->name('staff.store');
-    Route::get('/tables',     [AdminTablesController::class, 'index'])->name('tables');
-    Route::get('/tables/new', [AdminTablesController::class, 'create'])->name('tables.create');
-    Route::post('/tables',    [AdminTablesController::class, 'store'])->name('tables.store');
+    Route::get('/tables',              [AdminTablesController::class, 'index'])->name('tables');
+    Route::get('/tables/new',          [AdminTablesController::class, 'create'])->name('tables.create');
+    Route::post('/tables',             [AdminTablesController::class, 'store'])->name('tables.store');
+    Route::put('/tables/{id}',         [AdminTablesController::class, 'update'])->name('tables.update');
+    Route::delete('/tables/{id}',      [AdminTablesController::class, 'destroy'])->name('tables.destroy');
+    Route::post('/tables/{id}/sentar', [AdminTablesController::class, 'sentar'])->name('tables.sentar');
+    Route::post('/tables/{id}/checkin',[AdminTablesController::class, 'checkIn'])->name('tables.checkin');
+    Route::post('/tables/{id}/liberar',[AdminTablesController::class, 'liberar'])->name('tables.liberar');
+    Route::patch('/tables/{id}/estado',[AdminTablesController::class, 'updateStatus'])->name('tables.status');
     Route::get('/finance',   [AdminFinanceController::class, 'index'])->name('finance');
     Route::get('/ai',        [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask',   [AdminAIController::class, 'ask'])->name('ai.ask');

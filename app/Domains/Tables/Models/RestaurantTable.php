@@ -13,7 +13,7 @@ class RestaurantTable extends Model
     protected $fillable = [
         'restaurant_id', 'number', 'capacity', 'zone', 'status',
         'qr_code', 'is_reserved', 'reservation_time', 'customer_name',
-        'customer_phone', 'party_size', 'reservation_notes',
+        'customer_phone', 'party_size', 'reservation_notes', 'waiter_id',
     ];
 
     protected $casts = [
