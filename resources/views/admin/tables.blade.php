@@ -302,8 +302,8 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                 </div>
 
                 @elseif($mesa->status === 'ocupada')
-                {{-- Ver orden + Liberar --}}
-                @if($orden)
+
+                {{-- Ver orden (siempre visible) --}}
                 <button type="button"
                         onclick="abrirOrden(
                             '{{ $mesa->number }}',
@@ -319,13 +319,50 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <span class="material-symbols-outlined text-[18px]">receipt_long</span>
                     Ver orden completa
                 </button>
+
+                {{-- Estado rápido de la orden --}}
+                @if($orden)
+                @php $orderStatus = $orden->status ?? 'pending'; @endphp
+                <div class="grid grid-cols-3 gap-1.5">
+                    @foreach([
+                        ['status'=>'pending',   'label'=>'Pendiente',  'color'=>'text-amber-700 bg-amber-50 border-amber-200',   'active'=>'bg-amber-500 text-white border-amber-500'],
+                        ['status'=>'preparing', 'label'=>'Preparando', 'color'=>'text-blue-700 bg-blue-50 border-blue-200',       'active'=>'bg-blue-500 text-white border-blue-500'],
+                        ['status'=>'ready',     'label'=>'Listo',      'color'=>'text-emerald-700 bg-emerald-50 border-emerald-200','active'=>'bg-emerald-500 text-white border-emerald-500'],
+                    ] as $st)
+                    <form method="POST" action="{{ route('admin.tables.order.status', $mesa->id) }}">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="{{ $st['status'] }}">
+                        <button type="submit"
+                                class="w-full py-2 rounded-xl border font-bold text-xs transition-all active:scale-95
+                                       {{ $orderStatus === $st['status'] ? $st['active'] : $st['color'] }}">
+                            {{ $st['label'] }}
+                        </button>
+                    </form>
+                    @endforeach
+                </div>
+
+                {{-- Finalizar pedido --}}
+                <form method="POST" action="{{ route('admin.tables.order.status', $mesa->id) }}">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="status" value="completed">
+                    <button type="submit"
+                            onclick="return confirm('¿Finalizar el pedido de mesa {{ $mesa->number }}? La mesa permanecerá ocupada hasta que uses Liberar.')"
+                            class="w-full py-2.5 rounded-2xl bg-emerald-500 text-white font-bold text-sm
+                                   hover:bg-emerald-600 active:scale-95 transition-all
+                                   flex items-center justify-center gap-2 shadow-sm shadow-emerald-200">
+                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                        Finalizar / Cobrar
+                    </button>
+                </form>
                 @endif
+
+                {{-- Liberar mesa --}}
                 <form method="POST" action="{{ route('admin.tables.liberar', $mesa->id) }}">
                     @csrf
                     <button type="submit"
-                            onclick="return confirm('¿Liberar mesa {{ $mesa->number }} y cerrar la orden activa?')"
-                            class="w-full py-2.5 rounded-2xl bg-gray-100 text-gray-700 font-bold text-sm
-                                   hover:bg-gray-200 active:scale-95 transition-all flex items-center justify-center gap-2">
+                            onclick="return confirm('¿Liberar mesa {{ $mesa->number }}? Se cerrará la orden activa.')"
+                            class="w-full py-2.5 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm
+                                   hover:bg-gray-200 active:scale-95 transition-all flex items-center justify-center gap-2 border border-gray-200">
                         <span class="material-symbols-outlined text-[18px]">logout</span>
                         Liberar mesa
                     </button>
@@ -385,11 +422,13 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
 ══════════════════════════════════════════════════════════════════ --}}
 
 {{-- ── Modal: Sentar clientes ──────────────────────────────────────── --}}
-<div id="modalSentar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-emerald-50/40">
+{{-- ══ MODAL: Sentar clientes ════════════════════════════════════════
+     Estructura: header fijo + body scroll + footer fijo (botones siempre visibles) --}}
+<div id="modalSentar" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col" style="max-height:90vh">
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-emerald-50/40 rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
+                <div class="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">restaurant</span>
                 </div>
                 <div>
@@ -397,46 +436,46 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p id="sentarSubtitulo" class="text-xs text-gray-400"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalSentar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400">
+            <button onclick="cerrarModal('modalSentar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form id="formSentar" method="POST" action="" class="p-7 space-y-5">
+        <form id="formSentar" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
             @csrf
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                        N° de personas <span class="text-red-500">*</span>
-                    </label>
-                    <input type="number" name="party_size" id="sentarParty"
-                           min="1" max="50" required value="2"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-xl font-black
-                                  focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none"/>
+            <div class="flex-1 overflow-y-auto px-7 py-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                            N° de personas <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="party_size" id="sentarParty"
+                               min="1" max="50" required value="2"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-xl font-black
+                                      focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Mesero asignado</label>
+                        <select name="waiter_user_id"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 outline-none bg-white">
+                            <option value="">Sin asignar</option>
+                            @foreach($meseros as $m)
+                            <option value="{{ $m->user_id }}">{{ $m->name }} ({{ $m->position ?: 'Staff' }})</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Mesero asignado</label>
-                    <select name="waiter_user_id"
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none bg-white">
-                        <option value="">Sin asignar</option>
-                        @foreach($meseros as $m)
-                        <option value="{{ $m->user_id }}">{{ $m->name }} ({{ $m->position ?: 'Staff' }})</option>
-                        @endforeach
-                    </select>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nombre del cliente (opcional)</label>
+                    <input type="text" name="customer_name" placeholder="ej. Familia Rodríguez"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 outline-none"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Notas</label>
+                    <input type="text" name="notes" placeholder="ej. Celebración de cumpleaños, silla para bebé..."
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 outline-none"/>
                 </div>
             </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nombre del cliente (opcional)</label>
-                <input type="text" name="customer_name"
-                       placeholder="ej. Familia Rodríguez"
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none"/>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Notas</label>
-                <input type="text" name="notes"
-                       placeholder="ej. Celebración de cumpleaños, silla para bebé..."
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none"/>
-            </div>
-            <div class="flex gap-3 pt-2 border-t border-gray-100">
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalSentar')"
                         class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
                     Cancelar
@@ -451,12 +490,12 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
     </div>
 </div>
 
-{{-- ── Modal: Reservar mesa ─────────────────────────────────────────── --}}
-<div id="modalReservar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-blue-50/40">
+{{-- ══ MODAL: Reservar mesa ══════════════════════════════════════════ --}}
+<div id="modalReservar" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col" style="max-height:90vh">
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-blue-50/40 rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600">
+                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">bookmark_add</span>
                 </div>
                 <div>
@@ -464,42 +503,43 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p id="reservarSubtitulo" class="text-xs text-gray-400"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalReservar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400">
+            <button onclick="cerrarModal('modalReservar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form id="formReservar" method="POST" action="" class="p-7 space-y-4">
+        <form id="formReservar" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
             @csrf @method('PATCH')
             <input type="hidden" name="status" value="reservada">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nombre del cliente <span class="text-red-500">*</span></label>
-                    <input type="text" name="customer_name" required
-                           placeholder="Nombre o apellido"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Personas</label>
-                    <input type="number" name="party_size" min="1" max="50" value="2"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Hora de llegada</label>
-                    <input type="datetime-local" name="reservation_time"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Teléfono</label>
-                    <input type="text" name="customer_phone" placeholder="+57 300 000 0000"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Notas</label>
-                    <input type="text" name="reservation_notes" placeholder="Ocasión especial, alergias, preferencias..."
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
+            <div class="flex-1 overflow-y-auto px-7 py-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nombre del cliente <span class="text-red-500">*</span></label>
+                        <input type="text" name="customer_name" required placeholder="Nombre o apellido"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Personas</label>
+                        <input type="number" name="party_size" min="1" max="50" value="2"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 outline-none"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Hora de llegada</label>
+                        <input type="datetime-local" name="reservation_time"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 outline-none"/>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Teléfono</label>
+                        <input type="text" name="customer_phone" placeholder="+57 300 000 0000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 outline-none"/>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Notas</label>
+                        <input type="text" name="reservation_notes" placeholder="Ocasión especial, alergias, preferencias..."
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 outline-none"/>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-3 pt-2 border-t border-gray-100">
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalReservar')"
                         class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">Cancelar</button>
                 <button type="submit"
@@ -512,12 +552,12 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
     </div>
 </div>
 
-{{-- ── Modal: Check In ─────────────────────────────────────────────── --}}
-<div id="modalCheckIn" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between">
+{{-- ══ MODAL: Check In ══════════════════════════════════════════════ --}}
+<div id="modalCheckIn" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col" style="max-height:90vh">
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600">
+                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">how_to_reg</span>
                 </div>
                 <div>
@@ -525,13 +565,13 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p id="checkInSubtitulo" class="text-xs text-gray-400"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalCheckIn')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400">
+            <button onclick="cerrarModal('modalCheckIn')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form id="formCheckIn" method="POST" action="" class="p-7 space-y-4">
+        <form id="formCheckIn" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
             @csrf
-            <div>
+            <div class="flex-1 overflow-y-auto px-7 py-6">
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Mesero asignado</label>
                 <select name="waiter_user_id"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-500 outline-none bg-white">
@@ -541,7 +581,7 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     @endforeach
                 </select>
             </div>
-            <div class="flex gap-3 pt-2 border-t border-gray-100">
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalCheckIn')"
                         class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">Cancelar</button>
                 <button type="submit"
@@ -554,12 +594,12 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
     </div>
 </div>
 
-{{-- ── Modal: Ver orden completa ──────────────────────────────────── --}}
-<div id="modalOrden" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-orange-50/40">
+{{-- ══ MODAL: Ver orden completa ════════════════════════════════════ --}}
+<div id="modalOrden" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col" style="max-height:90vh">
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-orange-50/40 rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
+                <div class="w-11 h-11 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">receipt_long</span>
                 </div>
                 <div>
@@ -567,12 +607,12 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p id="ordenCliente" class="text-xs text-gray-400"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalOrden')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400">
+            <button onclick="cerrarModal('modalOrden')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <div class="p-7 space-y-5">
-            {{-- Mesero --}}
+        <div class="flex-1 overflow-y-auto px-7 py-6 space-y-5">
+            {{-- Mesero + personas --}}
             <div class="flex items-center gap-3 bg-blue-50 rounded-2xl px-4 py-3 border border-blue-100">
                 <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0" id="ordenMeseroAvatar"></div>
                 <div>
@@ -584,28 +624,32 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p class="text-sm font-bold text-gray-700" id="ordenPersonas"></p>
                 </div>
             </div>
-
             {{-- Items --}}
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Platos pedidos</p>
-                <div id="ordenItems" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                <div id="ordenItems" class="space-y-2"></div>
             </div>
-
             {{-- Total --}}
             <div class="border-t-2 border-dashed border-gray-200 pt-4 flex justify-between items-center">
-                <span class="font-bold text-gray-600">Total</span>
+                <span class="font-bold text-gray-600 text-base">Total</span>
                 <span class="text-2xl font-black text-orange-600" id="ordenTotal"></span>
             </div>
+        </div>
+        <div class="shrink-0 px-7 py-4 border-t border-gray-100 bg-white rounded-b-3xl">
+            <button onclick="cerrarModal('modalOrden')"
+                    class="w-full py-3 rounded-2xl bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 transition-all">
+                Cerrar
+            </button>
         </div>
     </div>
 </div>
 
-{{-- ── Modal: Editar mesa ──────────────────────────────────────────── --}}
-<div id="modalEditar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between">
+{{-- ══ MODAL: Editar mesa ════════════════════════════════════════════ --}}
+<div id="modalEditar" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col" style="max-height:90vh">
+        <div class="shrink-0 px-7 py-5 border-b border-gray-100 flex items-center justify-between rounded-t-3xl">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600">
+                <div class="w-11 h-11 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">edit</span>
                 </div>
                 <div>
@@ -613,31 +657,32 @@ $byZone = $tables->groupBy(fn($t) => $t->zone ?: 'General');
                     <p id="editarSubtitulo" class="text-xs text-gray-400"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalEditar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400">
+            <button onclick="cerrarModal('modalEditar')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 shrink-0">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
-        <form id="formEditar" method="POST" action="" class="p-7 space-y-4">
+        <form id="formEditar" method="POST" action="" class="flex flex-col flex-1 overflow-hidden">
             @csrf @method('PUT')
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Número *</label>
-                    <input type="text" name="number" id="editarNumero" required
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Capacidad *</label>
-                    <input type="number" name="capacity" id="editarCapacidad" min="1" max="50" required
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Zona</label>
-                    <input type="text" name="zone" id="editarZona"
-                           placeholder="ej. Terraza, Salón principal"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
+            <div class="flex-1 overflow-y-auto px-7 py-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Número *</label>
+                        <input type="text" name="number" id="editarNumero" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Capacidad *</label>
+                        <input type="number" name="capacity" id="editarCapacidad" min="1" max="50" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Zona</label>
+                        <input type="text" name="zone" id="editarZona" placeholder="ej. Terraza, Salón principal"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none"/>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-3 pt-2 border-t border-gray-100">
+            <div class="shrink-0 px-7 py-5 border-t border-gray-100 flex gap-3 bg-white rounded-b-3xl">
                 <button type="button" onclick="cerrarModal('modalEditar')"
                         class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">Cancelar</button>
                 <button type="submit"

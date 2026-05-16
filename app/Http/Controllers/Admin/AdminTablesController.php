@@ -215,6 +215,35 @@ class AdminTablesController extends Controller
         return redirect()->route('admin.tables')->with('success', "✓ Mesa {$table->number} liberada y disponible.");
     }
 
+    // ── Cambiar estado de la orden activa de la mesa ─────────────────
+    public function updateOrderStatus(Request $request, int $id)
+    {
+        $request->validate(['status' => 'required|in:pending,preparing,ready,completed']);
+
+        $restaurant = $this->restaurant();
+        $table      = $this->table($id);
+
+        $updated = $restaurant->orders()
+            ->where('table_id', $table->id)
+            ->whereIn('status', ['pending', 'preparing', 'ready'])
+            ->update(['status' => $request->status]);
+
+        if ($request->status === 'completed') {
+            // Solo cambia el estado de la orden, NO libera la mesa automáticamente
+            // El admin decide cuándo liberar (puede necesitar cobrar propinas, etc.)
+            $this->clearCache();
+            return redirect()->route('admin.tables')
+                ->with('success', "✓ Pedido de mesa {$table->number} marcado como completado. Cuando cobres, usa 'Liberar mesa'.");
+        }
+
+        $labels = ['pending' => 'pendiente', 'preparing' => 'en preparación', 'ready' => 'listo para servir'];
+        $label  = $labels[$request->status] ?? $request->status;
+
+        $this->clearCache();
+        return redirect()->route('admin.tables')
+            ->with('success', "✓ Pedido de mesa {$table->number} marcado como {$label}.");
+    }
+
     // ── Cambiar estado / registrar reserva ───────────────────────────
     public function updateStatus(Request $request, int $id)
     {

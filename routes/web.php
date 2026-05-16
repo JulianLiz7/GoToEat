@@ -54,10 +54,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/tables',             [AdminTablesController::class, 'store'])->name('tables.store');
     Route::put('/tables/{id}',         [AdminTablesController::class, 'update'])->name('tables.update');
     Route::delete('/tables/{id}',      [AdminTablesController::class, 'destroy'])->name('tables.destroy');
-    Route::post('/tables/{id}/sentar', [AdminTablesController::class, 'sentar'])->name('tables.sentar');
-    Route::post('/tables/{id}/checkin',[AdminTablesController::class, 'checkIn'])->name('tables.checkin');
-    Route::post('/tables/{id}/liberar',[AdminTablesController::class, 'liberar'])->name('tables.liberar');
-    Route::patch('/tables/{id}/estado',[AdminTablesController::class, 'updateStatus'])->name('tables.status');
+    Route::post('/tables/{id}/sentar',       [AdminTablesController::class, 'sentar'])->name('tables.sentar');
+    Route::post('/tables/{id}/checkin',      [AdminTablesController::class, 'checkIn'])->name('tables.checkin');
+    Route::post('/tables/{id}/liberar',      [AdminTablesController::class, 'liberar'])->name('tables.liberar');
+    Route::patch('/tables/{id}/estado',      [AdminTablesController::class, 'updateStatus'])->name('tables.status');
+    Route::patch('/tables/{id}/orden-estado',[AdminTablesController::class, 'updateOrderStatus'])->name('tables.order.status');
     Route::get('/finance',   [AdminFinanceController::class, 'index'])->name('finance');
     Route::get('/ai',        [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask',   [AdminAIController::class, 'ask'])->name('ai.ask');
