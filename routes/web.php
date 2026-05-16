@@ -36,8 +36,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/inventory/{id}',              [AdminInventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{id}',           [AdminInventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::patch('/inventory/{id}/stock',      [AdminInventoryController::class, 'adjustStock'])->name('inventory.stock');
-    Route::get('/menu',      [AdminMenuController::class, 'index'])->name('menu');
-    Route::post('/menu',     [AdminMenuController::class, 'store'])->name('menu.store');
+    Route::get('/menu',                 [AdminMenuController::class, 'index'])->name('menu');
+    Route::post('/menu',                [AdminMenuController::class, 'store'])->name('menu.store');
+    Route::put('/menu/{id}',            [AdminMenuController::class, 'update'])->name('menu.update');
+    Route::delete('/menu/{id}',         [AdminMenuController::class, 'destroy'])->name('menu.destroy');
+    Route::patch('/menu/{id}/toggle',   [AdminMenuController::class, 'toggleAvailable'])->name('menu.toggle');
     Route::get('/staff',      [AdminStaffController::class,  'index'])->name('staff');
     Route::get('/staff/new',  [AdminStaffController::class,  'create'])->name('staff.create');
     Route::post('/staff',     [AdminStaffController::class,  'store'])->name('staff.store');
