@@ -4,102 +4,6 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>¡Bienvenido a GoToEat!</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "surface": "#f8f9ff",
-                    "on-tertiary-container": "#003554",
-                    "background": "#f8f9ff",
-                    "secondary-fixed": "#6ffbbe",
-                    "error": "#ba1a1a",
-                    "tertiary-fixed-dim": "#93ccff",
-                    "on-error": "#ffffff",
-                    "on-primary-fixed-variant": "#783200",
-                    "primary-fixed-dim": "#ffb690",
-                    "surface-variant": "#d3e4fe",
-                    "on-secondary": "#ffffff",
-                    "on-tertiary-fixed-variant": "#004b74",
-                    "on-tertiary": "#ffffff",
-                    "surface-container": "#e5eeff",
-                    "surface-tint": "#9d4300",
-                    "outline-variant": "#e0c0b1",
-                    "on-secondary-fixed-variant": "#005236",
-                    "outline": "#8c7164",
-                    "secondary": "#006c49",
-                    "on-error-container": "#93000a",
-                    "primary-container": "#f97316",
-                    "on-primary-fixed": "#341100",
-                    "tertiary": "#006398",
-                    "surface-container-highest": "#d3e4fe",
-                    "secondary-container": "#6cf8bb",
-                    "inverse-surface": "#213145",
-                    "on-tertiary-fixed": "#001d32",
-                    "on-secondary-fixed": "#002113",
-                    "on-surface-variant": "#584237",
-                    "on-surface": "#0b1c30",
-                    "on-secondary-container": "#00714d",
-                    "surface-container-lowest": "#ffffff",
-                    "inverse-primary": "#ffb690",
-                    "surface-container-low": "#eff4ff",
-                    "on-primary": "#ffffff",
-                    "surface-container-high": "#dce9ff",
-                    "on-primary-container": "#582200",
-                    "surface-dim": "#cbdbf5",
-                    "primary-fixed": "#ffdbca",
-                    "tertiary-fixed": "#cde5ff",
-                    "primary": "#9d4300",
-                    "inverse-on-surface": "#eaf1ff",
-                    "error-container": "#ffdad6",
-                    "tertiary-container": "#00a2f4",
-                    "surface-bright": "#f8f9ff",
-                    "secondary-fixed-dim": "#4edea3",
-                    "on-background": "#0b1c30"
-            },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-            },
-            "spacing": {
-                    "sm": "16px",
-                    "xl": "64px",
-                    "gutter": "24px",
-                    "container_max": "1280px",
-                    "base": "4px",
-                    "xs": "8px",
-                    "md": "24px",
-                    "lg": "40px"
-            },
-            "fontFamily": {
-                    "body-lg": ["Inter"],
-                    "body-md": ["Inter"],
-                    "label-caps": ["Inter"],
-                    "h2": ["Sora"],
-                    "body-sm": ["Inter"],
-                    "h1": ["Sora"],
-                    "h3": ["Sora"]
-            },
-            "fontSize": {
-                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
-                    "h2": ["36px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                    "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                    "h3": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}]
-            }
-          },
-        },
-      }
-    </script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -111,6 +15,9 @@
             background-size: 24px 24px;
         }
     </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-surface-container-lowest font-body-md text-on-surface min-h-screen flex flex-col items-center justify-center bg-pattern">
 <!-- Top Navigation (Simplified for Transactional Success Screen) -->

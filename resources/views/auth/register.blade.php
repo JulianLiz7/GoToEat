@@ -3,101 +3,6 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Registro | GoToEat - Gestión Gastronómica Moderna</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "on-error-container": "#93000a",
-                      "surface-container-low": "#eff4ff",
-                      "on-tertiary-fixed-variant": "#004b74",
-                      "inverse-on-surface": "#eaf1ff",
-                      "surface-container": "#e5eeff",
-                      "secondary-fixed-dim": "#4edea3",
-                      "on-primary-fixed-variant": "#783200",
-                      "on-secondary-fixed-variant": "#005236",
-                      "tertiary-fixed-dim": "#93ccff",
-                      "on-secondary-fixed": "#002113",
-                      "surface-container-lowest": "#ffffff",
-                      "surface-variant": "#d3e4fe",
-                      "outline-variant": "#e0c0b1",
-                      "secondary": "#006c49",
-                      "on-tertiary-container": "#003554",
-                      "surface-container-high": "#dce9ff",
-                      "on-primary": "#ffffff",
-                      "primary": "#9d4300",
-                      "error": "#ba1a1a",
-                      "primary-fixed-dim": "#ffb690",
-                      "primary-fixed": "#ffdbca",
-                      "on-surface": "#0b1c30",
-                      "tertiary-fixed": "#cde5ff",
-                      "secondary-container": "#6cf8bb",
-                      "on-tertiary": "#ffffff",
-                      "inverse-surface": "#213145",
-                      "on-background": "#0b1c30",
-                      "background": "#f8f9ff",
-                      "surface-container-highest": "#d3e4fe",
-                      "tertiary": "#006398",
-                      "tertiary-container": "#00a2f4",
-                      "outline": "#8c7164",
-                      "on-surface-variant": "#584237",
-                      "surface-tint": "#9d4300",
-                      "inverse-primary": "#ffb690",
-                      "on-secondary": "#ffffff",
-                      "surface-bright": "#f8f9ff",
-                      "surface-dim": "#cbdbf5",
-                      "on-primary-container": "#582200",
-                      "secondary-fixed": "#6ffbbe",
-                      "surface": "#f8f9ff",
-                      "on-primary-fixed": "#341100",
-                      "on-secondary-container": "#00714d",
-                      "primary-container": "#f97316",
-                      "error-container": "#ffdad6",
-                      "on-error": "#ffffff",
-                      "on-tertiary-fixed": "#001d32"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "0.75rem",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "sm": "16px",
-                      "xs": "8px",
-                      "gutter": "24px",
-                      "md": "24px",
-                      "base": "4px",
-                      "lg": "40px",
-                      "container_max": "1280px",
-                      "xl": "64px"
-              },
-              "fontFamily": {
-                      "body-sm": ["Inter"],
-                      "h1": ["Sora"],
-                      "h3": ["Sora"],
-                      "body-md": ["Inter"],
-                      "h2": ["Sora"],
-                      "label-caps": ["Inter"],
-                      "body-lg": ["Inter"]
-              },
-              "fontSize": {
-                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                      "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                      "h3": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
-                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                      "h2": ["36px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
-                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
-              }
-            },
-          },
-        }
-    </script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -113,6 +18,9 @@
             transform: rotateY(0deg) rotateX(0deg);
         }
     </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-background font-body-md text-on-background selection:bg-primary-container selection:text-white">
 <!-- TopNavBar -->

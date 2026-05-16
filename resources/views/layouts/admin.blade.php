@@ -7,8 +7,6 @@
     <title>{{ $title ?? 'Panel' }} — GoToEat Admin</title>
     @include('partials.head-assets')
     @livewireStyles
-    {{-- Chart.js: solo en páginas que lo usan, cargado con defer para no bloquear render --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="bg-background font-body text-on-background antialiased">
 
@@ -122,6 +120,8 @@
 </main>
 
 @livewireScripts
+{{-- Chart.js antes del stack para que esté disponible cuando los scripts inline lo usen --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 @stack('scripts')
 </body>
 </html>

@@ -4,101 +4,6 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>GoToEat - Perfil de Usuario</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "surface-bright": "#f8f9ff",
-                    "on-surface": "#0b1c30",
-                    "secondary": "#006c49",
-                    "primary-container": "#f97316",
-                    "on-primary-fixed-variant": "#783200",
-                    "error": "#f97316", // Replaced red with orange
-                    "surface-container-highest": "#d3e4fe",
-                    "outline": "#f97316", // Replaced brown/muted with orange
-                    "inverse-surface": "#213145",
-                    "secondary-fixed-dim": "#4edea3",
-                    "on-error": "#ffffff",
-                    "on-tertiary-container": "#003554",
-                    "inverse-primary": "#ffb690",
-                    "on-error-container": "#f97316", // Replaced red with orange
-                    "error-container": "#ffdbca", // Replaced red container with light orange
-                    "on-background": "#0b1c30",
-                    "tertiary-fixed-dim": "#93ccff",
-                    "on-primary-container": "#ffffff",
-                    "on-secondary-fixed-variant": "#005236",
-                    "surface-container-low": "#eff4ff",
-                    "surface": "#f8f9ff",
-                    "on-secondary-fixed": "#002113",
-                    "on-primary": "#ffffff",
-                    "secondary-fixed": "#6ffbbe",
-                    "primary-fixed-dim": "#ffb690",
-                    "surface-tint": "#f97316",
-                    "surface-container-high": "#dce9ff",
-                    "primary-fixed": "#ffdbca",
-                    "tertiary-fixed": "#cde5ff",
-                    "outline-variant": "#ffdbca", // Replaced muted variant with light orange
-                    "on-primary-fixed": "#341100",
-                    "background": "#f8f9ff",
-                    "surface-dim": "#cbdbf5",
-                    "inverse-on-surface": "#eaf1ff",
-                    "on-tertiary": "#ffffff",
-                    "on-secondary": "#ffffff",
-                    "primary": "#f97316", // Vibrant Orange
-                    "on-secondary-container": "#00714d",
-                    "tertiary": "#006398",
-                    "secondary-container": "#6cf8bb",
-                    "on-tertiary-fixed": "#001d32",
-                    "tertiary-container": "#00a2f4",
-                    "on-tertiary-fixed-variant": "#004b74",
-                    "surface-variant": "#d3e4fe",
-                    "surface-container": "#e5eeff",
-                    "surface-container-lowest": "#ffffff",
-                    "on-surface-variant": "#584237"
-            },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-            },
-            "spacing": {
-                    "xl": "64px",
-                    "gutter": "24px",
-                    "base": "4px",
-                    "container_max": "1280px",
-                    "md": "24px",
-                    "sm": "16px",
-                    "xs": "8px",
-                    "lg": "40px"
-            },
-            "fontFamily": {
-                    "body-lg": ["Inter"],
-                    "h1": ["Sora"],
-                    "body-md": ["Inter"],
-                    "label-caps": ["Inter"],
-                    "h3": ["Sora"],
-                    "body-sm": ["Inter"],
-                    "h2": ["Sora"]
-            },
-            "fontSize": {
-                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                    "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
-                    "h3": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
-                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                    "h2": ["36px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}]
-            }
-          }
-        }
-      }
-    </script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -108,6 +13,9 @@
             -webkit-backdrop-filter: blur(12px);
         }
     </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
 <!-- TopNavBar -->

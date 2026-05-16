@@ -8,9 +8,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -34,20 +34,19 @@ class RegisteredUserController extends Controller
             'password' => $request->password,
         ]);
 
-        if ($request->role === 'restaurante') {
-            $user->assignRole('admin');
-        } else {
-            $user->assignRole('cliente');
-        }
+        $roleName = $request->role === 'restaurante' ? 'admin' : 'cliente';
+
+        // Garantiza que el rol exista antes de asignarlo.
+        // Si el seeder no se corrió, lo crea en el momento.
+        Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        $user->assignRole($roleName);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        if ($request->role === 'comensal') {
-            return redirect()->route('welcome.comensal');
-        }
-
-        return redirect(route('dashboard', absolute: false));
+        return $request->role === 'comensal'
+            ? redirect()->route('welcome.comensal')
+            : redirect(route('dashboard', absolute: false));
     }
 }
