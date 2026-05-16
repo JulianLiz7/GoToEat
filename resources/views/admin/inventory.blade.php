@@ -403,92 +403,119 @@
 </div>
 
 {{-- ── Modal: Ajustar stock ─────────────────────────────────────── --}}
-<div id="modalAjuste" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-blue-50/30">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+<div id="modalAjuste" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
+
+        {{-- Header --}}
+        <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">tune</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg font-heading">Ajustar stock</h2>
-                    <p id="ajusteSubtitulo" class="text-xs text-gray-400"></p>
+                    <h2 class="font-bold text-lg font-heading leading-none">Ajustar stock</h2>
+                    <p id="ajusteSubtitulo" class="text-sm text-gray-400 mt-0.5 truncate max-w-[180px]"></p>
                 </div>
             </div>
-            <button onclick="cerrarModal('modalAjuste')" class="p-2 hover:bg-gray-100 rounded-full">
-                <span class="material-symbols-outlined text-gray-400">close</span>
+            <button onclick="cerrarModal('modalAjuste')"
+                    class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 shrink-0">
+                <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
 
-        <form id="formAjuste" method="POST" action="" class="p-7 space-y-5">
+        <form id="formAjuste" method="POST" action="" class="px-8 py-7 space-y-7">
             @csrf
             @method('PATCH')
 
             {{-- Stock actual --}}
-            <div class="bg-gray-50 rounded-2xl p-4 text-center">
-                <p class="text-xs text-gray-400 uppercase tracking-wide font-bold mb-1">Stock actual</p>
-                <p class="text-3xl font-black font-heading text-on-surface" id="stockActualTexto">—</p>
+            <div class="bg-gray-50 rounded-2xl py-5 px-6 text-center border border-gray-100">
+                <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold mb-2">Stock actual</p>
+                <p class="text-4xl font-black font-heading text-on-surface" id="stockActualTexto">—</p>
             </div>
 
             {{-- Tipo de ajuste --}}
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo de ajuste</label>
-                <div class="grid grid-cols-3 gap-2">
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Tipo de ajuste
+                </label>
+                <div class="grid grid-cols-3 gap-3">
                     <label class="cursor-pointer">
                         <input type="radio" name="tipo" value="agregar" class="peer hidden" checked>
-                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
-                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">add</span>
-                            Agregar
+                        <div class="py-4 rounded-2xl border-2 border-gray-200
+                                    peer-checked:border-emerald-500 peer-checked:bg-emerald-50
+                                    text-center transition-all text-gray-400 hover:border-gray-300
+                                    peer-checked:text-emerald-700">
+                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">add_circle</span>
+                            <span class="text-xs font-bold block">Agregar</span>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="tipo" value="retirar" class="peer hidden">
-                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
-                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">remove</span>
-                            Retirar
+                        <div class="py-4 rounded-2xl border-2 border-gray-200
+                                    peer-checked:border-red-500 peer-checked:bg-red-50
+                                    text-center transition-all text-gray-400 hover:border-gray-300
+                                    peer-checked:text-red-700">
+                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">remove_circle</span>
+                            <span class="text-xs font-bold block">Retirar</span>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="tipo" value="fijar" class="peer hidden">
-                        <div class="px-3 py-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 text-center text-sm font-semibold transition-all text-gray-500 hover:border-gray-300">
-                            <span class="material-symbols-outlined text-[18px] block mx-auto mb-0.5">edit_note</span>
-                            Fijar
+                        <div class="py-4 rounded-2xl border-2 border-gray-200
+                                    peer-checked:border-blue-500 peer-checked:bg-blue-50
+                                    text-center transition-all text-gray-400 hover:border-gray-300
+                                    peer-checked:text-blue-700">
+                            <span class="material-symbols-outlined text-[22px] block mx-auto mb-1.5">edit_square</span>
+                            <span class="text-xs font-bold block">Fijar</span>
                         </div>
                     </label>
                 </div>
             </div>
 
             {{-- Cantidad --}}
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Cantidad <span id="ajusteUnidad" class="normal-case font-normal text-gray-400"></span>
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Cantidad
+                    <span id="ajusteUnidad" class="normal-case font-normal text-gray-400 ml-1"></span>
                 </label>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-4">
                     <button type="button"
                             onclick="cambiarCantidad(-1)"
-                            class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl transition-all active:scale-90">
+                            class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-red-100 hover:text-red-600
+                                   flex items-center justify-center text-gray-600 text-2xl font-bold
+                                   transition-all active:scale-90 shrink-0 select-none">
                         −
                     </button>
                     <input type="number" name="cantidad" id="inputCantidad"
                            step="0.01" min="0.01" value="1" required
-                           class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-center text-lg font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"/>
+                           class="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200
+                                  text-center text-2xl font-black
+                                  focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10
+                                  outline-none transition-all"/>
                     <button type="button"
                             onclick="cambiarCantidad(1)"
-                            class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl transition-all active:scale-90">
+                            class="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-emerald-100 hover:text-emerald-600
+                                   flex items-center justify-center text-gray-600 text-2xl font-bold
+                                   transition-all active:scale-90 shrink-0 select-none">
                         +
                     </button>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-2 border-t border-gray-100">
-                <button type="button" onclick="cerrarModal('modalAjuste')"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50">
+            {{-- Acciones --}}
+            <div class="flex gap-3 pt-1">
+                <button type="button"
+                        onclick="cerrarModal('modalAjuste')"
+                        class="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500
+                               bg-gray-100 hover:bg-gray-200 transition-all">
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-6 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-bold hover:bg-blue-600 active:scale-95 shadow-sm flex items-center gap-2">
+                        class="flex-1 py-3 rounded-2xl bg-blue-500 text-white text-sm font-bold
+                               hover:bg-blue-600 active:scale-95 shadow-md shadow-blue-200
+                               transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">check</span>
-                    Confirmar ajuste
+                    Confirmar
                 </button>
             </div>
         </form>
