@@ -41,9 +41,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/menu/{id}',            [AdminMenuController::class, 'update'])->name('menu.update');
     Route::delete('/menu/{id}',         [AdminMenuController::class, 'destroy'])->name('menu.destroy');
     Route::patch('/menu/{id}/toggle',   [AdminMenuController::class, 'toggleAvailable'])->name('menu.toggle');
-    Route::get('/staff',      [AdminStaffController::class,  'index'])->name('staff');
-    Route::get('/staff/new',  [AdminStaffController::class,  'create'])->name('staff.create');
-    Route::post('/staff',     [AdminStaffController::class,  'store'])->name('staff.store');
+    Route::get('/staff',              [AdminStaffController::class, 'index'])->name('staff');
+    Route::get('/staff/new',          [AdminStaffController::class, 'create'])->name('staff.create');
+    Route::post('/staff',             [AdminStaffController::class, 'store'])->name('staff.store');
+    Route::put('/staff/{id}',         [AdminStaffController::class, 'update'])->name('staff.update');
+    Route::delete('/staff/{id}',      [AdminStaffController::class, 'destroy'])->name('staff.destroy');
+    // Canal de notificaciones al personal
+    Route::post('/staff/notifications',        [AdminStaffController::class, 'sendNotification'])->name('staff.notify');
+    Route::delete('/staff/notifications/{id}', [AdminStaffController::class, 'archiveNotification'])->name('staff.notify.archive');
     Route::get('/tables',              [AdminTablesController::class, 'index'])->name('tables');
     Route::get('/tables/new',          [AdminTablesController::class, 'create'])->name('tables.create');
     Route::post('/tables',             [AdminTablesController::class, 'store'])->name('tables.store');
