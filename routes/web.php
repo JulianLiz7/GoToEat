@@ -59,7 +59,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/tables/{id}/liberar',      [AdminTablesController::class, 'liberar'])->name('tables.liberar');
     Route::patch('/tables/{id}/estado',      [AdminTablesController::class, 'updateStatus'])->name('tables.status');
     Route::patch('/tables/{id}/orden-estado',[AdminTablesController::class, 'updateOrderStatus'])->name('tables.order.status');
-    Route::get('/finance',   [AdminFinanceController::class, 'index'])->name('finance');
+    // ── Finanzas (sub-panel propio) ───────────────────────────────
+    Route::get('/finance',                [AdminFinanceController::class, 'resumen'])->name('finance');
+    Route::get('/finance/ingresos',       [AdminFinanceController::class, 'ingresos'])->name('finance.ingresos');
+    Route::get('/finance/gastos',         [AdminFinanceController::class, 'gastos'])->name('finance.gastos');
+    Route::post('/finance/gastos',        [AdminFinanceController::class, 'storeGasto'])->name('finance.gastos.store');
+    Route::get('/finance/cierre-caja',    [AdminFinanceController::class, 'cierreCaja'])->name('finance.cierre');
+    Route::post('/finance/cierre-caja',   [AdminFinanceController::class, 'storeCierre'])->name('finance.cierre.store');
+    Route::get('/finance/ajustes',        [AdminFinanceController::class, 'ajustes'])->name('finance.ajustes');
+    Route::get('/finance/export/csv',     [AdminFinanceController::class, 'exportCsv'])->name('finance.export.csv');
+    Route::get('/finance/export/pdf',     [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');
     Route::get('/ai',        [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask',   [AdminAIController::class, 'ask'])->name('ai.ask');
 });
