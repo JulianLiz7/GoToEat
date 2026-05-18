@@ -5,8 +5,8 @@
 @plugin "@tailwindcss/forms";
 
 @theme {
-  --color-primary: #9d4300;
-  --color-primary-container: #f97316;
+  --color-primary: #f97316;
+  --color-primary-container: #ffdbca;
   --color-on-primary: #ffffff;
   --color-on-primary-container: #582200;
   --color-on-primary-fixed: #341100;
@@ -36,7 +36,7 @@
   --color-surface-dim: #cbdbf5;
   --color-surface-bright: #f8f9ff;
   --color-surface-variant: #d3e4fe;
-  --color-surface-tint: #9d4300;
+  --color-surface-tint: #f97316;
   --color-surface-container: #e5eeff;
   --color-surface-container-low: #eff4ff;
   --color-surface-container-high: #dce9ff;

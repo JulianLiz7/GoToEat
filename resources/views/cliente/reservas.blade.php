@@ -20,6 +20,7 @@
     </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sora:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-background font-body-md text-on-background overflow-x-hidden">
@@ -38,7 +39,7 @@
 <button class="hidden md:flex bg-primary text-on-primary px-4 py-1 rounded-lg font-bold hover:bg-on-primary-fixed-variant transition-all duration-200 active:scale-95">Nueva Reserva</button>
 <div class="flex gap-2">
 <span class="material-symbols-outlined text-on-surface-variant cursor-pointer p-1 rounded-full hover:bg-surface-container-low" data-icon="notifications">notifications</span>
-<span class="material-symbols-outlined text-on-surface-variant cursor-pointer p-1 rounded-full hover:bg-surface-container-low" data-icon="account_circle">account_circle</span>
+<a href="{{ route('perfil') }}" class="material-symbols-outlined text-on-surface-variant cursor-pointer p-1 rounded-full hover:bg-surface-container-low" data-icon="account_circle" style="text-decoration:none;">account_circle</a>
 </div>
 </div>
 </div>
@@ -59,11 +60,11 @@
 <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
                     Mis Reservas
                 </a>
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
+<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('perfil') }}">
 <span class="material-symbols-outlined" data-icon="person">person</span>
                     Perfil
                 </a>
-<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1 mt-auto" href="#">
+<a class="flex items-center gap-4 p-4 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1 mt-auto" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
 <span class="material-symbols-outlined" data-icon="logout">logout</span>
                     Cerrar Sesión
                 </a>

@@ -24,6 +24,7 @@
     </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sora:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
@@ -83,9 +84,9 @@
 <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-90">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
-<button class="p-1 rounded-full border-2 border-outline-variant hover:border-primary transition-all active:scale-90 overflow-hidden w-10 h-10">
+<a href="{{ route('perfil') }}" class="block p-1 rounded-full border-2 border-outline-variant hover:border-primary transition-all active:scale-90 overflow-hidden w-10 h-10">
 <img alt="Avatar" data-alt="A professional close-up headshot of a person with a friendly expression, set against a soft blurred background of a modern office. The lighting is bright and natural, reflecting a clean corporate aesthetic with warm tones that complement the GoToEat primary orange brand colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxKjRUCAeEkPz3bH2RNhKdOJsn10_JCh8G8S8T5a3wqNInrjMuncueRnEajm7FDoga7C94MHCjAtFyW3uxK7d038walda1udnisQv8Pe0OeFnS_NYySm4ygFwKjY1agulFovPvFYLX_LoouaHTA--1UiYqq_FrYEtknFdXbJaHblEW-hbDmtx4h6F1T6mYNswUwmtbYIrwr--0PvrcPHaDJN7cLNqg4VlSlwga3NT6U8Wg1Il-msI9bOB0-jtLLxXjj7o2O4MvCEk"/>
-</button>
+</a>
 </div>
 </div>
 </header>
