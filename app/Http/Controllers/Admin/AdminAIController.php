@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Domains\AI\Models\AIConversation;
 use App\Jobs\ProcessAIAnalysis;
 use Illuminate\Http\Request;
 
@@ -13,9 +12,11 @@ class AdminAIController extends Controller
     {
         $restaurant = auth()->user()->ownedRestaurants()->first();
 
-        if (!$restaurant) return redirect()->route('onboarding.step1');
+        if (! $restaurant) {
+            return redirect()->route('onboarding.step1');
+        }
 
-        $conversations = $restaurant->aiConversations()->latest()->take(20)->get();
+        $conversations = $restaurant->aiConversations()->latest()->take(20)->get()->reverse();
 
         // Alertas proactivas de stock bajo
         $alerts = $restaurant->inventoryItems()
@@ -23,8 +24,8 @@ class AdminAIController extends Controller
             ->where('status', 'active')
             ->get()
             ->map(fn ($item) => [
-                'type'    => 'low_stock',
-                'level'   => 'warning',
+                'type' => 'low_stock',
+                'level' => 'warning',
                 'message' => "Stock bajo: {$item->name} — {$item->quantity} {$item->unit} (mínimo: {$item->min_stock})",
             ]);
 
@@ -38,9 +39,9 @@ class AdminAIController extends Controller
         $restaurant = auth()->user()->ownedRestaurants()->first();
 
         $conversation = $restaurant->aiConversations()->create([
-            'user_id'  => auth()->id(),
-            'prompt'   => $request->prompt,
-            'response' => null,
+            'user_id' => auth()->id(),
+            'prompt' => $request->prompt,
+            'response' => '',
         ]);
 
         ProcessAIAnalysis::dispatch($conversation);
