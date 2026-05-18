@@ -25,9 +25,9 @@
 <div class="text-2xl font-black tracking-tight text-orange-600 font-h1">GoToEat</div>
 </div>
 </nav>
-<main class="max-w-[1280px] mx-auto px-8 py-xl">
+<main class="max-w-[1280px] mx-auto px-8 py-16">
 <!-- Progress Indicator -->
-<div class="mb-lg max-w-4xl mx-auto">
+<div class="mb-10 max-w-4xl mx-auto">
 <div class="flex items-center justify-between relative">
 <div class="absolute top-1/2 left-0 w-full h-0.5 bg-primary-fixed -z-10 transform -translate-y-1/2"></div>
 <div class="flex flex-col items-center">
@@ -50,18 +50,18 @@
 </div>
 </div>
 </div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 <!-- Left Side: Visual/Descriptive Area -->
-<div class="lg:col-span-5 space-y-md sticky top-32">
+<div class="lg:col-span-5 space-y-6 sticky top-32">
 <div class="relative rounded-3xl overflow-hidden aspect-[4/5] shadow-xl group">
 <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A professional restaurant staff meeting in a bright, modern dining room. The team consists of diverse waiters and chefs in clean uniforms discussing service strategy. High-key natural lighting illuminates the scene, reinforcing a sense of teamwork and professional excellence in the hospitality industry. The color palette is dominated by warm wood tones and clean white surfaces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH-MJQGlLoVU4Ht7pozoBTpPxGY5897YYxUOFnMv7mTnpgxfSfnL73gI6INvjuZ4w3iipa_PwtqTT0fi7cyvERjvsvFxFuZt502DENYLLOuiE45B1j9NOfBN4Z43v2PxlNP5gF6tM-QJdQp23ikCXBl-yGZcjn-hArSooEVV8-E2Pi3Y7cz5MZaScDOjvunY7dozoK7XvPS6vx4fh_KlJW6d9RyolfigzGVi62zts4WolsC7f0-LTRucaDT2cTIqlItjWFw3Gg9Sk"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-lg">
-<h2 class="text-white font-h2 text-h2 mb-sm">Construye tu equipo de alto rendimiento</h2>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+<h2 class="text-white font-h2 text-h2 mb-4">Construye tu equipo de alto rendimiento</h2>
 <p class="text-white/80 font-body-lg">Asigna roles específicos y gestiona permisos para que cada miembro brinde su mejor servicio desde el primer día.</p>
 </div>
 </div>
-<div class="bg-surface-container-low p-md rounded-2xl border border-surface-container">
-<div class="flex gap-sm">
+<div class="bg-surface-container-low p-6 rounded-2xl border border-surface-container">
+<div class="flex gap-4">
 <div class="w-10 h-10 bg-tertiary-container/20 text-tertiary rounded-lg flex items-center justify-center">
 <span class="material-symbols-outlined">security</span>
 </div>
@@ -73,18 +73,18 @@
 </div>
 </div>
 <!-- Right Side: Form Card -->
-<div class="lg:col-span-7 bg-white p-lg rounded-3xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] border border-gray-100">
-<div class="mb-lg">
+<div class="lg:col-span-7 bg-white p-10 rounded-3xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] border border-gray-100">
+<div class="mb-10">
 <h1 class="font-h1 text-h2 text-slate-900 mb-2">Gestiona tu Equipo</h1>
 <p class="text-slate-500 font-body-md">Envía invitaciones a tus colaboradores para que se unan a la plataforma.</p>
 </div>
 <!-- Invite Collaborator Form -->
-<section class="mb-xl">
-<h3 class="font-h3 text-h3 mb-md flex items-center gap-2">
+<section class="mb-16">
+<h3 class="font-h3 text-h3 mb-6 flex items-center gap-2">
 <span class="material-symbols-outlined text-primary-container">person_add</span>
                         Invitar Colaborador
                     </h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="space-y-2">
 <label class="block text-label-caps font-label-caps text-slate-600">Nombre</label>
 <input class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" placeholder="Ej. Juan Pérez" type="text"/>
@@ -95,7 +95,7 @@
 </div>
 <div class="md:col-span-2 space-y-2">
 <label class="block text-label-caps font-label-caps text-slate-600">Rol del Equipo</label>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-sm">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-orange-50 transition-colors has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
 <input class="hidden peer" name="role" type="radio"/>
 <div class="flex flex-col">
@@ -123,24 +123,24 @@
 </div>
 </div>
 </div>
-<button class="mt-lg w-full md:w-auto bg-primary-container text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/20 hover:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+<button class="mt-10 w-full md:w-auto bg-primary-container text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/20 hover:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
 <span class="material-symbols-outlined">send</span>
                         Enviar Invitación
                     </button>
 </section>
 <!-- Invitations Sent List -->
-<div class="mt-xl">
-<div class="flex items-center justify-between mb-md">
+<div class="mt-16">
+<div class="flex items-center justify-between mb-6">
 <h3 class="font-h3 text-h3">Invitaciones Enviadas</h3>
 <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">0 PENDIENTES</span>
 </div>
-<div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-lg flex flex-col items-center justify-center text-center">
-<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-sm">
+<div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
 <span class="material-symbols-outlined text-slate-300">mail</span>
 </div>
 <p class="text-slate-500 font-body-md">Aún no has enviado invitaciones</p>
 </div>
-</div><div class="mt-xl flex justify-between items-center pt-lg border-t border-gray-100">
+</div><div class="mt-16 flex justify-between items-center pt-10 border-t border-gray-100">
 <a href="{{ route('register.step2') }}" class="text-slate-500 font-bold flex items-center gap-2 hover:text-slate-700 transition-colors">
 <span class="material-symbols-outlined">arrow_back</span>
                         Atrás

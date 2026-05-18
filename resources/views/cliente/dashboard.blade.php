@@ -28,31 +28,31 @@
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
 <!-- SideNavBar (Desktop Only) -->
-<aside class="hidden md:flex flex-col h-full p-sm gap-xs bg-surface-container-low fixed left-0 top-0 w-64 z-[60] shadow-md">
-<div class="mb-lg px-xs py-sm">
+<aside class="hidden md:flex flex-col h-full p-4 gap-2 bg-surface-container-low fixed left-0 top-0 w-64 z-[60] shadow-md">
+<div class="mb-10 px-2 py-4">
 <h1 class="font-h3 text-h3 font-bold text-primary">GoToEat</h1>
 <p class="text-body-sm text-on-surface-variant">Gastronomía Premium</p>
 </div>
-<nav class="flex-1 flex flex-col gap-xs">
-<a class="flex items-center gap-sm px-sm py-xs bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="{{ route('dashboard') }}">
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-4 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="{{ route('dashboard') }}">
 <span class="material-symbols-outlined" data-icon="search">search</span>
 <span class="font-body-sm">Explorar</span>
 </a>
-<a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('reservas') }}">
+<a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('reservas') }}">
 <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
 <span class="font-body-sm">Mis Reservas</span>
 </a>
-<a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('perfil') }}">
+<a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('perfil') }}">
 <span class="material-symbols-outlined" data-icon="person">person</span>
 <span class="font-body-sm">Perfil</span>
 </a>
 </nav>
-<div class="mt-auto flex flex-col gap-xs pt-md border-t border-outline-variant/30">
-<a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
+<div class="mt-auto flex flex-col gap-2 pt-6 border-t border-outline-variant/30">
+<a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
 <span class="material-symbols-outlined" data-icon="settings">settings</span>
 <span class="font-body-sm">Ajustes</span>
 </a>
-<a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1 text-error" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+<a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1 text-error" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
 <span class="material-symbols-outlined" data-icon="logout">logout</span>
 <span class="font-body-sm">Cerrar Sesión</span>
 </a>
@@ -61,25 +61,25 @@
 <!-- Main Content Shell -->
 <main class="md:ml-64 flex flex-col min-h-screen">
 <!-- TopAppBar -->
-<header class="docked full-width top-0 sticky z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-gutter py-4 max-w-container_max mx-auto">
-<div class="flex items-center gap-md">
+<header class="docked full-width top-0 sticky z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-6 py-4 max-w-container_max mx-auto">
+<div class="flex items-center gap-6">
 <div class="relative group">
 <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant group-focus-within:text-primary transition-colors">
 <span class="material-symbols-outlined" data-icon="search">search</span>
 </span>
 <input class="bg-surface-container-low border-transparent focus:border-primary focus:ring-1 focus:ring-primary rounded-full pl-10 pr-4 py-2 w-64 md:w-80 transition-all font-body-sm" placeholder="Buscar restaurantes..." type="text"/>
 </div>
-<nav class="hidden lg:flex items-center gap-lg">
+<nav class="hidden lg:flex items-center gap-10">
 <a class="font-body-md text-primary font-bold border-b-2 border-primary py-1" href="{{ route('dashboard') }}">Explorar</a>
 <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" href="{{ route('reservas') }}">Reservas</a>
 
 </nav>
 </div>
-<div class="flex items-center gap-md">
-<button class="hidden sm:flex items-center gap-xs bg-primary text-on-primary px-sm py-2 rounded-lg font-bold text-body-sm shadow-md hover:bg-primary/90 active:scale-95 transition-all">
+<div class="flex items-center gap-6">
+<button class="hidden sm:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-bold text-body-sm shadow-md hover:bg-primary/90 active:scale-95 transition-all">
                     Nueva Reserva
                 </button>
-<div class="flex items-center gap-sm">
+<div class="flex items-center gap-4">
 <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-90">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
@@ -90,18 +90,18 @@
 </div>
 </header>
 <!-- Dashboard Canvas -->
-<div class="px-gutter py-xl max-w-container_max mx-auto w-full space-y-xl">
+<div class="px-6 py-16 max-w-container_max mx-auto w-full space-y-16">
 <!-- Hero Section / Welcome -->
-<section class="relative overflow-hidden bg-primary/10 rounded-xl p-lg border border-primary/20">
+<section class="relative overflow-hidden bg-primary/10 rounded-xl p-10 border border-primary/20">
 <div class="relative z-10 max-w-2xl">
-<h2 class="font-h1 text-h2 text-primary mb-sm">Bienvenido de nuevo, {{ auth()->user()->name }}</h2>
-<p class="text-body-lg text-on-primary-fixed-variant mb-md">Explora las mesas disponibles hoy y disfruta de una experiencia gastronómica sin precedentes.</p>
-<div class="flex gap-sm">
-<span class="px-sm py-xs bg-white/50 backdrop-blur-sm rounded-full text-label-caps border border-primary/20 flex items-center gap-xs text-primary">
+<h2 class="font-h1 text-h2 text-primary mb-4">Bienvenido de nuevo, {{ auth()->user()->name }}</h2>
+<p class="text-body-lg text-on-primary-fixed-variant mb-6">Explora las mesas disponibles hoy y disfruta de una experiencia gastronómica sin precedentes.</p>
+<div class="flex gap-4">
+<span class="px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full text-label-caps border border-primary/20 flex items-center gap-2 text-primary">
 <span class="material-symbols-outlined text-[16px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
                             Nivel: Élite
                         </span>
-<span class="px-sm py-xs bg-white/50 backdrop-blur-sm rounded-full text-label-caps border border-primary/20 flex items-center gap-xs text-primary">
+<span class="px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full text-label-caps border border-primary/20 flex items-center gap-2 text-primary">
 <span class="material-symbols-outlined text-[16px]" data-icon="loyalty">loyalty</span>
                             120 Puntos
                         </span>
@@ -109,9 +109,9 @@
 </div>
 <!-- 3D Perspective Graphic Placeholder -->
 <div class="absolute right-0 top-1/2 -translate-y-1/2 hidden xl:block w-96 perspective-card">
-<div class="perspective-content bg-white p-sm rounded-xl shadow-2xl border border-outline-variant/30">
+<div class="perspective-content bg-white p-4 rounded-xl shadow-2xl border border-outline-variant/30">
 <img class="rounded-lg shadow-inner" data-alt="A stunning high-angle perspective shot of a gourmet seafood dish being served in a minimalist, upscale restaurant. The table is made of light wood, and the surrounding decor is sleek and professional. Warm ambient lighting creates an inviting atmosphere, with soft orange accents reflecting the brand's identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfmvXMsorgxvtT7zSao3Lqq9NqRQz8Nsrdnqy9yXIab9vlX0uZIrNLYrja7BddPuRMBLnCUxYVybIBWAn2wfRmpOF6DHfJdKhJpme15Sha4f_7_CFIRIopOwAO_psHt8fGzUFpNwjNOGzORQXr-n-qmbooHaGCQ92E6cDnAngG-ERUku8OetIAmdI4vC5PZPfnNqYA9mOdmPpTrf_PLx78fSG97xAJhsQUNv1ohIenBOas1uXvTjrcfn41jLq5lZqsLZyNBXmp2Kc"/>
-<div class="mt-sm p-xs flex justify-between items-center">
+<div class="mt-4 p-2 flex justify-between items-center">
 <span class="font-h3 text-body-md text-primary">Reserva Confirmada</span>
 <span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
 </div>
@@ -120,16 +120,16 @@
 </section>
 <!-- Recent Reservations -->
 <section>
-<div class="flex justify-between items-end mb-md">
+<div class="flex justify-between items-end mb-6">
 <div>
 <h3 class="font-h2 text-h3 text-on-surface">Reservas Recientes</h3>
 <p class="text-body-sm text-on-surface-variant">Tus próximas experiencias gastronómicas</p>
 </div>
 <a class="text-primary font-bold text-body-sm hover:underline" href="#">Ver todas</a>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 <!-- Reservation Card 1 -->
-<div class="bg-white p-md rounded-xl border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group flex items-start gap-md">
+<div class="bg-white p-6 rounded-xl border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group flex items-start gap-6">
 <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
 <span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
 </div>
@@ -138,14 +138,14 @@
 <p class="font-h3 text-body-md text-on-surface font-bold">L'Atelier de Luxe</p>
 <span class="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Confirmada</span>
 </div>
-<p class="text-body-sm text-on-surface-variant flex items-center gap-xs mt-1">
+<p class="text-body-sm text-on-surface-variant flex items-center gap-2 mt-1">
 <span class="material-symbols-outlined text-[14px]" data-icon="event">event</span>
                                 Hoy, 20:30
                             </p>
 </div>
 </div>
 <!-- Reservation Card 2 -->
-<div class="bg-white p-md rounded-xl border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group flex items-start gap-md">
+<div class="bg-white p-6 rounded-xl border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group flex items-start gap-6">
 <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
 <span class="material-symbols-outlined" data-icon="local_pizza">local_pizza</span>
 </div>
@@ -154,14 +154,14 @@
 <p class="font-h3 text-body-md text-on-surface font-bold">Pizza Craft Co.</p>
 <span class="bg-on-surface-variant/10 text-on-surface-variant text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Finalizada</span>
 </div>
-<p class="text-body-sm text-on-surface-variant flex items-center gap-xs mt-1">
+<p class="text-body-sm text-on-surface-variant flex items-center gap-2 mt-1">
 <span class="material-symbols-outlined text-[14px]" data-icon="event">event</span>
                                 14 Oct, 21:00
                             </p>
 </div>
 </div>
 <!-- Empty/CTA State -->
-<div class="bg-surface-container border border-dashed border-outline-variant/50 rounded-xl flex items-center justify-center p-md group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="bg-surface-container border border-dashed border-outline-variant/50 rounded-xl flex items-center justify-center p-6 group cursor-pointer hover:bg-surface-container-high transition-colors">
 <div class="text-center">
 <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors mb-1" data-icon="add_circle">add_circle</span>
 <p class="text-label-caps text-on-surface-variant">Nueva Reserva</p>
@@ -171,12 +171,12 @@
 </section>
 <!-- Available Restaurants (Bento Grid Style) -->
 <section>
-<div class="flex justify-between items-end mb-md">
+<div class="flex justify-between items-end mb-6">
 <div>
 <h3 class="font-h2 text-h3 text-on-surface">Restaurantes Disponibles</h3>
 <p class="text-body-sm text-on-surface-variant">Descubre los mejores sabores cerca de ti</p>
 </div>
-<div class="flex gap-xs">
+<div class="flex gap-2">
 <button class="p-2 border border-outline-variant/30 rounded-lg hover:bg-surface-container-high transition-all">
 <span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
 </button>
@@ -185,22 +185,22 @@
 </button>
 </div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-12 gap-md h-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto">
 <!-- Feature Card 1 (Large) -->
 <div class="md:col-span-8 group relative overflow-hidden rounded-xl bg-white border border-outline-variant/20 shadow-sm hover:shadow-lg transition-all">
 <div class="h-64 md:h-80 w-full overflow-hidden">
 <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional top-down photograph of an elegantly set marble restaurant table. It features a diverse spread of Mediterranean tapas. The lighting is soft and golden. The palette emphasizes earthy tones with pops of deep orange, maintaining the GoToEat aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSDyFnVi9vckkGU665o_Hn1w8TkGX-8B08tpjKnkgYG5zEuI1_iwj_2onmRNHTQ96URzICB3rYD8k5YJxJ5YcAr5JqSC6G1J9p1WmZUfI9ikZFgIQ989kSJs9OdkKN0bs5krTlmSRv78xtK17Gr-Ejk0ljX90pfr_EHIKEQSQZgohI5BJDT8Avw1nnAZO_tlFxKgGLgnK-cwD9pG_x4EBqPXTgDvvTQV1fvuwUbvRHxBKxkBRUPEYKv11wdd95gWSCtfAWhz8alKI"/>
 </div>
-<div class="absolute top-4 left-4 flex gap-xs">
-<span class="bg-primary/90 backdrop-blur-md text-on-primary px-sm py-1 rounded-full text-label-caps flex items-center gap-xs">
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="bg-primary/90 backdrop-blur-md text-on-primary px-4 py-1 rounded-full text-label-caps flex items-center gap-2">
 <span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span> Reservar Ahora
                             </span>
 </div>
-<div class="p-md flex justify-between items-center">
+<div class="p-6 flex justify-between items-center">
 <div>
 <h4 class="font-h3 text-h3 text-on-surface">Mar y Tierra Fusion</h4>
-<div class="flex items-center gap-sm mt-1">
-<span class="flex items-center gap-xs text-primary font-bold text-body-sm">
+<div class="flex items-center gap-4 mt-1">
+<span class="flex items-center gap-2 text-primary font-bold text-body-sm">
 <span class="material-symbols-outlined text-[18px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span> 4.9
                                     </span>
 <span class="text-on-surface-variant text-body-sm">•</span>
@@ -209,7 +209,7 @@
 <span class="text-on-surface-variant text-body-sm">$$$</span>
 </div>
 </div>
-<button class="bg-primary text-on-primary px-lg py-3 rounded-lg font-bold text-body-md hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+<button class="bg-primary text-on-primary px-10 py-3 rounded-lg font-bold text-body-md hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
                                 Ver Menú
                             </button>
 </div>
@@ -220,17 +220,17 @@
 <div class="h-40 w-full overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A close-up of a beautifully plated fine-dining dessert in a modern, brightly lit restaurant. The focus is sharp on the intricate textures of the dish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxJBXCnTOo4bitThHvXrD7BUBO8BoRgc5S5cDC5IdgXH3nfPxcJrwmQBecWJtOkOb1xiQyjZAHgLMweh3dEqitqsvJaD_YV1Jae9TYDD3urabNpI22Xt1FJ_5r-t5ToCl5RbUCsrY3jFYPQ-62a42-Xden-WZ5dAmprQkj5BB4Y5Ve6-Aw9yA63et1edEFnO7INCsBIKOtZ1wonAZKJSMVtjvdr5AT-7mxtlUUTjm112PGSG4NoulIWS1Y3Wb6gF74725D_ap7k9k"/>
 </div>
-<div class="p-md flex-1">
+<div class="p-6 flex-1">
 <div class="flex justify-between items-start mb-2">
 <h4 class="font-h3 text-body-lg text-on-surface font-bold">The Green Table</h4>
-<span class="flex items-center gap-xs text-primary font-bold text-body-sm">
+<span class="flex items-center gap-2 text-primary font-bold text-body-sm">
 <span class="material-symbols-outlined text-[16px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span> 4.7
                                 </span>
 </div>
 <p class="text-body-sm text-on-surface-variant line-clamp-2">Ingredientes orgánicos y sostenibilidad en cada plato.</p>
-<div class="mt-md pt-md border-t border-outline-variant/20 flex justify-between items-center">
+<div class="mt-6 pt-6 border-t border-outline-variant/20 flex justify-between items-center">
 <span class="text-label-caps text-on-surface-variant">Sants, Barcelona</span>
-<button class="text-primary font-bold text-body-sm hover:translate-x-1 transition-transform flex items-center gap-xs">
+<button class="text-primary font-bold text-body-sm hover:translate-x-1 transition-transform flex items-center gap-2">
                                     Ver Ofertas <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
 </button>
 </div>
@@ -241,17 +241,17 @@
 <div class="h-40 w-full overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="The interior of a trendy, urban industrial bistro at twilight. Warm glowing pendant lights hang over a polished concrete floor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRNM1zLeRghBXRCt1Y3mgoFMlQafVc9-xDj1M3K6PFRL8Ju9FYtCUy35IYer5SEOndhwsRBT8BY5ay1vTW6pwKYh0yuDYkoA_mM_pOU1HlHa2WUdSDDTS2qcazlyFbTnuB4swj4G1c5c12KGD33aWyPO8bV1EpSQgsuTBua301WEC71waOAt1Id2Pq8goFA_QNA88TwmfNr0jxr4cHk6xzDwuU2fe5BRe3u9uv6pE2WGG_gRwrDfmWWkgzjLf4wRdEI2Dqo0hZ4qE"/>
 </div>
-<div class="p-md flex-1">
+<div class="p-6 flex-1">
 <div class="flex justify-between items-start mb-2">
 <h4 class="font-h3 text-body-lg text-on-surface font-bold">Sushi Lab</h4>
-<span class="flex items-center gap-xs text-primary font-bold text-body-sm">
+<span class="flex items-center gap-2 text-primary font-bold text-body-sm">
 <span class="material-symbols-outlined text-[16px]" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span> 4.8
                                 </span>
 </div>
 <p class="text-body-sm text-on-surface-variant line-clamp-2">Innovación japonesa con técnicas moleculares.</p>
-<div class="mt-md pt-md border-t border-outline-variant/20 flex justify-between items-center">
+<div class="mt-6 pt-6 border-t border-outline-variant/20 flex justify-between items-center">
 <span class="text-label-caps text-on-surface-variant">Salamanca, Madrid</span>
-<button class="text-primary font-bold text-body-sm hover:translate-x-1 transition-transform flex items-center gap-xs">
+<button class="text-primary font-bold text-body-sm hover:translate-x-1 transition-transform flex items-center gap-2">
                                     Reservar <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
 </button>
 </div>
@@ -259,11 +259,11 @@
 </div>
 <!-- Bottom Wide Card (Asymmetric) -->
 <div class="md:col-span-8 group relative overflow-hidden rounded-xl bg-on-surface border border-outline-variant/10 shadow-lg transition-all flex items-center">
-<div class="p-lg md:w-1/2 z-10">
-<span class="text-primary text-label-caps mb-xs block">Destacado de la Semana</span>
-<h4 class="font-h1 text-h2 text-surface mb-sm">Bistro 22: Noche de Jazz &amp; Vinos</h4>
-<p class="text-body-md text-surface-variant mb-md">Únete a nosotros para una experiencia sensorial única con maridaje exclusivo.</p>
-<button class="bg-primary text-on-primary px-lg py-3 rounded-lg font-bold text-body-md hover:bg-primary/90 transition-all active:scale-95">
+<div class="p-10 md:w-1/2 z-10">
+<span class="text-primary text-label-caps mb-2 block">Destacado de la Semana</span>
+<h4 class="font-h1 text-h2 text-surface mb-4">Bistro 22: Noche de Jazz &amp; Vinos</h4>
+<p class="text-body-md text-surface-variant mb-6">Únete a nosotros para una experiencia sensorial única con maridaje exclusivo.</p>
+<button class="bg-primary text-on-primary px-10 py-3 rounded-lg font-bold text-body-md hover:bg-primary/90 transition-all active:scale-95">
                                 Ver Evento
                             </button>
 </div>
@@ -276,13 +276,13 @@
 </section>
 </div>
 <!-- Footer (Simple) -->
-<footer class="mt-auto border-t border-outline-variant/30 py-lg px-gutter bg-surface-container-low">
-<div class="max-w-container_max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<footer class="mt-auto border-t border-outline-variant/30 py-10 px-6 bg-surface-container-low">
+<div class="max-w-container_max mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
 <div class="flex flex-col items-center md:items-start">
 <span class="font-h3 text-body-md font-bold text-primary">GoToEat</span>
 <p class="text-body-sm text-on-surface-variant">© 2024 GoToEat Technologies Inc. Todos los derechos reservados.</p>
 </div>
-<div class="flex gap-lg">
+<div class="flex gap-10">
 <a class="text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacidad</a>
 <a class="text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Términos</a>
 <a class="text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contacto</a>
@@ -291,16 +291,16 @@
 </footer>
 </main>
 <!-- BottomNavBar (Mobile Only) -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav bg-surface/90 border-t border-outline-variant/30 px-sm py-xs flex justify-around items-center z-[60]">
-<a class="flex flex-col items-center gap-xs p-xs text-primary font-bold" href="{{ route('dashboard') }}">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav bg-surface/90 border-t border-outline-variant/30 px-4 py-2 flex justify-around items-center z-[60]">
+<a class="flex flex-col items-center gap-2 p-2 text-primary font-bold" href="{{ route('dashboard') }}">
 <span class="material-symbols-outlined" data-icon="search" data-weight="fill" style="font-variation-settings: 'FILL' 1;">search</span>
 <span class="text-[10px] font-body-sm">Explorar</span>
 </a>
-<a class="flex flex-col items-center gap-xs p-xs text-on-surface-variant" href="{{ route('reservas') }}">
+<a class="flex flex-col items-center gap-2 p-2 text-on-surface-variant" href="{{ route('reservas') }}">
 <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
 <span class="text-[10px] font-body-sm">Reservas</span>
 </a>
-<a class="flex flex-col items-center gap-xs p-xs text-on-surface-variant" href="{{ route('perfil') }}">
+<a class="flex flex-col items-center gap-2 p-2 text-on-surface-variant" href="{{ route('perfil') }}">
 <span class="material-symbols-outlined" data-icon="person">person</span>
 <span class="text-[10px] font-body-sm">Perfil</span>
 </a>

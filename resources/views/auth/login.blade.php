@@ -19,10 +19,12 @@
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-surface-variant font-body-md text-on-surface selection:bg-primary-fixed selection:text-on-primary-container">
-<main class="min-h-screen flex items-center justify-center p-sm md:p-lg relative overflow-hidden">
+<body class="bg-surface-variant font-body text-body-md text-on-surface selection:bg-primary-fixed selection:text-on-primary-container">
+<main class="min-h-screen flex items-center justify-center p-4 md:p-10 relative overflow-hidden">
 
     {{-- Background decorative elements --}}
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
@@ -31,39 +33,39 @@
     </div>
 
     <div class="w-full max-w-[480px] z-10 perspective-container">
-        <div class="glass-card rounded-xl p-lg md:p-xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-white/40">
+        <div class="glass-card rounded-xl p-10 md:p-16 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-white/40">
 
             {{-- Logo & Header --}}
-            <div class="text-center mb-xl">
-                <div class="inline-flex items-center gap-xs mb-md">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 mb-6">
                     <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center shadow-lg shadow-primary-container/20">
                         <span class="material-symbols-outlined text-white text-2xl">restaurant_menu</span>
                     </div>
-                    <span class="font-h2 text-h3 text-primary-container tracking-tight font-black">GoToEat</span>
+                    <span class="font-heading text-h3 text-primary-container tracking-tight font-black">GoToEat</span>
                 </div>
-                <h1 class="font-h2 text-h3 text-on-background mb-base">Bienvenido de nuevo</h1>
-                <p class="font-body-sm text-on-surface-variant">Accede a tu panel de gestión de restaurante</p>
+                <h1 class="font-heading text-h3 text-on-background mb-1">Bienvenido de nuevo</h1>
+                <p class="font-body text-body-sm text-on-surface-variant">Accede a tu panel de gestión de restaurante</p>
             </div>
 
             {{-- Session errors --}}
             @if ($errors->any())
-                <div class="mb-md p-sm bg-error/10 border border-error/30 rounded-lg flex items-start gap-xs">
+                <div class="mb-6 p-4 bg-error/10 border border-error/30 rounded-lg flex items-start gap-2">
                     <span class="material-symbols-outlined text-error text-xl shrink-0 mt-[2px]">error</span>
                     <div>
                         @foreach ($errors->all() as $error)
-                            <p class="font-body-sm text-error">{{ $error }}</p>
+                            <p class="font-body text-body-sm text-error">{{ $error }}</p>
                         @endforeach
                     </div>
                 </div>
             @endif
 
             {{-- Login Form --}}
-            <form action="{{ route('login') }}" method="POST" class="space-y-md">
+            <form action="{{ route('login') }}" method="POST" class="space-y-6">
                 @csrf
 
                 {{-- Email --}}
-                <div class="space-y-xs">
-                    <label class="font-label-caps text-on-surface-variant block uppercase" for="email">Correo Electrónico</label>
+                <div class="space-y-2">
+                    <label class="font-body text-label-caps text-on-surface-variant block uppercase" for="email">Correo Electrónico</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
                         <input
@@ -75,14 +77,14 @@
                             autofocus
                             required
                             placeholder="nombre@restaurante.com"
-                            class="w-full pl-[48px] pr-sm py-md bg-surface-bright border @error('email') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
+                            class="w-full pl-[48px] pr-4 py-6 bg-surface-bright border @error('email') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
                         />
                     </div>
                 </div>
 
                 {{-- Password --}}
-                <div class="space-y-xs">
-                    <label class="font-label-caps text-on-surface-variant block uppercase" for="password">Contraseña</label>
+                <div class="space-y-2">
+                    <label class="font-body text-label-caps text-on-surface-variant block uppercase" for="password">Contraseña</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock</span>
                         <input
@@ -92,14 +94,14 @@
                             autocomplete="current-password"
                             required
                             placeholder="••••••••"
-                            class="w-full pl-[48px] pr-sm py-md bg-surface-bright border @error('password') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
+                            class="w-full pl-[48px] pr-4 py-6 bg-surface-bright border @error('password') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
                         />
                     </div>
                 </div>
 
                 {{-- Options --}}
-                <div class="flex items-center justify-between py-xs">
-                    <label class="flex items-center gap-xs cursor-pointer group">
+                <div class="flex items-center justify-between py-2">
+                    <label class="flex items-center gap-2 cursor-pointer group">
                         <div class="relative flex items-center">
                             <input
                                 name="remember"
@@ -108,17 +110,17 @@
                             />
                             <span class="material-symbols-outlined absolute text-white text-sm scale-0 peer-checked:scale-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform pointer-events-none">check</span>
                         </div>
-                        <span class="font-body-sm text-on-surface-variant group-hover:text-primary transition-colors">Recordarme</span>
+                        <span class="font-body text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">Recordarme</span>
                     </label>
                     @if (Route::has('password.request'))
-                        <a class="font-body-sm font-semibold text-primary hover:text-primary-container transition-colors" href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
+                        <a class="font-body text-body-sm font-semibold text-primary hover:text-primary-container transition-colors" href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
                     @endif
                 </div>
 
                 {{-- Submit --}}
                 <button
                     type="submit"
-                    class="w-full py-md bg-primary-container text-white font-h3 text-body-md rounded-lg shadow-lg shadow-primary-container/20 hover:shadow-xl hover:shadow-primary-container/30 active:scale-[0.98] transition-all flex items-center justify-center gap-xs"
+                    class="w-full py-6 bg-primary-container text-white font-heading text-body-md rounded-lg shadow-lg shadow-primary-container/20 hover:shadow-xl hover:shadow-primary-container/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                     Iniciar Sesión
                     <span class="material-symbols-outlined text-xl">login</span>
@@ -126,23 +128,23 @@
             </form>
 
             {{-- Footer --}}
-            <div class="mt-xl pt-lg border-t border-outline-variant/30 text-center">
-                <p class="font-body-sm text-on-surface-variant">
+            <div class="mt-16 pt-10 border-t border-outline-variant/30 text-center">
+                <p class="font-body text-body-sm text-on-surface-variant">
                     ¿No tienes una cuenta?
                     <a class="font-semibold text-secondary hover:text-on-secondary-container transition-colors" href="{{ route('register') }}">Registrarse Gratis</a>
                 </p>
             </div>
         </div>
 
-        <div class="mt-lg flex items-center justify-center gap-md grayscale opacity-50">
-            <div class="flex items-center gap-xs">
+        <div class="mt-10 flex items-center justify-center gap-6 grayscale opacity-50">
+            <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-body-sm">verified_user</span>
-                <span class="font-label-caps text-[10px]">Secure 256-bit SSL</span>
+                <span class="font-body text-label-caps text-[10px]">Secure 256-bit SSL</span>
             </div>
             <div class="h-1 w-1 bg-outline-variant rounded-full"></div>
-            <div class="flex items-center gap-xs">
+            <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-body-sm">shield</span>
-                <span class="font-label-caps text-[10px]">GDPR Compliant</span>
+                <span class="font-body text-label-caps text-[10px]">GDPR Compliant</span>
             </div>
         </div>
     </div>
@@ -152,7 +154,7 @@
         <div class="w-full h-full bg-white rounded-[40px] shadow-2xl border border-white/50 overflow-hidden relative">
             <img
                 class="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2kwzjb_YA8VWEICrQh0ZZu0qTWXJbJUxxudcA4-G-hzwRs8lSbRqMftkyRMwknkXuuLhPnFYloNAbX5xNy5LmwU8y5jqsV7UKgtKiUeRdU_EUHYs8Ev1Kn-a5w5WLoEmow3eGjmizarGjtUtU4iJjxnJI53bHIstxkZyYj8w16wCD8x1zoEqjvDQlyR-7Fpl-5zVrIKk-29LZEhCYtOvb_rrOTm8LHDwwTYANiLGYzLnkhPSzCX5JGAaa7ZweB0y2qzBBE69kIpQ"
+                src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1974&auto=format&fit=crop"
                 alt="Panel de gestión GoToEat"
             />
             <div class="absolute inset-0 bg-gradient-to-tr from-primary-container/20 to-transparent"></div>
