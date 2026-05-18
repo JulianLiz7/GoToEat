@@ -123,34 +123,54 @@
 </div>
 <div class="space-y-6">
 <h3 class="font-h3 text-body-md font-bold text-on-surface-variant mb-4">Cambiar Contraseña</h3>
+<form method="post" action="{{ route('password.update') }}" class="space-y-6">
+@csrf
+@method('put')
 <div class="space-y-6">
 <div class="space-y-2">
-<label class="font-label-caps text-on-surface-variant uppercase">Contraseña Actual</label>
+<label class="font-label-caps text-on-surface-variant uppercase" for="update_password_current_password">Contraseña Actual</label>
 <div class="relative">
-<input class="w-full bg-surface-container-low border border-primary/20 rounded-lg p-4 cursor-not-allowed outline-none" disabled="" placeholder="••••••••" type="password"/>
-<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant cursor-not-allowed">visibility</span>
+<input id="update_password_current_password" name="current_password" class="w-full bg-surface border border-primary/20 rounded-lg p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="••••••••" type="password" autocomplete="current-password"/>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant cursor-pointer">visibility</span>
 </div>
+@if($errors->updatePassword->has('current_password'))
+    <div class="text-error text-body-sm mt-1">{{ $errors->updatePassword->first('current_password') }}</div>
+@endif
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="space-y-2">
-<label class="font-label-caps text-on-surface-variant uppercase">Nueva Contraseña</label>
-<input class="w-full bg-surface-container-low border border-primary/20 rounded-lg p-4 cursor-not-allowed outline-none" disabled="" placeholder="Solo lectura" type="password"/>
+<label class="font-label-caps text-on-surface-variant uppercase" for="update_password_password">Nueva Contraseña</label>
+<input id="update_password_password" name="password" class="w-full bg-surface border border-primary/20 rounded-lg p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="Ingresa nueva contraseña" type="password" autocomplete="new-password"/>
+@if($errors->updatePassword->has('password'))
+    <div class="text-error text-body-sm mt-1">{{ $errors->updatePassword->first('password') }}</div>
+@endif
 </div>
 <div class="space-y-2">
-<label class="font-label-caps text-on-surface-variant uppercase">Confirmar Nueva Contraseña</label>
-<input class="w-full bg-surface-container-low border border-primary/20 rounded-lg p-4 cursor-not-allowed outline-none" disabled="" placeholder="Solo lectura" type="password"/>
+<label class="font-label-caps text-on-surface-variant uppercase" for="update_password_password_confirmation">Confirmar Nueva Contraseña</label>
+<input id="update_password_password_confirmation" name="password_confirmation" class="w-full bg-surface border border-primary/20 rounded-lg p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="Confirma nueva contraseña" type="password" autocomplete="new-password"/>
+@if($errors->updatePassword->has('password_confirmation'))
+    <div class="text-error text-body-sm mt-1">{{ $errors->updatePassword->first('password_confirmation') }}</div>
+@endif
 </div>
 </div>
 </div>
 <div class="pt-6 flex justify-between items-center">
-<span class="text-body-sm text-on-surface-variant flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                                Último cambio hace 3 meses
-                            </span>
-<button class="bg-primary/20 text-primary font-bold px-10 py-4 rounded-lg cursor-not-allowed" disabled="" type="button">
+@if (session('status') === 'password-updated')
+    <span class="text-body-sm text-secondary flex items-center gap-2 font-bold" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        ¡Contraseña actualizada con éxito!
+    </span>
+@else
+    <span class="text-body-sm text-on-surface-variant flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">shield</span>
+        Protege tu cuenta con una contraseña segura
+    </span>
+@endif
+<button class="bg-primary text-on-primary shadow-lg shadow-primary/20 font-bold px-10 py-4 rounded-lg hover:scale-95 active:scale-90 transition-all duration-200" type="submit">
                                 Actualizar Contraseña
                             </button>
 </div>
+</form>
 </div>
 </div>
 <!-- Removed Sessions Section as requested -->
