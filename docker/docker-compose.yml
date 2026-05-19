@@ -1,7 +1,7 @@
 
 services:
 
-  # ── Aplicación PHP-FPM ──────────────────────────────────────
+  # ── Aplicacion PHP-FPM ────────────────────────────────────────────
   app:
     build:
       context: ..
@@ -9,83 +9,107 @@ services:
     container_name: laravel_app
     volumes:
       - ..:/var/www
+      - storage_data:/var/www/storage/app
     depends_on:
-      - db
-      - redis
-    restart: on-failure
+      db:
+        condition: service_healthy
+    restart: unless-stopped
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - APP_ENV=${APP_ENV:-local}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-GoToEat}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - CACHE_STORE=${CACHE_STORE:-database}
+      - SESSION_DRIVER=${SESSION_DRIVER:-database}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
 
-  # ── Queue Worker (AI + Finance + Inventory queues) ───────────
+  # ── Queue Worker (colas: ai, finance, inventory, default) ─────────
+  # Procesa los jobs en segundo plano:
+  #   - ProcessAIAnalysis: llama a Gemini API y guarda la respuesta
+  #   - Otros jobs de inventario y finanzas
   queue:
     build:
       context: ..
       dockerfile: docker/Dockerfile
     container_name: laravel_queue
-    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90 --queue=ai,finance,inventory,default
+    command: >
+      php artisan queue:work
+      --queue=ai,finance,inventory,default
+      --sleep=3
+      --tries=3
+      --timeout=120
+      --max-time=3600
     volumes:
       - ..:/var/www
+      - storage_data:/var/www/storage/app
     depends_on:
-      - app
-      - db
-      - redis
-    restart: on-failure
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+    restart: unless-stopped
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - APP_ENV=${APP_ENV:-local}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-GoToEat}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
 
-  # ── Nginx (Reverse Proxy) ─────────────────────────────────────
+  # ── Nginx (Reverse Proxy) ─────────────────────────────────────────
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: laravel_nginx
     ports:
-      - "8000:80"
+      - "${APP_PORT:-8000}:80"
     volumes:
       - ..:/var/www
       - ./nginx:/etc/nginx/conf.d
     depends_on:
       - app
-    restart: on-failure
+    restart: unless-stopped
 
-  # ── MySQL 8 ───────────────────────────────────────────────────
+  # ── MySQL 8 ───────────────────────────────────────────────────────
   db:
     image: mysql:8
     container_name: laravel_db
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: GoToEat
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE:      ${DB_DATABASE:-GoToEat}
+      MYSQL_USER:          ${DB_USERNAME:-root}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-root}
     ports:
-      - "3306:3306"
+      - "${DB_PORT_EXPOSED:-3306}:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # ── phpMyAdmin ───────────────────────────────────────────────
+  # ── phpMyAdmin (solo en local/staging, no en produccion) ──────────
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: laravel_phpmyadmin
     ports:
-      - "8080:80"
+      - "${PMA_PORT:-8080}:80"
     environment:
-      PMA_HOST: db
+      PMA_HOST:     db
+      PMA_USER:     ${DB_USERNAME:-root}
+      PMA_PASSWORD: ${DB_PASSWORD:-root}
     depends_on:
       - db
-
-  # ── Microservicio IA (activar cuando se implemente) ───────────
-  # ai_service:
-  #   build:
-  #     context: ../services/ai
-  #     dockerfile: Dockerfile
-  #   container_name: gotoeat_ai
-  #   ports:
-  #     - "8001:8001"
-  #   environment:
-  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
-  #   restart: on-failure
+    profiles:
+      - dev
 
 volumes:
   db_data:
-  redis_data:
+  storage_data:
