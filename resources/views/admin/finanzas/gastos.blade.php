@@ -154,7 +154,7 @@
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 Ingreso Manual
             </button>
-            <button onclick="document.getElementById('modalGasto').classList.remove('hidden')"
+            <button onclick="document.getElementById('modalComprobante').classList.remove('hidden')"
                     class="w-full bg-white/20 text-white border border-white/30 py-3 rounded-xl font-bold text-sm
                            hover:bg-white/30 transition-all flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined text-[18px]">upload_file</span>
@@ -300,46 +300,6 @@
                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all resize-none">{{ old('notes') }}</textarea>
                 </div>
 
-                {{-- Comprobante de pago --}}
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">
-                        Comprobante de Pago
-                        <span class="text-gray-300 font-normal normal-case ml-1">(JPG, PNG o PDF — máx. 10 MB)</span>
-                    </label>
-                    <div id="dropZone"
-                         class="relative border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer transition-all duration-200
-                                hover:border-primary-container hover:bg-orange-50/40"
-                         onclick="document.getElementById('comprobanteInput').click()"
-                         ondragover="event.preventDefault(); this.classList.add('border-primary-container','bg-orange-50/40')"
-                         ondragleave="this.classList.remove('border-primary-container','bg-orange-50/40')"
-                         ondrop="handleDrop(event)">
-
-                        <div id="dropPlaceholder">
-                            <span class="material-symbols-outlined text-3xl text-gray-300 block mb-1"
-                                  style="font-variation-settings:'FILL' 0">upload_file</span>
-                            <p class="text-sm text-gray-500">Arrastra aquí o <span class="text-primary font-semibold">selecciona un archivo</span></p>
-                        </div>
-
-                        <div id="filePreview" class="hidden items-center gap-3 text-left">
-                            <div id="previewThumb" class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden"></div>
-                            <div class="flex-1 min-w-0">
-                                <p id="fileName" class="text-sm font-semibold text-on-surface truncate"></p>
-                                <p id="fileSize" class="text-xs text-gray-400"></p>
-                            </div>
-                            <button type="button" onclick="clearFile(event)"
-                                    class="p-1 rounded-lg hover:bg-red-50 hover:text-error transition-colors text-gray-400 shrink-0">
-                                <span class="material-symbols-outlined text-[18px]">close</span>
-                            </button>
-                        </div>
-
-                        <input id="comprobanteInput" name="comprobante" type="file"
-                               accept=".jpg,.jpeg,.png,.pdf,.webp"
-                               class="hidden" onchange="handleFileSelect(this)"/>
-                    </div>
-                    @error('comprobante')
-                    <p class="text-xs text-error mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
             </div>
 
             {{-- Footer --}}
@@ -351,6 +311,112 @@
                 <button type="submit"
                         class="flex-1 py-2.5 bg-primary-container text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm">
                     Registrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ══ MODAL: Subir Comprobante ══════════════════════════════ --}}
+<div id="modalComprobante"
+     class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+     onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col" style="max-height:90vh;">
+        {{-- Header --}}
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+            <h3 class="font-bold text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px] text-primary-container">upload_file</span>
+                Subir Comprobante
+            </h3>
+            <button onclick="document.getElementById('modalComprobante').classList.add('hidden')"
+                    class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                <span class="material-symbols-outlined text-[20px] text-gray-400">close</span>
+            </button>
+        </div>
+
+        {{-- Body --}}
+        <form method="POST" action="{{ route('admin.finance.gastos.store') }}"
+              enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
+            @csrf
+            <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+
+                {{-- Zona de upload --}}
+                <div id="dropZoneC"
+                     class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer transition-all
+                            hover:border-primary-container hover:bg-orange-50/40"
+                     onclick="document.getElementById('cInput').click()"
+                     ondragover="event.preventDefault(); this.classList.add('border-primary-container','bg-orange-50/40')"
+                     ondragleave="this.classList.remove('border-primary-container','bg-orange-50/40')"
+                     ondrop="handleDropC(event)">
+
+                    <div id="dropPlaceholderC">
+                        <span class="material-symbols-outlined text-5xl text-gray-200 block mb-2"
+                              style="font-variation-settings:'FILL' 0">upload_file</span>
+                        <p class="font-semibold text-sm text-gray-500">
+                            Arrastra aquí o <span class="text-primary">selecciona el archivo</span>
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP o PDF — máx. 10 MB</p>
+                    </div>
+
+                    <div id="filePreviewC" class="hidden items-center gap-3 text-left">
+                        <div id="previewThumbC"
+                             class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden"></div>
+                        <div class="flex-1 min-w-0">
+                            <p id="fileNameC" class="text-sm font-bold text-on-surface truncate"></p>
+                            <p id="fileSizeC" class="text-xs text-gray-400 mt-0.5"></p>
+                        </div>
+                        <button type="button" onclick="clearFileC(event)"
+                                class="p-1.5 rounded-lg hover:bg-red-50 hover:text-error text-gray-300 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <input id="cInput" name="comprobante" type="file"
+                           accept=".jpg,.jpeg,.png,.pdf,.webp"
+                           class="hidden" onchange="handleFileSelectC(this)" required/>
+                </div>
+
+                {{-- Datos mínimos del gasto --}}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Concepto *</label>
+                    <input name="name" type="text" required placeholder="Ej: Factura proveedor #001"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Monto *</label>
+                        <input name="amount" type="number" step="1" min="0" required placeholder="0"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Fecha *</label>
+                        <input name="expense_date" type="date" required value="{{ now()->toDateString() }}"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Categoría</label>
+                    <select name="category"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all">
+                        <option value="">Seleccionar...</option>
+                        @foreach(['Proveedores','Nómina','Servicios','Arriendo','Mantenimiento','Marketing','Operativos','Otros'] as $cat)
+                        <option value="{{ $cat }}">{{ $cat }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="px-6 py-4 border-t border-gray-100 flex gap-3 shrink-0">
+                <button type="button"
+                        onclick="document.getElementById('modalComprobante').classList.add('hidden')"
+                        class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 bg-primary-container text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">upload</span>
+                    Subir
                 </button>
             </div>
         </form>
@@ -393,55 +459,51 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 @endif
 
-// ── Comprobante upload: preview ────────────────────────────────────
-function handleFileSelect(input) {
-    if (input.files && input.files[0]) showFilePreview(input.files[0]);
+// ── Comprobante upload (modal simple) ──────────────────────────────
+const ALLOWED_TYPES = ['image/jpeg','image/png','image/webp','application/pdf'];
+const MAX_SIZE = 10 * 1024 * 1024;
+
+function validateFile(file) {
+    if (!ALLOWED_TYPES.includes(file.type)) { alert('Solo se permiten JPG, PNG, WEBP o PDF'); return false; }
+    if (file.size > MAX_SIZE) { alert('El archivo supera los 10 MB'); return false; }
+    return true;
 }
 
-function handleDrop(e) {
+function handleFileSelectC(input) {
+    if (input.files && input.files[0] && validateFile(input.files[0])) {
+        showFilePreviewC(input.files[0]);
+    }
+}
+
+function handleDropC(e) {
     e.preventDefault();
-    document.getElementById('dropZone').classList.remove('border-primary-container','bg-orange-50/40');
+    document.getElementById('dropZoneC').classList.remove('border-primary-container','bg-orange-50/40');
     const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const allowed = ['image/jpeg','image/png','image/webp','application/pdf'];
-    if (!allowed.includes(file.type)) { alert('Solo se permiten JPG, PNG, WEBP o PDF'); return; }
-    if (file.size > 10 * 1024 * 1024) { alert('El archivo supera los 10 MB'); return; }
+    if (!file || !validateFile(file)) return;
     const dt = new DataTransfer();
     dt.items.add(file);
-    document.getElementById('comprobanteInput').files = dt.files;
-    showFilePreview(file);
+    document.getElementById('cInput').files = dt.files;
+    showFilePreviewC(file);
 }
 
-function showFilePreview(file) {
-    const placeholder = document.getElementById('dropPlaceholder');
-    const preview     = document.getElementById('filePreview');
-    const thumb       = document.getElementById('previewThumb');
-    const nameEl      = document.getElementById('fileName');
-    const sizeEl      = document.getElementById('fileSize');
-
-    nameEl.textContent = file.name;
-    sizeEl.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-
-    thumb.innerHTML = '';
-    if (file.type.startsWith('image/')) {
-        const img = document.createElement('img');
-        img.className = 'w-full h-full object-cover';
-        img.src = URL.createObjectURL(file);
-        thumb.appendChild(img);
-    } else {
-        thumb.innerHTML = '<span class="material-symbols-outlined text-2xl text-error">picture_as_pdf</span>';
-    }
-
-    placeholder.classList.add('hidden');
+function showFilePreviewC(file) {
+    document.getElementById('dropPlaceholderC').classList.add('hidden');
+    const preview = document.getElementById('filePreviewC');
+    const thumb   = document.getElementById('previewThumbC');
+    document.getElementById('fileNameC').textContent = file.name;
+    document.getElementById('fileSizeC').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    thumb.innerHTML = file.type.startsWith('image/')
+        ? `<img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover">`
+        : '<span class="material-symbols-outlined text-2xl text-error">picture_as_pdf</span>';
     preview.classList.remove('hidden');
     preview.classList.add('flex');
 }
 
-function clearFile(e) {
+function clearFileC(e) {
     e.stopPropagation();
-    document.getElementById('comprobanteInput').value = '';
-    document.getElementById('dropPlaceholder').classList.remove('hidden');
-    const preview = document.getElementById('filePreview');
+    document.getElementById('cInput').value = '';
+    document.getElementById('dropPlaceholderC').classList.remove('hidden');
+    const preview = document.getElementById('filePreviewC');
     preview.classList.add('hidden');
     preview.classList.remove('flex');
 }
