@@ -32,83 +32,7 @@
     },
 
     previewCierre() {
-        const date     = new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'long', year:'numeric' });
-        const expected = {{ $expectedCash }};
-        const counted  = this.totalCounted;
-        const diff     = this.difference;
-        const deposit  = this.depositAmount;
-        const expenses = {{ $todayExpenses }};
-        const orders   = {{ $todayOrdersCount }};
-        const fmt      = n => '$' + Math.abs(n).toLocaleString('es-CO');
-
-        const billetes = this.billetes.filter(d => d.qty > 0);
-        const monedas  = this.monedas.filter(d => d.qty > 0);
-
-        const rows = (arr) => arr.map(d =>
-            `<tr><td>${d.label}</td><td style="text-align:right">${parseInt(d.qty)||0}</td><td style="text-align:right">${fmt(d.value*(parseInt(d.qty)||0))}</td></tr>`
-        ).join('');
-
-        const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/>
-        <title>Cierre de Caja — GoToEat</title>
-        <style>
-          * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-          body { padding: 32px; font-size: 13px; color: #111; }
-          h1  { font-size: 22px; color: #f97316; margin-bottom: 4px; }
-          h2  { font-size: 14px; font-weight: 700; margin: 20px 0 8px; border-bottom: 2px solid #f97316; padding-bottom: 4px; }
-          table { width: 100%; border-collapse: collapse; font-size: 12px; }
-          th  { background: #f9fafb; padding: 8px 12px; text-align: left; font-size: 11px; text-transform: uppercase; color: #6b7280; }
-          td  { padding: 7px 12px; border-bottom: 1px solid #f3f4f6; }
-          .kpi { display: flex; gap: 16px; margin: 16px 0; }
-          .kpi-card { flex: 1; background: #f9fafb; border-radius: 8px; padding: 14px; }
-          .kpi-card label { font-size: 10px; text-transform: uppercase; color: #9ca3af; display: block; margin-bottom: 4px; }
-          .kpi-card span  { font-size: 22px; font-weight: 900; }
-          .green { color: #006c49; } .red { color: #ba1a1a; } .orange { color: #f97316; }
-          .total-row td { font-weight: 900; border-top: 2px solid #f97316; background: #fff8f5; }
-          .footer { margin-top: 40px; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 12px; display: flex; justify-content: space-between; }
-          @media print { body { padding: 20px; } @page { margin: 1cm; size: A4; } }
-        </style></head><body>
-        <h1>GoToEat</h1>
-        <p style="font-size:13px;font-weight:700;margin-bottom:2px">Cierre de Caja — Reporte del Día</p>
-        <p style="font-size:11px;color:#9ca3af">Fecha: ${date} &nbsp;|&nbsp; Órdenes procesadas: ${orders}</p>
-
-        <div class="kpi">
-          <div class="kpi-card"><label>Efectivo Esperado (POS)</label><span class="orange">${fmt(expected)}</span></div>
-          <div class="kpi-card"><label>Efectivo Contado</label><span class="orange">${fmt(counted)}</span></div>
-          <div class="kpi-card"><label>${diff >= 0 ? 'Sobrante' : 'Faltante'}</label>
-            <span class="${diff >= 0 ? 'green' : 'red'}">${diff >= 0 ? '+' : '-'}${fmt(diff)}</span></div>
-        </div>
-
-        ${billetes.length ? `<h2>Billetes Contados</h2>
-        <table><thead><tr><th>Denominación</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Subtotal</th></tr></thead>
-        <tbody>${rows(billetes)}</tbody></table>` : ''}
-
-        ${monedas.length ? `<h2>Monedas Contadas</h2>
-        <table><thead><tr><th>Denominación</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Subtotal</th></tr></thead>
-        <tbody>${rows(monedas)}</tbody></table>` : ''}
-
-        <h2>Resumen de Cierre</h2>
-        <table>
-          <tbody>
-            <tr><td>Ventas del día (POS)</td><td style="text-align:right;color:#006c49;font-weight:700">${fmt(expected)}</td></tr>
-            <tr><td>Egresos del día</td><td style="text-align:right;color:#ba1a1a;font-weight:700">-${fmt(expenses)}</td></tr>
-            <tr><td>Efectivo contado físicamente</td><td style="text-align:right;font-weight:700">${fmt(counted)}</td></tr>
-            <tr><td>${diff >= 0 ? 'Sobrante' : 'Faltante'} de caja</td>
-                <td style="text-align:right;font-weight:700;color:${diff >= 0 ? '#006c49' : '#ba1a1a'}">${diff >= 0 ? '+' : '-'}${fmt(diff)}</td></tr>
-            <tr class="total-row"><td>Monto a depositar</td><td style="text-align:right">${fmt(deposit)}</td></tr>
-          </tbody>
-        </table>
-
-        <div class="footer">
-          <span>GoToEat Restaurant Management — Documento confidencial generado automáticamente.</span>
-          <span>${date}</span>
-        </div>
-        <script>window.addEventListener('load', () => window.print());<\/script>
-        </body></html>`;
-
-        const w = window.open('', '_blank', 'width=900,height=700');
-        w.document.open();
-        w.document.write(html);
-        w.document.close();
+        window._cierrePreview(this.totalCounted, this.difference, this.depositAmount, this.denominations, this.notes);
     }
 }">
 
@@ -512,5 +436,99 @@
 </div>
 
 </div>{{-- /x-data --}}
+
+@push('scripts')
+<script>
+// Función global para previsualizar el cierre de caja.
+// Está en <script> y NO en x-data para que los template literals
+// (backticks) se evalúen correctamente por el motor JS del navegador.
+window._cierrePreview = function(counted, diff, deposit, denominations, notes) {
+    const expected = {{ $expectedCash }};
+    const expenses = {{ $todayExpenses }};
+    const orders   = {{ $todayOrdersCount }};
+    const date     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    const fmt      = n => '$' + Math.abs(n).toLocaleString('es-CO');
+
+    const billetes = denominations.filter(d => d.type === 'billete' && (parseInt(d.qty) || 0) > 0);
+    const monedas  = denominations.filter(d => d.type === 'moneda'  && (parseInt(d.qty) || 0) > 0);
+
+    const rows = arr => arr.map(d =>
+        '<tr>' +
+            '<td>' + d.label + '</td>' +
+            '<td style="text-align:right">' + (parseInt(d.qty) || 0) + '</td>' +
+            '<td style="text-align:right">' + fmt(d.value * (parseInt(d.qty) || 0)) + '</td>' +
+        '</tr>'
+    ).join('');
+
+    const billetesHtml = billetes.length
+        ? '<h2>Billetes Contados</h2>' +
+          '<table><thead><tr><th>Denominación</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Subtotal</th></tr></thead>' +
+          '<tbody>' + rows(billetes) + '</tbody></table>'
+        : '';
+
+    const monedasHtml = monedas.length
+        ? '<h2>Monedas Contadas</h2>' +
+          '<table><thead><tr><th>Denominación</th><th style="text-align:right">Cantidad</th><th style="text-align:right">Subtotal</th></tr></thead>' +
+          '<tbody>' + rows(monedas) + '</tbody></table>'
+        : '';
+
+    const diffLabel = diff >= 0 ? 'Sobrante' : 'Faltante';
+    const diffColor = diff >= 0 ? '#006c49' : '#ba1a1a';
+    const diffSign  = diff >= 0 ? '+' : '-';
+
+    const html = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/>' +
+        '<title>Cierre de Caja — GoToEat</title>' +
+        '<style>' +
+        '* { box-sizing:border-box; margin:0; padding:0; font-family:Arial,sans-serif; }' +
+        'body { padding:32px; font-size:13px; color:#111; }' +
+        'h1  { font-size:22px; color:#f97316; margin-bottom:4px; }' +
+        'h2  { font-size:14px; font-weight:700; margin:20px 0 8px; border-bottom:2px solid #f97316; padding-bottom:4px; }' +
+        'table { width:100%; border-collapse:collapse; font-size:12px; }' +
+        'th  { background:#f9fafb; padding:8px 12px; text-align:left; font-size:11px; text-transform:uppercase; color:#6b7280; }' +
+        'td  { padding:7px 12px; border-bottom:1px solid #f3f4f6; }' +
+        '.kpi { display:flex; gap:16px; margin:16px 0; }' +
+        '.kpi-card { flex:1; background:#f9fafb; border-radius:8px; padding:14px; }' +
+        '.kpi-card label { font-size:10px; text-transform:uppercase; color:#9ca3af; display:block; margin-bottom:4px; }' +
+        '.kpi-card span  { font-size:22px; font-weight:900; }' +
+        '.green { color:#006c49; } .red { color:#ba1a1a; } .orange { color:#f97316; }' +
+        '.total-row td { font-weight:900; border-top:2px solid #f97316; background:#fff8f5; }' +
+        '.footer { margin-top:40px; font-size:10px; color:#9ca3af; border-top:1px solid #e5e7eb; padding-top:12px; display:flex; justify-content:space-between; }' +
+        '@media print { body { padding:20px; } @page { margin:1cm; size:A4; } }' +
+        '</style></head><body>' +
+        '<h1>GoToEat</h1>' +
+        '<p style="font-size:13px;font-weight:700;margin-bottom:2px">Cierre de Caja — Reporte del Día</p>' +
+        '<p style="font-size:11px;color:#9ca3af">Fecha: ' + date + ' &nbsp;|&nbsp; Órdenes procesadas: ' + orders + '</p>' +
+        '<div class="kpi">' +
+            '<div class="kpi-card"><label>Efectivo Esperado (POS)</label><span class="orange">' + fmt(expected) + '</span></div>' +
+            '<div class="kpi-card"><label>Efectivo Contado</label><span class="orange">' + fmt(counted) + '</span></div>' +
+            '<div class="kpi-card"><label>' + diffLabel + '</label>' +
+                '<span style="color:' + diffColor + '">' + diffSign + fmt(diff) + '</span></div>' +
+        '</div>' +
+        billetesHtml +
+        monedasHtml +
+        '<h2>Resumen de Cierre</h2>' +
+        '<table><tbody>' +
+            '<tr><td>Ventas del día (POS)</td><td style="text-align:right;color:#006c49;font-weight:700">' + fmt(expected) + '</td></tr>' +
+            '<tr><td>Egresos del día</td><td style="text-align:right;color:#ba1a1a;font-weight:700">-' + fmt(expenses) + '</td></tr>' +
+            '<tr><td>Efectivo contado físicamente</td><td style="text-align:right;font-weight:700">' + fmt(counted) + '</td></tr>' +
+            '<tr><td>' + diffLabel + ' de caja</td><td style="text-align:right;font-weight:700;color:' + diffColor + '">' + diffSign + fmt(diff) + '</td></tr>' +
+            '<tr class="total-row"><td>Monto a depositar</td><td style="text-align:right">' + fmt(deposit) + '</td></tr>' +
+        '</tbody></table>' +
+        (notes ? '<p style="margin-top:16px;font-size:12px;color:#584237"><strong>Observaciones:</strong> ' + notes + '</p>' : '') +
+        '<div class="footer">' +
+            '<span>GoToEat Restaurant Management — Documento confidencial.</span>' +
+            '<span>' + date + '</span>' +
+        '</div>' +
+        '<script>window.addEventListener("load",function(){window.print();});<\/script>' +
+        '</body></html>';
+
+    const w = window.open('', '_blank', 'width=900,height=700');
+    if (!w) { alert('Permite ventanas emergentes para este sitio y vuelve a intentarlo.'); return; }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+};
+</script>
+@endpush
 
 </x-finance-layout>
