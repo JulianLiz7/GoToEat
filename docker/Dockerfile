@@ -14,14 +14,8 @@ RUN docker-php-ext-install \
 # ── Redis vía PECL ──────────────────────────────────────────────────
 RUN pecl install redis && docker-php-ext-enable redis
 
-# ── OPcache para producción ──────────────────────────────────────────
-RUN { \
-    echo 'opcache.enable=1'; \
-    echo 'opcache.memory_consumption=256'; \
-    echo 'opcache.max_accelerated_files=20000'; \
-    echo 'opcache.revalidate_freq=0'; \
-    echo 'opcache.validate_timestamps=0'; \
-} > /usr/local/etc/php/conf.d/opcache.ini
+# ── OPcache + JIT optimizado para Docker Windows ─────────────────────
+COPY docker/zz-opcache-prod.ini /usr/local/etc/php/conf.d/zz-opcache-prod.ini
 
 # ── Node.js 20 (para compilar assets Vite en el servidor si hace falta)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
