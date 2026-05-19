@@ -17,6 +17,18 @@ RUN pecl install redis && docker-php-ext-enable redis
 # ── OPcache + JIT optimizado para Docker Windows ─────────────────────
 COPY docker/zz-opcache-prod.ini /usr/local/etc/php/conf.d/zz-opcache-prod.ini
 
+# ── PHP-FPM pool: más workers + timeout extendido ────────────────────
+COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/zz-gotoeat.conf
+
+# ── PHP: límites de tiempo y upload ──────────────────────────────────
+RUN { \
+    echo 'max_execution_time=300'; \
+    echo 'max_input_time=300'; \
+    echo 'memory_limit=512M'; \
+    echo 'upload_max_filesize=20M'; \
+    echo 'post_max_size=25M'; \
+} > /usr/local/etc/php/conf.d/zz-php-limits.ini
+
 # ── Node.js 20 (para compilar assets Vite en el servidor si hace falta)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \

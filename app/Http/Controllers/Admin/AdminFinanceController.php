@@ -253,18 +253,26 @@ class AdminFinanceController extends Controller
             'category'     => 'nullable|string|max:100',
             'notes'        => 'nullable|string|max:1000',
             'due_date'     => 'nullable|date',
+            'comprobante'  => 'nullable|file|mimes:jpg,jpeg,png,pdf,webp|max:10240',
         ]);
 
+        $comprobantePath = null;
+        if ($request->hasFile('comprobante') && $request->file('comprobante')->isValid()) {
+            $comprobantePath = $request->file('comprobante')
+                ->store("comprobantes/{$restaurant->id}", 'public');
+        }
+
         DB::table('expenses')->insert([
-            'restaurant_id' => $restaurant->id,
-            'name'          => $validated['name'],
-            'amount'        => $validated['amount'],
-            'expense_date'  => $validated['expense_date'],
-            'category'      => $validated['category'] ?? null,
-            'notes'         => $validated['notes'] ?? null,
-            'due_date'      => $validated['due_date'] ?? null,
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'restaurant_id'   => $restaurant->id,
+            'name'            => $validated['name'],
+            'amount'          => $validated['amount'],
+            'expense_date'    => $validated['expense_date'],
+            'category'        => $validated['category'] ?? null,
+            'notes'           => $validated['notes'] ?? null,
+            'due_date'        => $validated['due_date'] ?? null,
+            'comprobante_path' => $comprobantePath,
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ]);
 
         return back()->with('success', 'Gasto registrado correctamente.');

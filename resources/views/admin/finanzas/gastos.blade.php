@@ -213,9 +213,17 @@
                         ${{ number_format($expense->amount, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button class="p-1.5 rounded-lg hover:bg-orange-50 hover:text-primary transition-colors text-gray-300">
-                            <span class="material-symbols-outlined text-[18px]">attach_file</span>
-                        </button>
+                        @if(!empty($expense->comprobante_path))
+                            <a href="{{ Storage::url($expense->comprobante_path) }}" target="_blank"
+                               class="inline-flex items-center gap-1 p-1.5 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors"
+                               title="Ver comprobante">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </a>
+                        @else
+                            <span class="p-1.5 rounded-lg text-gray-300 cursor-default" title="Sin comprobante">
+                                <span class="material-symbols-outlined text-[18px]">attach_file</span>
+                            </span>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -248,23 +256,26 @@
         </div>
 
         {{-- Body --}}
-        <form id="formGasto" method="POST" action="{{ route('admin.finance.gastos.store') }}" class="flex flex-col flex-1 overflow-hidden">
+        <form id="formGasto" method="POST" action="{{ route('admin.finance.gastos.store') }}"
+              enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
             @csrf
             <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Concepto *</label>
                     <input name="name" type="text" required placeholder="Ej: Proveedor Carnes S.A."
+                           value="{{ old('name') }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Monto *</label>
-                        <input name="amount" type="number" step="0.01" min="0" required placeholder="0.00"
+                        <input name="amount" type="number" step="1" min="0" required placeholder="0"
+                               value="{{ old('amount') }}"
                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Fecha *</label>
-                        <input name="expense_date" type="date" required value="{{ now()->toDateString() }}"
+                        <input name="expense_date" type="date" required value="{{ old('expense_date', now()->toDateString()) }}"
                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
                     </div>
                 </div>
@@ -273,25 +284,61 @@
                     <select name="category"
                             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all">
                         <option value="">Seleccionar...</option>
-                        <option value="Proveedores">Proveedores</option>
-                        <option value="Nómina">Nómina</option>
-                        <option value="Servicios">Servicios</option>
-                        <option value="Arriendo">Arriendo</option>
-                        <option value="Mantenimiento">Mantenimiento</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Operativos">Operativos</option>
-                        <option value="Otros">Otros</option>
+                        @foreach(['Proveedores','Nómina','Servicios','Arriendo','Mantenimiento','Marketing','Operativos','Otros'] as $cat)
+                        <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Fecha de vencimiento</label>
-                    <input name="due_date" type="date"
+                    <input name="due_date" type="date" value="{{ old('due_date') }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Notas</label>
                     <textarea name="notes" rows="2" placeholder="Detalle adicional..."
-                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all resize-none"></textarea>
+                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all resize-none">{{ old('notes') }}</textarea>
+                </div>
+
+                {{-- Comprobante de pago --}}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">
+                        Comprobante de Pago
+                        <span class="text-gray-300 font-normal normal-case ml-1">(JPG, PNG o PDF — máx. 10 MB)</span>
+                    </label>
+                    <div id="dropZone"
+                         class="relative border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer transition-all duration-200
+                                hover:border-primary-container hover:bg-orange-50/40"
+                         onclick="document.getElementById('comprobanteInput').click()"
+                         ondragover="event.preventDefault(); this.classList.add('border-primary-container','bg-orange-50/40')"
+                         ondragleave="this.classList.remove('border-primary-container','bg-orange-50/40')"
+                         ondrop="handleDrop(event)">
+
+                        <div id="dropPlaceholder">
+                            <span class="material-symbols-outlined text-3xl text-gray-300 block mb-1"
+                                  style="font-variation-settings:'FILL' 0">upload_file</span>
+                            <p class="text-sm text-gray-500">Arrastra aquí o <span class="text-primary font-semibold">selecciona un archivo</span></p>
+                        </div>
+
+                        <div id="filePreview" class="hidden items-center gap-3 text-left">
+                            <div id="previewThumb" class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden"></div>
+                            <div class="flex-1 min-w-0">
+                                <p id="fileName" class="text-sm font-semibold text-on-surface truncate"></p>
+                                <p id="fileSize" class="text-xs text-gray-400"></p>
+                            </div>
+                            <button type="button" onclick="clearFile(event)"
+                                    class="p-1 rounded-lg hover:bg-red-50 hover:text-error transition-colors text-gray-400 shrink-0">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        </div>
+
+                        <input id="comprobanteInput" name="comprobante" type="file"
+                               accept=".jpg,.jpeg,.png,.pdf,.webp"
+                               class="hidden" onchange="handleFileSelect(this)"/>
+                    </div>
+                    @error('comprobante')
+                    <p class="text-xs text-error mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -345,6 +392,59 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalGasto').classList.remove('hidden');
 });
 @endif
+
+// ── Comprobante upload: preview ────────────────────────────────────
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) showFilePreview(input.files[0]);
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('border-primary-container','bg-orange-50/40');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const allowed = ['image/jpeg','image/png','image/webp','application/pdf'];
+    if (!allowed.includes(file.type)) { alert('Solo se permiten JPG, PNG, WEBP o PDF'); return; }
+    if (file.size > 10 * 1024 * 1024) { alert('El archivo supera los 10 MB'); return; }
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('comprobanteInput').files = dt.files;
+    showFilePreview(file);
+}
+
+function showFilePreview(file) {
+    const placeholder = document.getElementById('dropPlaceholder');
+    const preview     = document.getElementById('filePreview');
+    const thumb       = document.getElementById('previewThumb');
+    const nameEl      = document.getElementById('fileName');
+    const sizeEl      = document.getElementById('fileSize');
+
+    nameEl.textContent = file.name;
+    sizeEl.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+
+    thumb.innerHTML = '';
+    if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.className = 'w-full h-full object-cover';
+        img.src = URL.createObjectURL(file);
+        thumb.appendChild(img);
+    } else {
+        thumb.innerHTML = '<span class="material-symbols-outlined text-2xl text-error">picture_as_pdf</span>';
+    }
+
+    placeholder.classList.add('hidden');
+    preview.classList.remove('hidden');
+    preview.classList.add('flex');
+}
+
+function clearFile(e) {
+    e.stopPropagation();
+    document.getElementById('comprobanteInput').value = '';
+    document.getElementById('dropPlaceholder').classList.remove('hidden');
+    const preview = document.getElementById('filePreview');
+    preview.classList.add('hidden');
+    preview.classList.remove('flex');
+}
 </script>
 @endpush
 
