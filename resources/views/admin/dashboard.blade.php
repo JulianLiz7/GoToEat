@@ -257,14 +257,59 @@
     @endif
 </div>
 
-{{-- ── FAB: Nueva Orden ─────────────────────────────────────────── --}}
-<button onclick="alert('POS en desarrollo — próximamente disponible')"
-        class="fixed bottom-10 right-10 w-16 h-16 bg-orange-500 text-white rounded-full shadow-2xl shadow-orange-300 flex items-center justify-center hover:scale-110 hover:bg-orange-600 active:scale-95 transition-all z-50 group">
-    <span class="material-symbols-outlined text-3xl">add</span>
-    <span class="absolute right-full mr-4 px-3 py-2 bg-on-background text-white rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg">
-        Nueva Orden
-    </span>
-</button>
+{{-- ── FAB: Exportar Dashboard ───────────────────────────────────── --}}
+<div class="fixed bottom-10 right-10 z-50"
+     x-data="{ open: false }"
+     @click.outside="open = false">
+
+    {{-- Dropdown opciones --}}
+    <div x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="absolute bottom-full right-0 mb-3 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div class="px-4 py-2.5 border-b border-gray-50">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Exportar Dashboard</p>
+        </div>
+        <a href="{{ route('admin.export.csv') }}"
+           class="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-orange-50 hover:text-primary transition-colors group">
+            <div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                <span class="material-symbols-outlined text-secondary text-[18px]">table_chart</span>
+            </div>
+            <div>
+                <p class="font-semibold">Descargar CSV</p>
+                <p class="text-[11px] text-gray-400">Compatible con Excel</p>
+            </div>
+        </a>
+        <div class="mx-4 h-px bg-gray-50"></div>
+        <a href="{{ route('admin.export.pdf') }}" target="_blank"
+           class="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-orange-50 hover:text-primary transition-colors group">
+            <div class="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center group-hover:bg-error/20 transition-colors">
+                <span class="material-symbols-outlined text-error text-[18px]">picture_as_pdf</span>
+            </div>
+            <div>
+                <p class="font-semibold">Imprimir PDF</p>
+                <p class="text-[11px] text-gray-400">Reporte A4</p>
+            </div>
+        </a>
+    </div>
+
+    {{-- Botón principal --}}
+    <button @click="open = !open"
+            class="w-16 h-16 bg-primary-container text-white rounded-2xl shadow-2xl shadow-orange-300
+                   flex flex-col items-center justify-center gap-0.5
+                   hover:scale-110 hover:bg-primary active:scale-95 transition-all group">
+        <span class="material-symbols-outlined text-[22px]"
+              :class="open ? 'rotate-45' : ''"
+              style="transition: transform .2s">
+            download
+        </span>
+        <span class="text-[9px] font-bold leading-none">Export</span>
+    </button>
+</div>
 
 @push('scripts')
 <script>

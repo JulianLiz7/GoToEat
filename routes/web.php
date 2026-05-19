@@ -71,6 +71,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/finance/ajustes', [AdminFinanceController::class, 'ajustes'])->name('finance.ajustes');
     Route::get('/finance/export/csv', [AdminFinanceController::class, 'exportCsv'])->name('finance.export.csv');
     Route::get('/finance/export/pdf', [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');
+    Route::get('/export/dashboard/csv', [DashboardController::class, 'exportCsv'])->name('export.csv');
+    Route::get('/export/dashboard/pdf', [DashboardController::class, 'exportPdf'])->name('export.pdf');
     Route::get('/ai', [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask', [AdminAIController::class, 'ask'])->name('ai.ask');
     // ── Configuración del restaurante ─────────────────────────────

@@ -304,6 +304,117 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('restaurant', 'stats'));
     }
 
+    public function exportCsv()
+    {
+        $user       = auth()->user();
+        $restaurant = $user->ownedRestaurants()->first();
+        if (!$restaurant) return redirect()->route('onboarding.step1');
+
+        $rid   = $restaurant->id;
+        $month = now()->month;
+        $year  = now()->year;
+
+        $orders   = DB::table('orders')
+            ->where('restaurant_id', $rid)
+            ->whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->orderBy('created_at')->get();
+
+        $expenses = DB::table('expenses')
+            ->where('restaurant_id', $rid)
+            ->whereMonth('expense_date', $month)->whereYear('expense_date', $year)
+            ->orderBy('expense_date')->get();
+
+        $todayOrders = DB::table('orders')
+            ->where('restaurant_id', $rid)
+            ->whereDate('created_at', now()->toDateString())
+            ->get();
+
+        $filename = 'dashboard_' . $restaurant->name . '_' . now()->format('Y-m') . '.csv';
+        $headers  = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($restaurant, $orders, $expenses, $todayOrders) {
+            $f = fopen('php://output', 'w');
+            fwrite($f, "\xEF\xBB\xBF");
+
+            fputcsv($f, ['DASHBOARD OPERATIVO — ' . strtoupper($restaurant->name)]);
+            fputcsv($f, ['Período:', now()->locale('es')->isoFormat('MMMM YYYY')]);
+            fputcsv($f, ['Generado:', now()->format('d/m/Y H:i')]);
+            fputcsv($f, []);
+
+            fputcsv($f, ['=== RESUMEN DEL MES ===']);
+            fputcsv($f, ['Indicador', 'Valor']);
+            $monthRevenue  = $orders->sum('total');
+            $monthExpenses = $expenses->sum('amount');
+            fputcsv($f, ['Ingresos del mes',  '$' . number_format($monthRevenue, 0, ',', '.')]);
+            fputcsv($f, ['Egresos del mes',   '$' . number_format($monthExpenses, 0, ',', '.')]);
+            fputcsv($f, ['Profit neto',       '$' . number_format($monthRevenue - $monthExpenses, 0, ',', '.')]);
+            fputcsv($f, ['Órdenes hoy',       $todayOrders->count()]);
+            fputcsv($f, ['Ventas hoy',        '$' . number_format($todayOrders->sum('total'), 0, ',', '.')]);
+            fputcsv($f, []);
+
+            fputcsv($f, ['=== ÓRDENES DEL MES ===']);
+            fputcsv($f, ['ID', 'Fecha', 'Total', 'Estado']);
+            foreach ($orders as $o) {
+                fputcsv($f, ['#GT-' . $o->id, $o->created_at, number_format($o->total, 2, '.', ''), $o->status ?? 'completado']);
+            }
+            fputcsv($f, ['', 'TOTAL', number_format($monthRevenue, 2, '.', ''), '']);
+            fputcsv($f, []);
+
+            fputcsv($f, ['=== EGRESOS DEL MES ===']);
+            fputcsv($f, ['Concepto', 'Fecha', 'Monto', 'Categoría']);
+            foreach ($expenses as $e) {
+                fputcsv($f, [$e->name, $e->expense_date, number_format($e->amount, 2, '.', ''), $e->category ?? 'Operativos']);
+            }
+            fputcsv($f, ['', 'TOTAL', number_format($monthExpenses, 2, '.', ''), '']);
+
+            fclose($f);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdf()
+    {
+        $user       = auth()->user();
+        $restaurant = $user->ownedRestaurants()->first();
+        if (!$restaurant) return redirect()->route('onboarding.step1');
+
+        $rid   = $restaurant->id;
+        $month = now()->month;
+        $year  = now()->year;
+
+        $monthRevenue  = (float) DB::table('orders')
+            ->where('restaurant_id', $rid)
+            ->whereMonth('created_at', $month)->whereYear('created_at', $year)->sum('total');
+
+        $monthExpenses = (float) DB::table('expenses')
+            ->where('restaurant_id', $rid)
+            ->whereMonth('expense_date', $month)->whereYear('expense_date', $year)->sum('amount');
+
+        $todayRevenue = (float) DB::table('orders')
+            ->where('restaurant_id', $rid)->whereDate('created_at', now()->toDateString())->sum('total');
+
+        $todayOrders = (int) DB::table('orders')
+            ->where('restaurant_id', $rid)->whereDate('created_at', now()->toDateString())->count();
+
+        $recentOrders = DB::table('orders')
+            ->where('restaurant_id', $rid)->latest()->take(10)->get();
+
+        $totalTables  = (int) DB::table('tables')->where('restaurant_id', $rid)->count();
+        $activeTables = (int) DB::table('tables')->where('restaurant_id', $rid)->where('status', 'ocupada')->count();
+        $staffCount   = (int) DB::table('employees')->where('restaurant_id', $rid)->where('status', 'active')->count();
+        $menuCount    = (int) DB::table('menu_items')->where('restaurant_id', $rid)->where('available', true)->count();
+
+        return view('admin.dashboard-export-pdf', compact(
+            'restaurant', 'monthRevenue', 'monthExpenses', 'todayRevenue',
+            'todayOrders', 'recentOrders', 'totalTables', 'activeTables',
+            'staffCount', 'menuCount'
+        ));
+    }
+
     private function clienteView(Request $request)
     {
         $search = $request->get('search', '');
