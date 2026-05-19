@@ -80,6 +80,34 @@ class AdminRestaurantSettingsController extends Controller
         return back()->with('success', 'Configuración guardada correctamente.');
     }
 
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name'                  => 'required|string|max:100',
+            'email'                 => 'required|email|max:150|unique:users,email,' . $user->id,
+            'current_password'      => 'nullable|string',
+            'password'              => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'];
+
+        if (!empty($validated['current_password'])) {
+            if (!\Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.'])->with('tab', 'perfil');
+            }
+            if (!empty($validated['password'])) {
+                $user->password = \Hash::make($validated['password']);
+            }
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Perfil actualizado correctamente.')->with('tab', 'perfil');
+    }
+
     public function deleteLogo()
     {
         $restaurant = $this->restaurant();

@@ -35,7 +35,6 @@
             ['route' => 'admin.tables',    'icon' => 'table_restaurant', 'label' => 'Mesas'],
             ['route' => 'admin.finance',   'icon' => 'bar_chart',        'label' => 'Finanzas'],
             ['route' => 'admin.ai',        'icon' => 'smart_toy',        'label' => 'AI Assistant'],
-            ['route' => 'admin.settings',  'icon' => 'tune',             'label' => 'Configuración'],
         ];
         @endphp
 
@@ -56,9 +55,9 @@
 
     {{-- Parte inferior --}}
     <div class="mt-auto space-y-1 border-t border-gray-100 pt-4">
-        <a href="{{ route('profile.edit') }}"
+        <a href="{{ route('admin.settings') }}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                  {{ request()->routeIs('profile.*') ? 'text-orange-600 font-bold bg-orange-50 border-r-4 border-orange-500' : 'text-gray-500 hover:text-orange-500 hover:bg-gray-50' }}">
+                  {{ request()->routeIs('admin.settings*') ? 'text-orange-600 font-bold bg-orange-50 border-r-4 border-orange-500' : 'text-gray-500 hover:text-orange-500 hover:bg-gray-50' }}">
             <span class="material-symbols-outlined text-[22px]">settings</span>
             <span>Configuración</span>
         </a>

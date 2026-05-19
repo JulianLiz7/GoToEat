@@ -8,7 +8,7 @@
 
 <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data"
       x-data="{
-          tab: 'info',
+          tab: '{{ session('tab', 'info') }}',
           primary: '{{ $restaurant->primary_color ?? '#f97316' }}',
           secondary: '{{ $restaurant->secondary_color ?? '#006c49' }}',
           logoPreview: '{{ $restaurant->logo_path ? Storage::url($restaurant->logo_path) : '' }}',
@@ -27,7 +27,7 @@
 
     {{-- Tabs ──────────────────────────────────────────────────── --}}
     <div class="flex gap-1 mb-8 bg-gray-100 p-1 rounded-2xl w-fit">
-        @foreach(['info' => ['Información General','store'], 'apariencia' => ['Apariencia','palette'], 'contacto' => ['Horarios y Contacto','schedule']] as $key => [$label, $icon])
+        @foreach(['info' => ['Información General','store'], 'apariencia' => ['Apariencia','palette'], 'contacto' => ['Horarios y Contacto','schedule'], 'perfil' => ['Mi Perfil','person']] as $key => [$label, $icon])
         <button type="button" @click="tab = '{{ $key }}'"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
                 :class="tab === '{{ $key }}'
@@ -369,8 +369,122 @@
         </div>
     </div>
 
-    {{-- Botón guardar (siempre visible) ──────────────────────────── --}}
-    <div class="mt-8 flex items-center justify-between bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
+    {{-- ══ TAB: Mi Perfil ══════════════════════════════════════════ --}}
+    <div x-show="tab === 'perfil'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Datos personales --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-on-surface mb-5 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container text-[22px]">manage_accounts</span>
+                    Datos del Usuario Administrador
+                </h3>
+                <form method="POST" action="{{ route('admin.settings.profile.update') }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Nombre completo *</label>
+                        <input name="name" type="text" required value="{{ old('name', auth()->user()->name) }}"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                        @error('name')<p class="text-xs text-error mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Correo electrónico *</label>
+                        <input name="email" type="email" required value="{{ old('email', auth()->user()->email) }}"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                        @error('email')<p class="text-xs text-error mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100">
+                        <h4 class="text-sm font-bold text-on-surface mb-3">Cambiar contraseña
+                            <span class="font-normal text-gray-400 text-xs ml-1">— Dejar vacío para mantener la actual</span>
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Contraseña actual</label>
+                                <input name="current_password" type="password" placeholder="••••••••"
+                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                @error('current_password')<p class="text-xs text-error mt-1">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Nueva contraseña</label>
+                                <input name="password" type="password" placeholder="Mínimo 8 caracteres"
+                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Confirmar nueva contraseña</label>
+                                <input name="password_confirmation" type="password" placeholder="••••••••"
+                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit"
+                                class="flex items-center gap-2 px-6 py-2.5 bg-primary-container text-white rounded-xl font-bold text-sm
+                                       hover:bg-primary active:scale-[0.97] transition-all shadow-sm shadow-orange-200">
+                            <span class="material-symbols-outlined text-[18px]">save</span>
+                            Guardar Perfil
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Info cuenta --}}
+            <div class="space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary-container text-[22px]">badge</span>
+                        Información de la Cuenta
+                    </h3>
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center text-white text-2xl font-black shadow-md shadow-orange-200">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-on-surface">{{ auth()->user()->name }}</p>
+                            <p class="text-sm text-gray-400">{{ auth()->user()->email }}</p>
+                            <span class="text-xs font-bold text-primary bg-primary-container/20 px-2 py-0.5 rounded-full mt-1 inline-block">
+                                Administrador
+                            </span>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Restaurante</span>
+                            <span class="font-semibold text-on-surface">{{ $restaurant->name }}</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Miembro desde</span>
+                            <span class="font-semibold text-on-surface">{{ auth()->user()->created_at->format('d M, Y') }}</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-500">Último acceso</span>
+                            <span class="font-semibold text-on-surface">Hoy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-50 border border-red-100 rounded-2xl p-5">
+                    <h4 class="font-bold text-sm text-error mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">warning</span>
+                        Zona peligrosa
+                    </h4>
+                    <p class="text-xs text-gray-500 mb-3">Cerrar sesión en todos los dispositivos o eliminar la cuenta son acciones irreversibles.</p>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-error rounded-xl text-sm font-semibold hover:bg-red-50 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">logout</span>
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Botón guardar (oculto en pestaña Mi Perfil que tiene su propio form) --}}
+    <div class="mt-8 flex items-center justify-between bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100"
+         x-show="tab !== 'perfil'">
         @if(session('success'))
         <div class="flex items-center gap-2 text-secondary">
             <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">check_circle</span>

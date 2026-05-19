@@ -76,6 +76,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // ── Configuración del restaurante ─────────────────────────────
     Route::get('/settings',              [AdminRestaurantSettingsController::class, 'index'])->name('settings');
     Route::post('/settings',             [AdminRestaurantSettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/profile',     [AdminRestaurantSettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::delete('/settings/logo',      [AdminRestaurantSettingsController::class, 'deleteLogo'])->name('settings.logo.delete');
     Route::delete('/settings/cover',     [AdminRestaurantSettingsController::class, 'deleteCover'])->name('settings.cover.delete');
 });
