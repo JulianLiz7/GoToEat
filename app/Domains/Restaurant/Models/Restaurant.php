@@ -19,8 +19,10 @@ class Restaurant extends Model
     use HasFactory;
 
     protected $fillable = [
-        'owner_id', 'name', 'slug', 'description', 'logo',
-        'category', 'cuisine_type', 'address', 'phone', 'email', 'status',
+        'owner_id', 'name', 'slug', 'description', 'logo', 'logo_path', 'cover_path',
+        'primary_color', 'secondary_color',
+        'category', 'cuisine_type', 'address', 'phone', 'whatsapp', 'email',
+        'website', 'opening_hours', 'status',
     ];
 
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo

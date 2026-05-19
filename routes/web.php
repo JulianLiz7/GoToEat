@@ -3,6 +3,7 @@
 use App\Domains\Auth\Controllers\Web\ProfileController;
 use App\Http\Controllers\Admin\AdminAIController;
 use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminRestaurantSettingsController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminStaffController;
@@ -71,6 +72,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/finance/export/pdf', [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');
     Route::get('/ai', [AdminAIController::class, 'index'])->name('ai');
     Route::post('/ai/ask', [AdminAIController::class, 'ask'])->name('ai.ask');
+    // ── Configuración del restaurante ─────────────────────────────
+    Route::get('/settings',              [AdminRestaurantSettingsController::class, 'index'])->name('settings');
+    Route::post('/settings',             [AdminRestaurantSettingsController::class, 'update'])->name('settings.update');
+    Route::delete('/settings/logo',      [AdminRestaurantSettingsController::class, 'deleteLogo'])->name('settings.logo.delete');
+    Route::delete('/settings/cover',     [AdminRestaurantSettingsController::class, 'deleteCover'])->name('settings.cover.delete');
 });
 
 // ── Perfil y zona de cliente ──────────────────────────────────────

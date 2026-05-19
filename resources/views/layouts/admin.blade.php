@@ -35,12 +35,13 @@
             ['route' => 'admin.tables',    'icon' => 'table_restaurant', 'label' => 'Mesas'],
             ['route' => 'admin.finance',   'icon' => 'bar_chart',        'label' => 'Finanzas'],
             ['route' => 'admin.ai',        'icon' => 'smart_toy',        'label' => 'AI Assistant'],
+            ['route' => 'admin.settings',  'icon' => 'tune',             'label' => 'Configuración'],
         ];
         @endphp
 
         @foreach ($navItems as $item)
             @if (Route::has($item['route']))
-            @php $active = request()->routeIs($item['route']); @endphp
+            @php $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*'); @endphp
             <a href="{{ route($item['route']) }}"
                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
                       {{ $active

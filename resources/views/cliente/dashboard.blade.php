@@ -276,6 +276,105 @@
 </div>
 </section>
 </div>
+{{-- ══ Restaurantes Reales desde la BD ═══════════════════════ --}}
+@if($restaurants->isNotEmpty())
+<section class="mt-4">
+    <div class="flex justify-between items-end mb-6">
+        <div>
+            <h3 class="font-h2 text-h3 text-on-surface">Restaurantes en GoToEat</h3>
+            <p class="text-body-sm text-on-surface-variant">Todos los locales registrados en la plataforma</p>
+        </div>
+        <span class="text-label-caps text-on-surface-variant">{{ $restaurants->total() }} disponibles</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        @foreach($restaurants as $rest)
+        @php
+            $primary   = $rest->primary_color   ?? '#f97316';
+            $secondary = $rest->secondary_color ?? '#006c49';
+            $logoUrl   = $rest->logo_path ? Storage::url($rest->logo_path) : null;
+            $coverUrl  = $rest->cover_path ? Storage::url($rest->cover_path) : null;
+        @endphp
+        <div class="group bg-white rounded-2xl border border-outline-variant/20 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
+            {{-- Cover / Header del color de marca --}}
+            <div class="h-28 relative overflow-hidden"
+                 style="{{ $coverUrl ? "background-image:url('{$coverUrl}');background-size:cover;background-position:center" : "background-color:{$primary}20" }}">
+                @if(!$coverUrl)
+                <div class="absolute inset-0 opacity-30"
+                     style="background: linear-gradient(135deg, {{ $primary }}40, {{ $secondary }}40)"></div>
+                @endif
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                {{-- Logo --}}
+                <div class="absolute bottom-3 left-3">
+                    <div class="w-12 h-12 rounded-xl border-2 border-white shadow-md overflow-hidden flex items-center justify-center"
+                         style="background-color:{{ $primary }}">
+                        @if($logoUrl)
+                            <img src="{{ $logoUrl }}" alt="Logo {{ $rest->name }}" class="w-full h-full object-contain p-1"/>
+                        @else
+                            <span class="material-symbols-outlined text-white text-[24px]" style="font-variation-settings:'FILL' 1">restaurant</span>
+                        @endif
+                    </div>
+                </div>
+                {{-- Badge estado --}}
+                <div class="absolute top-2 right-2">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                          style="background-color:{{ $secondary }}">
+                        Abierto
+                    </span>
+                </div>
+            </div>
+
+            {{-- Info --}}
+            <div class="p-4 flex-1 flex flex-col">
+                <h4 class="font-bold text-sm text-on-surface mb-0.5 truncate">{{ $rest->name }}</h4>
+                <p class="text-xs font-semibold mb-1" style="color:{{ $primary }}">{{ $rest->cuisine_type ?? $rest->category ?? 'Restaurante' }}</p>
+
+                @if($rest->description)
+                <p class="text-xs text-gray-400 line-clamp-2 flex-1 mb-3">{{ $rest->description }}</p>
+                @else
+                <div class="flex-1"></div>
+                @endif
+
+                <div class="flex items-center gap-2 mt-auto">
+                    @if($rest->address)
+                    <p class="text-[11px] text-gray-400 flex items-center gap-1 flex-1 truncate">
+                        <span class="material-symbols-outlined text-[13px]">location_on</span>
+                        {{ Str::limit($rest->address, 30) }}
+                    </p>
+                    @endif
+                    @if($rest->opening_hours)
+                    <p class="text-[11px] text-gray-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">schedule</span>
+                        {{ Str::limit($rest->opening_hours, 20) }}
+                    </p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Footer acción --}}
+            <div class="px-4 pb-4">
+                <button class="w-full py-2.5 rounded-xl text-white font-bold text-sm transition-all active:scale-[0.97] hover:opacity-90"
+                        style="background-color:{{ $primary }}">
+                    Ver Menú
+                </button>
+            </div>
+
+            {{-- Barra de color de marca (hover) --}}
+            <div class="h-1 w-0 group-hover:w-full transition-all duration-300 mt-0"
+                 style="background:linear-gradient(to right, {{ $primary }}, {{ $secondary }})"></div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- Paginación --}}
+    @if($restaurants->hasPages())
+    <div class="mt-8 flex justify-center">
+        {{ $restaurants->links() }}
+    </div>
+    @endif
+</section>
+@endif
+
 <!-- Footer (Simple) -->
 <footer class="mt-auto border-t border-outline-variant/30 py-10 px-6 bg-surface-container-low">
 <div class="max-w-container_max mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
