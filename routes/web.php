@@ -67,6 +67,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/finance/gastos', [AdminFinanceController::class, 'storeGasto'])->name('finance.gastos.store');
     Route::get('/finance/cierre-caja', [AdminFinanceController::class, 'cierreCaja'])->name('finance.cierre');
     Route::post('/finance/cierre-caja', [AdminFinanceController::class, 'storeCierre'])->name('finance.cierre.store');
+    Route::get('/finance/cierre-preview', [AdminFinanceController::class, 'cierrePreview'])->name('finance.cierre.preview');
     Route::get('/finance/ajustes', [AdminFinanceController::class, 'ajustes'])->name('finance.ajustes');
     Route::get('/finance/export/csv', [AdminFinanceController::class, 'exportCsv'])->name('finance.export.csv');
     Route::get('/finance/export/pdf', [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');

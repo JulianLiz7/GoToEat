@@ -367,6 +367,48 @@ class AdminFinanceController extends Controller
             ->with('success', 'Cierre de caja registrado. ¡Buen trabajo!');
     }
 
+    // ── Preview imprimible del cierre (GET con datos del conteo) ─────
+    public function cierrePreview(Request $request)
+    {
+        $restaurant = $this->restaurant();
+        $rid = $restaurant->id;
+
+        $cashCounted   = (float) ($request->cash_counted   ?? 0);
+        $depositAmount = (float) ($request->deposit_amount ?? 0);
+        $notes         = strip_tags($request->notes ?? '');
+
+        $denominations = [];
+        if ($request->denominations) {
+            $decoded = json_decode($request->denominations, true);
+            if (is_array($decoded)) {
+                $denominations = array_filter($decoded, fn ($d) => (int) ($d['qty'] ?? 0) > 0);
+            }
+        }
+
+        $expectedCash = (float) DB::table('orders')
+            ->where('restaurant_id', $rid)
+            ->whereDate('created_at', now()->toDateString())
+            ->sum('total');
+
+        $todayExpenses = (float) DB::table('expenses')
+            ->where('restaurant_id', $rid)
+            ->where('expense_date', now()->toDateString())
+            ->sum('amount');
+
+        $todayOrdersCount = (int) DB::table('orders')
+            ->where('restaurant_id', $rid)
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        $difference = $cashCounted - $expectedCash;
+
+        return view('admin.finanzas.cierre-preview', compact(
+            'restaurant', 'cashCounted', 'depositAmount', 'notes',
+            'denominations', 'expectedCash', 'todayExpenses',
+            'todayOrdersCount', 'difference'
+        ));
+    }
+
     // ── Ajustes ──────────────────────────────────────────────────────
     public function ajustes()
     {
