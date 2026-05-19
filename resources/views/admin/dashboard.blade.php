@@ -2,9 +2,26 @@
 <x-slot name="title">Dashboard Operativo</x-slot>
 
 {{-- ── Encabezado de página ────────────────────────────────────── --}}
-<div class="mb-8">
-    <h2 class="text-3xl font-bold font-heading text-on-background">Dashboard Operativo</h2>
-    <p class="text-gray-500 mt-1">Resumen de rendimiento en tiempo real para <span class="font-semibold text-orange-500">{{ $restaurant->name }}</span>.</p>
+<div class="mb-8 flex items-center justify-between gap-4 flex-wrap">
+    <div>
+        <h2 class="text-3xl font-bold font-heading text-on-background">Dashboard Operativo</h2>
+        <p class="text-gray-500 mt-1">Resumen de rendimiento en tiempo real para <span class="font-semibold text-orange-500">{{ $restaurant->name }}</span>.</p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+        <span class="text-xs text-gray-400 font-semibold hidden sm:block">Exportar:</span>
+        <a href="{{ route('admin.export.pdf') }}" target="_blank"
+           class="flex items-center gap-2 px-4 py-2.5 bg-white text-error rounded-xl shadow-sm border border-red-100
+                  font-bold text-sm hover:bg-red-50 hover:shadow-md active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            PDF
+        </a>
+        <a href="{{ route('admin.export.csv') }}"
+           class="flex items-center gap-2 px-4 py-2.5 bg-primary-container text-white rounded-xl shadow-sm shadow-orange-200
+                  font-bold text-sm hover:bg-primary hover:shadow-md active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px]">table_chart</span>
+            CSV
+        </a>
+    </div>
 </div>
 
 {{-- ── KPI Cards ────────────────────────────────────────────────── --}}
@@ -257,28 +274,6 @@
     @endif
 </div>
 
-{{-- ── Exportar Dashboard (botones fijos) ────────────────────────── --}}
-<div class="fixed bottom-8 right-8 z-50 flex flex-col gap-2 items-end">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">
-        Exportar Dashboard
-    </p>
-    <div class="flex items-center gap-2">
-        {{-- PDF --}}
-        <a href="{{ route('admin.export.pdf') }}" target="_blank"
-           class="flex items-center gap-2 px-4 py-3 bg-white text-error rounded-xl shadow-lg border border-red-100
-                  font-bold text-sm hover:bg-red-50 hover:scale-105 active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-            PDF
-        </a>
-        {{-- CSV --}}
-        <a href="{{ route('admin.export.csv') }}"
-           class="flex items-center gap-2 px-4 py-3 bg-primary-container text-white rounded-xl shadow-lg shadow-orange-200
-                  font-bold text-sm hover:bg-primary hover:scale-105 active:scale-95 transition-all">
-            <span class="material-symbols-outlined text-[20px]">table_chart</span>
-            CSV
-        </a>
-    </div>
-</div>
 
 @push('scripts')
 <script>
