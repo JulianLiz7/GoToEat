@@ -423,7 +423,7 @@
     </div>
 </div>
 
-@push('scripts')
+<script>
 <script>
 const expenseChart = @json($expenseChart);
 const COLORS = ['#f97316','#006398','#006c49','#8c7164','#9d4300'];
@@ -508,6 +508,6 @@ function clearFileC(e) {
     preview.classList.remove('flex');
 }
 </script>
-@endpush
+</script>
 
 </x-finance-layout>

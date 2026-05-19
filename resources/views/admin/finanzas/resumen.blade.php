@@ -237,7 +237,7 @@
     @endif
 </div>
 
-@push('scripts')
+<script>
 <script>
 const weekLabels     = @json($weekLabels->values());
 const weeklyIngresos = @json($weeklyIngresos->values());
@@ -317,6 +317,6 @@ if (donutCtx && expenseChart.length) {
     });
 }
 </script>
-@endpush
+</script>
 
 </x-finance-layout>

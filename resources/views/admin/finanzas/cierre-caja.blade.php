@@ -437,7 +437,6 @@
 
 </div>{{-- /x-data --}}
 
-@push('scripts')
 <script>
 // Función global para previsualizar el cierre de caja.
 // Está en <script> y NO en x-data para que los template literals
@@ -529,6 +528,5 @@ window._cierrePreview = function(counted, diff, deposit, denominations, notes) {
     w.document.close();
 };
 </script>
-@endpush
 
 </x-finance-layout>

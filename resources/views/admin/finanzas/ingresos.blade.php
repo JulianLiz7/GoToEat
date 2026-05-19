@@ -211,7 +211,7 @@
     @endif
 </div>
 
-@push('scripts')
+<script>
 <script>
 const trendLabels = @json($trendLabels->values());
 const trendData   = @json($trendData->values());
@@ -252,6 +252,6 @@ if (trendCtx) {
     });
 }
 </script>
-@endpush
+</script>
 
 </x-finance-layout>
