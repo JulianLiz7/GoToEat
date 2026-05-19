@@ -18,19 +18,19 @@
         <p class="text-body-sm text-on-surface-variant uppercase tracking-widest text-[10px] font-bold mt-1">Admin Panel</p>
     </div>
     <nav class="flex-1 flex flex-col gap-2">
-        <a class="flex items-center gap-4 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="#">
+        <a class="flex items-center gap-4 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="{{ route('empleado.dashboard') }}">
             <span class="material-symbols-outlined">dashboard</span>
             <span class="text-body-sm">Dashboard</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
+        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.turnos') }}">
             <span class="material-symbols-outlined">schedule</span>
             <span class="text-body-sm">Turnos</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
+        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.pagos') }}">
             <span class="material-symbols-outlined">payments</span>
             <span class="text-body-sm">Pagos</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="#">
+        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.perfil') }}">
             <span class="material-symbols-outlined">person</span>
             <span class="text-body-sm">Perfil</span>
         </a>
@@ -242,19 +242,19 @@
 
 <!-- Bottom NavBar (Mobile) -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 px-4 py-2 flex justify-around items-center z-[60]">
-    <a class="flex flex-col items-center gap-1 p-2 text-primary font-bold" href="#">
+    <a class="flex flex-col items-center gap-1 p-2 text-primary font-bold" href="{{ route('empleado.dashboard') }}">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
         <span class="text-[10px]">Dashboard</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="#">
+    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.turnos') }}">
         <span class="material-symbols-outlined">schedule</span>
         <span class="text-[10px]">Turnos</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="#">
+    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.pagos') }}">
         <span class="material-symbols-outlined">payments</span>
         <span class="text-[10px]">Pagos</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="#">
+    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.perfil') }}">
         <span class="material-symbols-outlined">person</span>
         <span class="text-[10px]">Perfil</span>
     </a>

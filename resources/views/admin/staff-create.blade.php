@@ -33,33 +33,72 @@
         <form method="POST" action="{{ route('admin.staff.store') }}" class="p-8 space-y-6">
             @csrf
 
-            {{-- Aviso: solo usuarios registrados pueden ser empleados --}}
-            <div class="flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <span class="material-symbols-outlined text-blue-500 text-[20px] shrink-0 mt-0.5">info</span>
-                <p class="text-xs text-blue-700 leading-relaxed">
-                    El empleado debe tener una cuenta registrada en la plataforma.
-                    Si aún no tiene cuenta, primero debe registrarse y luego podrás asignarlo aquí.
-                </p>
-            </div>
+            {{-- Modo de Selección/Invitación con Alpine.js --}}
+            <div x-data="{ mode: 'new' }" class="space-y-6">
+                {{-- Selector de modo --}}
+                <div class="flex gap-4 p-1 bg-gray-100 rounded-2xl max-w-md">
+                    <button type="button" 
+                            @click="mode = 'new'"
+                            :class="mode === 'new' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-500 hover:text-gray-800'"
+                            class="flex-1 py-2 text-xs font-bold rounded-xl transition-all">
+                        Invitar nuevo empleado
+                    </button>
+                    <button type="button" 
+                            @click="mode = 'existing'"
+                            :class="mode === 'existing' ? 'bg-white shadow-sm text-orange-600' : 'text-gray-500 hover:text-gray-800'"
+                            class="flex-1 py-2 text-xs font-bold rounded-xl transition-all">
+                        Asignar usuario existente
+                    </button>
+                </div>
 
-            {{-- Selección de usuario --}}
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Usuario registrado <span class="text-red-500">*</span>
-                </label>
-                <select name="user_id" required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white">
-                    <option value="">— Seleccionar usuario —</option>
-                    @foreach($availableUsers as $user)
-                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                    @endforeach
-                </select>
-                @if($availableUsers->isEmpty())
-                <p class="text-xs text-amber-600 mt-1.5">
-                    <span class="material-symbols-outlined text-[14px] align-middle">warning</span>
-                    No hay usuarios disponibles para asignar como empleados.
-                </p>
-                @endif
+                {{-- Campo oculto para enviar el modo --}}
+                <input type="hidden" name="mode" :value="mode"/>
+
+                {{-- Campos para invitar nuevo empleado --}}
+                <div x-show="mode === 'new'" x-collapse class="grid grid-cols-1 md:grid-cols-2 gap-5 bg-orange-50/20 p-5 rounded-2xl border border-orange-100/50">
+                    <div class="md:col-span-2">
+                        <p class="text-xs text-orange-600 font-semibold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px]">mail</span>
+                            Se creará una cuenta y se enviará un correo con su usuario y contraseña temporal.
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                            Nombre completo <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="name" :required="mode === 'new'"
+                               placeholder="Ej. Juan Pérez"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                            Correo electrónico <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" name="email" :required="mode === 'new'"
+                               placeholder="juan.perez@example.com"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white"/>
+                    </div>
+                </div>
+
+                {{-- Campos para seleccionar usuario existente --}}
+                <div x-show="mode === 'existing'" x-collapse class="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Usuario registrado <span class="text-red-500">*</span>
+                    </label>
+                    <select name="user_id" :required="mode === 'existing'"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm bg-white">
+                        <option value="">— Seleccionar usuario —</option>
+                        @foreach($availableUsers as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        @endforeach
+                    </select>
+                    @if($availableUsers->isEmpty())
+                    <p class="text-xs text-amber-600 mt-1.5">
+                        <span class="material-symbols-outlined text-[14px] align-middle">warning</span>
+                        No hay usuarios adicionales disponibles para asignar.
+                    </p>
+                    @endif
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -336,6 +336,88 @@
      MODALES
 ══════════════════════════════════════════════════════════════════ --}}
 
+{{-- ── Modal: Credenciales del nuevo empleado ─────────────────────── --}}
+@if(session('new_employee_credentials'))
+@php
+    $creds = session('new_employee_credentials');
+@endphp
+<div id="modalCredenciales" class="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/60 backdrop-blur-md">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 text-center relative border border-gray-100 transform transition-all duration-300 scale-100">
+        
+        {{-- Badge superior decorativo --}}
+        <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-100/50">
+            <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">key</span>
+        </div>
+
+        {{-- Encabezado --}}
+        <h2 class="text-2xl font-black font-heading text-on-surface mb-2">¡Empleado Registrado!</h2>
+        <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+            Se ha creado exitosamente el perfil de <strong class="text-gray-800">{{ $creds['name'] }}</strong> ({{ $creds['position'] }}). Copia sus credenciales de acceso para entregárselas directamente:
+        </p>
+
+        {{-- Caja de credenciales --}}
+        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-4 mb-6 text-left">
+            {{-- Usuario --}}
+            <div>
+                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nombre de usuario (o Correo)</span>
+                <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-gray-200">
+                    <span id="credUsername" class="text-sm font-mono font-bold text-on-surface select-all">{{ $creds['username'] }}</span>
+                    <button type="button" onclick="copiarTexto('credUsername', 'btnCopyUser')" id="btnCopyUser"
+                            class="text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1 text-xs font-bold">
+                        <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                        <span>Copiar</span>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Contraseña --}}
+            <div>
+                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Contraseña temporal</span>
+                <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-gray-200">
+                    <span id="credPassword" class="text-sm font-mono font-bold text-orange-600 select-all">{{ $creds['password'] }}</span>
+                    <button type="button" onclick="copiarTexto('credPassword', 'btnCopyPass')" id="btnCopyPass"
+                            class="text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1 text-xs font-bold">
+                        <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                        <span>Copiar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Advertencia de seguridad --}}
+        <div class="flex gap-2.5 p-3.5 bg-amber-50 rounded-xl border border-amber-100 text-left mb-6">
+            <span class="material-symbols-outlined text-amber-500 text-[18px] shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1">warning</span>
+            <p class="text-[11px] text-amber-800 leading-normal">
+                Por motivos de seguridad, esta contraseña solo se mostrará <strong>una vez</strong>. Asegúrate de copiarla ahora antes de cerrar esta ventana.
+            </p>
+        </div>
+
+        {{-- Botón de acción --}}
+        <button type="button" onclick="cerrarModal('modalCredenciales')"
+                class="w-full py-4 rounded-2xl bg-primary-container text-white font-bold shadow-lg shadow-orange-200 hover:brightness-110 active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+            Entendido y Copiado
+        </button>
+    </div>
+</div>
+
+<script>
+function copiarTexto(elementId, btnId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px] text-emerald-500">check</span><span class="text-emerald-600">Copiado</span>';
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+        }, 2000);
+    }).catch(err => {
+        console.error('Error al copiar: ', err);
+    });
+}
+</script>
+@endif
+
 {{-- ── Modal: Editar empleado ─────────────────────────────────────── --}}
 <div id="modalEditarEmp" class="hidden fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col" style="max-height:90vh">

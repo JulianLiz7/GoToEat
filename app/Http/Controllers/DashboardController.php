@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\Restaurant\Models\Restaurant;
+use App\Domains\Staff\Models\Employee;
+use App\Domains\Staff\Models\StaffNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -13,16 +15,87 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        return $user->hasRole('admin')
-            ? $this->adminView($user)
-            : $this->clienteView($request);
+        if ($user->hasRole('admin')) {
+            return $this->adminView($user);
+        }
+
+        if ($user->hasAnyRole(['chef', 'cajero', 'mesero'])) {
+            return $this->empleadoView($user);
+        }
+
+        return $this->clienteView($request);
+    }
+
+    private function empleadoView($user)
+    {
+        // Obtener el registro de empleado del usuario
+        $employee = Employee::where('user_id', $user->id)
+            ->with('restaurant')
+            ->first();
+
+        // Si por alguna razón no tiene registro de empleado, redirigir a la vista de cliente
+        if (! $employee) {
+            return $this->clienteView($request ?? request());
+        }
+
+        // Datos del dashboard de empleado
+        $cargo = $employee->position ?? 'Empleado';
+        $badgeId = 'GE-'.str_pad($employee->id, 6, '0', STR_PAD_LEFT);
+        $fechaIngreso = $employee->hire_date?->locale('es')->format('d M Y') ?? 'No registrada';
+        $salarioBase = number_format($employee->salary ?? 0, 0, ',', '.');
+
+        // Valores de turnos y horas reales/simulados
+        $horasHoy = '8h';
+        $horasTarget = '8h';
+        $horasPct = 100;
+        $horasExtrasSemana = '0h';
+        $horasSemana = '40h';
+
+        // Turnos de ejemplo
+        $turnos = [
+            ['dia' => 'Lunes — Viernes', 'hora' => '08:00 AM — 04:00 PM'],
+            ['dia' => 'Sábado', 'hora' => '09:00 AM — 02:00 PM'],
+        ];
+
+        // Notificaciones del restaurante para el staff
+        $notificaciones = StaffNotification::where('restaurant_id', $employee->restaurant_id)
+            ->active()
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($n) {
+                return [
+                    'titulo' => $n->title,
+                    'mensaje' => $n->message,
+                    'icono' => $n->type === 'urgente' ? 'alarm' : ($n->type === 'aviso' ? 'groups' : 'check_circle'),
+                    'color' => $n->type === 'urgente' ? 'orange' : ($n->type === 'aviso' ? 'blue' : 'emerald'),
+                ];
+            })
+            ->toArray();
+
+        if (empty($notificaciones)) {
+            $notificaciones = [
+                [
+                    'titulo' => '¡Bienvenido a tu nuevo Panel de Empleado!',
+                    'mensaje' => 'Aquí podrás ver tus turnos, programar tus tareas y mantenerte al día con las comunicaciones.',
+                    'icono' => 'check_circle',
+                    'color' => 'emerald',
+                ],
+            ];
+        }
+
+        return view('empleado.dashboard', compact(
+            'cargo', 'badgeId', 'fechaIngreso', 'salarioBase',
+            'horasHoy', 'horasTarget', 'horasPct', 'horasExtrasSemana', 'horasSemana',
+            'turnos', 'notificaciones', 'employee'
+        ));
     }
 
     private function adminView($user)
     {
         $restaurant = $user->ownedRestaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return redirect()->route('onboarding.step1');
         }
 
@@ -31,27 +104,27 @@ class DashboardController extends Controller
         // ── Stats cacheadas 2 minutos (evita 41 queries en cada recarga) ──
         $stats = Cache::remember("dashboard_stats_{$rid}", 120, function () use ($rid) {
 
-            $now   = now();
+            $now = now();
             $month = $now->month;
-            $year  = $now->year;
+            $year = $now->year;
 
             // ── Query 1: KPIs de órdenes en una sola pasada ───────────
             $orderKpis = DB::table('orders')
                 ->where('restaurant_id', $rid)
-                ->selectRaw("
+                ->selectRaw('
                     SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ?
                              THEN total ELSE 0 END) AS month_revenue,
                     SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ?
                              THEN total ELSE 0 END) AS prev_revenue,
                     SUM(CASE WHEN DATE(created_at) = CURDATE() THEN total ELSE 0 END) AS today_revenue,
                     COUNT(CASE WHEN DATE(created_at) = CURDATE() THEN 1 END) AS today_orders
-                ", [$month, $year, $now->copy()->subMonth()->month, $now->copy()->subMonth()->year])
+                ', [$month, $year, $now->copy()->subMonth()->month, $now->copy()->subMonth()->year])
                 ->first();
 
             $monthRevenue = (float) ($orderKpis->month_revenue ?? 0);
-            $prevRevenue  = (float) ($orderKpis->prev_revenue  ?? 0);
+            $prevRevenue = (float) ($orderKpis->prev_revenue ?? 0);
             $todayRevenue = (float) ($orderKpis->today_revenue ?? 0);
-            $todayOrders  = (int)   ($orderKpis->today_orders  ?? 0);
+            $todayOrders = (int) ($orderKpis->today_orders ?? 0);
             $revenueTrend = $prevRevenue > 0
                 ? round((($monthRevenue - $prevRevenue) / $prevRevenue) * 100, 1)
                 : 0;
@@ -112,10 +185,10 @@ class DashboardController extends Controller
                 ->pluck('total', 'day');
 
             // Rellenar todos los 7 días (aunque no haya datos ese día → 0)
-            $weekDays       = collect(range(6, 0))->map(fn ($d) => $now->copy()->subDays($d));
-            $weeklyRevenue  = $weekDays->map(fn ($d) => (float) ($weeklyOrdersRaw[$d->toDateString()] ?? 0));
+            $weekDays = collect(range(6, 0))->map(fn ($d) => $now->copy()->subDays($d));
+            $weeklyRevenue = $weekDays->map(fn ($d) => (float) ($weeklyOrdersRaw[$d->toDateString()] ?? 0));
             $weeklyExpenses = $weekDays->map(fn ($d) => (float) ($weeklyExpensesRaw[$d->toDateString()] ?? 0));
-            $weekLabels     = $weekDays->map(fn ($d) => mb_strtoupper(mb_substr($d->locale('es')->dayName, 0, 3)));
+            $weekLabels = $weekDays->map(fn ($d) => mb_strtoupper(mb_substr($d->locale('es')->dayName, 0, 3)));
 
             // ── Query 7: Gráfica de línea — últimos 13 días ───────────
             // Una sola query GROUP BY en lugar de 13 queries individuales
@@ -128,7 +201,7 @@ class DashboardController extends Controller
                 ->groupBy('day')
                 ->pluck('orders', 'day');
 
-            $chartDays   = collect(range(12, 0))->map(fn ($d) => $now->copy()->subDays($d));
+            $chartDays = collect(range(12, 0))->map(fn ($d) => $now->copy()->subDays($d));
             $dailyOrders = $chartDays->map(fn ($d) => (int) ($dailyOrdersRaw[$d->toDateString()] ?? 0));
             $chartLabels = $chartDays->map(fn ($d) => $d->format('d M'));
 
@@ -154,18 +227,18 @@ class DashboardController extends Controller
 
             if ($ordersWithItems->isNotEmpty()) {
                 $revenueByCategory = [];
-                $allMenuItemIds    = [];
+                $allMenuItemIds = [];
 
                 foreach ($ordersWithItems as $ord) {
                     $items = json_decode($ord->items, true) ?? [];
                     foreach ($items as $it) {
-                        if (!empty($it['menu_item_id'])) {
+                        if (! empty($it['menu_item_id'])) {
                             $allMenuItemIds[] = (int) $it['menu_item_id'];
                         }
                     }
                 }
 
-                if (!empty($allMenuItemIds)) {
+                if (! empty($allMenuItemIds)) {
                     $categories = DB::table('menu_items')
                         ->whereIn('id', array_unique($allMenuItemIds))
                         ->pluck('category', 'id');
@@ -173,8 +246,8 @@ class DashboardController extends Controller
                     foreach ($ordersWithItems as $ord) {
                         $items = json_decode($ord->items, true) ?? [];
                         foreach ($items as $it) {
-                            $mid   = (int) ($it['menu_item_id'] ?? 0);
-                            $cat   = $categories[$mid] ?? 'Sin categoría';
+                            $mid = (int) ($it['menu_item_id'] ?? 0);
+                            $cat = $categories[$mid] ?? 'Sin categoría';
                             $total = (float) ($it['unit_price'] ?? 0) * (int) ($it['quantity'] ?? 1);
                             $revenueByCategory[$cat] = ($revenueByCategory[$cat] ?? 0) + $total;
                         }
@@ -220,23 +293,23 @@ class DashboardController extends Controller
 
         // Extraer conteos de mesas del objeto stdClass
         $tc = $stats['tableCounts'];
-        $stats['totalTables']     = (int) ($tc->total    ?? 0);
-        $stats['activeTables']    = (int) ($tc->occupied  ?? 0);
+        $stats['totalTables'] = (int) ($tc->total ?? 0);
+        $stats['activeTables'] = (int) ($tc->occupied ?? 0);
         $stats['availableTables'] = (int) ($tc->available ?? 0);
-        $stats['activeStaff']     = $stats['staffCount'];
-        $stats['shiftStaff']      = $stats['staffCount'];
-        $stats['totalMenuItems']  = $stats['menuCount'];
-        $stats['netProfit']       = $stats['monthRevenue'] - $stats['monthExpenses'];
+        $stats['activeStaff'] = $stats['staffCount'];
+        $stats['shiftStaff'] = $stats['staffCount'];
+        $stats['totalMenuItems'] = $stats['menuCount'];
+        $stats['netProfit'] = $stats['monthRevenue'] - $stats['monthExpenses'];
 
         return view('admin.dashboard', compact('restaurant', 'stats'));
     }
 
     private function clienteView(Request $request)
     {
-        $search  = $request->get('search', '');
+        $search = $request->get('search', '');
         $cuisine = $request->get('cuisine', '');
 
-        $restaurants = \App\Domains\Restaurant\Models\Restaurant::where('status', 'active')
+        $restaurants = Restaurant::where('status', 'active')
             ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%")
                 ->orWhere('cuisine_type', 'like', "%{$search}%")
                 ->orWhere('category', 'like', "%{$search}%"))
@@ -244,7 +317,7 @@ class DashboardController extends Controller
             ->latest()
             ->paginate(12);
 
-        $cuisines = \App\Domains\Restaurant\Models\Restaurant::select('cuisine_type')
+        $cuisines = Restaurant::select('cuisine_type')
             ->distinct()->whereNotNull('cuisine_type')->orderBy('cuisine_type')->pluck('cuisine_type');
 
         return view('cliente.dashboard', compact('restaurants', 'cuisines', 'search', 'cuisine'));
