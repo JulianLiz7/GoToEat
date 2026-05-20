@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\AdminTablesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Cliente\ClienteController;
+use App\Domains\Reservations\Models\Reservation;
 use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,13 +85,32 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/settings/cover',     [AdminRestaurantSettingsController::class, 'deleteCover'])->name('settings.cover.delete');
 });
 
-// ── Perfil y zona de cliente ──────────────────────────────────────
+// ── Panel del Comensal ────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     Route::get('/welcome-comensal', fn () => view('welcome-comensal'))->name('welcome.comensal');
-    Route::get('/reservas', fn () => view('cliente.reservas'))->name('reservas');
-    Route::get('/perfil', fn () => view('cliente.perfil'))->name('perfil');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Explorar restaurantes
+    Route::get('/explorar', [ClienteController::class, 'dashboard'])->name('explorar');
+
+    // Reservas
+    Route::get('/reservas',                                [ClienteController::class, 'reservas'])->name('reservas');
+    Route::post('/reservas',                               [ClienteController::class, 'storeReservation'])->name('reservas.store');
+    Route::patch('/reservas/{reservation}/cancelar',       [ClienteController::class, 'cancelReservation'])->name('reservas.cancel');
+
+    // Perfil
+    Route::get('/perfil',                [ClienteController::class, 'perfil'])->name('perfil');
+    Route::post('/perfil',               [ClienteController::class, 'updatePerfil'])->name('perfil.update');
+    Route::post('/perfil/password',      [ClienteController::class, 'updatePassword'])->name('perfil.password');
+
+    // Menú JSON para modal de reserva
+    Route::get('/restaurante/{restaurant}/menu',    [ClienteController::class, 'menuRestaurant'])->name('restaurante.menu');
+    // Reseñas
+    Route::post('/restaurante/{restaurant}/resena', [ClienteController::class, 'storeReview'])->name('restaurante.review');
+    Route::get('/restaurante/{restaurant}/resenas', [ClienteController::class, 'reviews'])->name('restaurante.reviews');
+
+    // Breeze profile (admin use)
+    Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 

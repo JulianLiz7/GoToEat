@@ -3,7 +3,9 @@
     "allow": [
       "Bash(docker compose *)",
       "Bash(docker exec *)",
-      "Bash(grep -r \"namespace App\\\\\\\\Domains\" \"c:\\\\Users\\\\TomasPro\\\\Documents\\\\GoToEat\\\\app\" --include=\"*.php\")"
+      "Bash(grep -r \"namespace App\\\\\\\\Domains\" \"c:\\\\Users\\\\TomasPro\\\\Documents\\\\GoToEat\\\\app\" --include=\"*.php\")",
+      "PowerShell(docker restart laravel_app 2>&1)",
+      "PowerShell(docker exec laravel_app php -r \"echo opcache_get_configuration\\(\\)['directives']['opcache.validate_timestamps'] ? 'validate_timestamps=ON \\(BAD\\)' : 'validate_timestamps=OFF \\(GOOD\\)';\" 2>&1)"
     ]
   }
 }

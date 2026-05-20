@@ -23,7 +23,7 @@ class DashboardController extends Controller
             return $this->empleadoView($user);
         }
 
-        return $this->clienteView($request);
+        return redirect()->route('explorar');
     }
 
     private function empleadoView($user)

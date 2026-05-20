@@ -23,6 +23,7 @@ class Restaurant extends Model
         'primary_color', 'secondary_color',
         'category', 'cuisine_type', 'address', 'phone', 'whatsapp', 'email',
         'website', 'opening_hours', 'status',
+        'price_range', 'avg_rating', 'reviews_count',
     ];
 
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -75,5 +76,26 @@ class Restaurant extends Model
     public function aiConversations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(AIConversation::class);
+    }
+
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Domains\Reservations\Models\RestaurantReview::class);
+    }
+
+    public function reservations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Domains\Reservations\Models\Reservation::class);
+    }
+
+    public function starsHtml(int $rating = null): string
+    {
+        $r = $rating ?? round($this->avg_rating ?? 0);
+        $html = '';
+        for ($i = 1; $i <= 5; $i++) {
+            $fill = $i <= $r ? '1' : '0';
+            $html .= "<span class=\"material-symbols-outlined text-[16px] text-amber-400\" style=\"font-variation-settings:'FILL' {$fill}\">star</span>";
+        }
+        return $html;
     }
 }
