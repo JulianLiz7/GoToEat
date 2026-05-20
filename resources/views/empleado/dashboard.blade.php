@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html class="light" lang="es"><head>
+<html class="light" lang="es">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Panel del Empleado | GoToEat</title>
@@ -13,141 +14,160 @@
 
 <!-- SideNavBar (Desktop) -->
 <aside class="hidden md:flex flex-col h-full p-4 gap-2 bg-surface-container-low fixed left-0 top-0 w-64 z-[60] shadow-md">
-    <div class="mb-10 px-2 py-4">
+    <div class="mb-8 px-2 py-4">
         <h1 class="font-heading text-h3 font-bold text-primary">GoTo<span class="text-primary-container">Eat</span></h1>
         <p class="text-body-sm text-on-surface-variant uppercase tracking-widest text-[10px] font-bold mt-1">Panel del Empleado</p>
     </div>
-    <nav class="flex-1 flex flex-col gap-2">
-        <a class="flex items-center gap-4 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="{{ route('empleado.dashboard') }}">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="text-body-sm">Inicio</span>
+    <nav class="flex-1 flex flex-col gap-1">
+        <a class="flex items-center gap-3 px-4 py-2.5 bg-primary/10 text-primary rounded-xl font-bold transition-all hover:translate-x-1" href="{{ route('empleado.dashboard') }}">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">dashboard</span>
+            <span class="text-sm">Inicio</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.turnos') }}">
+        <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all hover:translate-x-1" href="{{ route('empleado.turnos') }}">
             <span class="material-symbols-outlined">schedule</span>
-            <span class="text-body-sm">Turnos</span>
+            <span class="text-sm">Turnos</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.pagos') }}">
+        <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all hover:translate-x-1" href="{{ route('empleado.pagos') }}">
             <span class="material-symbols-outlined">payments</span>
-            <span class="text-body-sm">Pagos</span>
+            <span class="text-sm">Pagos</span>
         </a>
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.perfil') }}">
+        <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all hover:translate-x-1" href="{{ route('empleado.perfil') }}">
             <span class="material-symbols-outlined">person</span>
-            <span class="text-body-sm">Perfil</span>
+            <span class="text-sm">Perfil</span>
         </a>
     </nav>
-    <div class="mt-auto flex flex-col gap-2 pt-6 border-t border-outline-variant/30">
-        <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1 text-error" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <span class="material-symbols-outlined">logout</span>
-            <span class="text-body-sm">Cerrar Sesión</span>
-        </a>
+    <div class="mt-auto flex flex-col gap-2 pt-4 border-t border-outline-variant/30">
+        <div class="flex items-center gap-3 px-4 py-2">
+            <div class="w-9 h-9 bg-primary-container rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                {{ strtoupper(substr(auth()->user()->name ?? 'E', 0, 1)) }}
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-on-surface truncate">{{ auth()->user()->name }}</p>
+                <p class="text-[10px] text-on-surface-variant truncate">{{ $cargo }}</p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('logout-form').submit()"
+            class="flex items-center gap-3 px-4 py-2.5 text-error hover:bg-error/5 rounded-xl transition-all hover:translate-x-1 w-full text-left">
+            <span class="material-symbols-outlined text-lg">logout</span>
+            <span class="text-sm font-medium">Cerrar Sesión</span>
+        </button>
     </div>
 </aside>
 
 <!-- Main Content -->
-<main class="md:ml-64 flex flex-col min-h-screen">
+<main class="md:ml-64 flex flex-col min-h-screen pb-20 md:pb-0">
 
     <!-- Top Bar -->
     <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-6 py-4">
-        <div class="flex items-center gap-4">
-            <h2 class="font-heading text-lg font-bold text-on-surface">Inicio</h2>
+        <div>
+            <h2 class="font-heading text-lg font-bold text-on-surface">Bienvenido, {{ explode(' ', auth()->user()->name)[0] }}</h2>
+            <p class="text-xs text-on-surface-variant">{{ now()->locale('es')->isoFormat('dddd, D [de] MMMM YYYY') }}</p>
         </div>
-        <div class="flex items-center gap-4">
-            <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-90 relative">
-                <span class="material-symbols-outlined">notifications</span>
-                <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
-            </button>
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {{ substr(auth()->user()->name ?? 'J', 0, 1) }}{{ substr(auth()->user()->name ?? 'R', strpos(auth()->user()->name ?? 'J R', ' ') + 1, 1) }}
+        <div class="flex items-center gap-3">
+            <a href="{{ route('empleado.perfil') }}" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-xl hover:bg-surface-container-high transition-all">
+                <div class="w-8 h-8 bg-primary-container rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'E', 0, 1)) }}
                 </div>
-            </div>
+                <span class="text-sm font-medium text-on-surface hidden sm:block">{{ explode(' ', auth()->user()->name)[0] }}</span>
+                <span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+            </a>
         </div>
     </header>
 
     <!-- Dashboard Content -->
-    <div class="px-6 py-8 max-w-7xl mx-auto w-full space-y-8">
+    <div class="px-4 md:px-6 py-6 max-w-7xl mx-auto w-full space-y-6">
 
         <!-- Employee Profile Header -->
-        <section class="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/10">
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-                <div class="w-20 h-20 bg-gradient-to-br from-primary-container to-primary rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-primary-container/30">
-                    {{ substr(auth()->user()->name ?? 'J', 0, 1) }}{{ substr(auth()->user()->name ?? 'R', strpos(auth()->user()->name ?? 'J R', ' ') + 1, 1) }}
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant/10">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-container to-primary rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary-container/30 shrink-0">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'E', 0, 1)) }}
                 </div>
                 <div class="flex-1">
-                    <h2 class="font-heading text-h3 font-bold text-on-surface">{{ auth()->user()->name ?? 'Julián Rodríguez' }}</h2>
-                    <p class="text-body-md text-on-surface-variant">{{ $cargo ?? 'Chef de Cuisine' }}</p>
-                    <div class="flex flex-wrap gap-3 mt-3">
-                        <span class="px-3 py-1 bg-surface-container rounded-full text-label-caps text-on-surface-variant flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px]">badge</span>
-                            ID: {{ $badgeId ?? 'GE-882910' }}
+                    <h2 class="font-heading text-xl font-bold text-on-surface">{{ auth()->user()->name }}</h2>
+                    <p class="text-sm text-on-surface-variant mt-0.5">{{ $cargo }}</p>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="px-2.5 py-1 bg-surface-container rounded-full text-xs text-on-surface-variant flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[13px]">badge</span>
+                            ID: {{ $badgeId }}
                         </span>
-                        <span class="px-3 py-1 bg-surface-container rounded-full text-label-caps text-on-surface-variant flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                            Ingreso: {{ $fechaIngreso ?? '17 Feb 2026' }}
+                        <span class="px-2.5 py-1 bg-surface-container rounded-full text-xs text-on-surface-variant flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                            Ingreso: {{ $fechaIngreso }}
                         </span>
+                        @if($employee->restaurant)
+                        <span class="px-2.5 py-1 bg-surface-container rounded-full text-xs text-on-surface-variant flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                            {{ $employee->restaurant->name }}
+                        </span>
+                        @endif
                     </div>
                 </div>
+                <a href="{{ route('empleado.perfil') }}" class="px-4 py-2 border border-outline-variant/50 text-on-surface-variant text-sm rounded-xl hover:bg-surface-container transition-all flex items-center gap-2 shrink-0">
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                    Editar perfil
+                </a>
             </div>
         </section>
 
         <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Horas Hoy -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-primary-fixed rounded-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="p-2.5 bg-primary-fixed rounded-xl">
                         <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">schedule</span>
                     </div>
                 </div>
                 <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-1">Horas Hoy</p>
-                <p class="text-2xl font-bold font-heading text-on-surface">{{ $horasHoy ?? '8h' }} <span class="text-base font-normal text-gray-400">/ {{ $horasTarget ?? '10h' }}</span></p>
-                <div class="w-full h-1.5 bg-gray-100 rounded-full mt-3 overflow-hidden">
-                    <div class="h-full bg-primary-container rounded-full transition-all duration-500" style="width: {{ $horasPct ?? '80' }}%"></div>
+                <p class="text-2xl font-bold font-heading text-on-surface">{{ $horasHoy }} <span class="text-base font-normal text-gray-400">/ {{ $horasTarget }}</span></p>
+                <div class="w-full h-1.5 bg-gray-100 rounded-full mt-2.5 overflow-hidden">
+                    <div class="h-full bg-primary-container rounded-full transition-all duration-500" style="width: {{ $horasPct }}%"></div>
                 </div>
             </div>
 
-            <!-- Esta Semana -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-blue-50 rounded-xl">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="p-2.5 bg-blue-50 rounded-xl">
                         <span class="material-symbols-outlined text-blue-600" style="font-variation-settings:'FILL' 1">date_range</span>
                     </div>
-                    <span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
-                        +{{ $horasExtrasSemana ?? '4h' }} vs prev.
+                    <span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px]">trending_up</span>
+                        +{{ $horasExtrasSemana }}
                     </span>
                 </div>
                 <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-1">Esta Semana</p>
-                <p class="text-2xl font-bold font-heading text-on-surface">{{ $horasSemana ?? '42h' }}</p>
+                <p class="text-2xl font-bold font-heading text-on-surface">{{ $horasSemana }}</p>
             </div>
 
-            <!-- Salario Base -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-emerald-50 rounded-xl">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="p-2.5 bg-emerald-50 rounded-xl">
                         <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings:'FILL' 1">account_balance_wallet</span>
                     </div>
+                    <a href="{{ route('empleado.pagos') }}" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                        Ver pagos <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                    </a>
                 </div>
                 <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-1">Salario Base</p>
-                <p class="text-2xl font-bold font-heading text-on-surface">${{ $salarioBase ?? '2.000.000' }}</p>
+                <p class="text-2xl font-bold font-heading text-on-surface">${{ $salarioBase }}</p>
                 <p class="text-xs text-gray-400 mt-1">COP / Mes</p>
             </div>
         </div>
 
-        {{-- ── Reservas del día (mesero) ──────────────────────────── --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden mb-6">
+        <!-- Reservas del día -->
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 1">event_seat</span>
-                    <h3 class="font-bold text-on-surface">Reservas del Día</h3>
+                    <h3 class="font-bold text-on-surface">Reservas Asignadas</h3>
                 </div>
                 <span class="text-xs font-bold text-primary-container bg-primary-container/10 px-2.5 py-1 rounded-full">
-                    {{ ($todayReservations ?? collect())->count() }} reservas
+                    {{ $todayReservations->count() }} reservas
                 </span>
             </div>
-            @if(($todayReservations ?? collect())->isEmpty())
-            <div class="px-6 py-8 text-center text-gray-400 text-sm">
-                <span class="material-symbols-outlined text-3xl text-gray-200 block mb-2">calendar_today</span>
+            @if($todayReservations->isEmpty())
+            <div class="px-6 py-10 text-center text-gray-400 text-sm">
+                <span class="material-symbols-outlined text-4xl text-gray-200 block mb-2">calendar_today</span>
                 Sin reservas próximas asignadas.
             </div>
             @else
@@ -164,7 +184,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
-                        @foreach($todayReservations ?? [] as $res)
+                        @foreach($todayReservations as $res)
                         @php
                             $items   = $res->selected_items ?? [];
                             $stColor = match($res->status) {
@@ -194,9 +214,6 @@
                                     @if(count($items) > 2)
                                     <p class="text-[11px] text-gray-400">+{{ count($items)-2 }} más</p>
                                     @endif
-                                    <p class="text-xs font-bold text-primary-container mt-0.5">
-                                        ${{ number_format(collect($items)->sum(fn($i) => ($i['price']??0)*($i['qty']??1)), 0, ',', '.') }}
-                                    </p>
                                 </div>
                                 @elseif($res->notes)
                                 <p class="text-xs text-gray-400 italic">{{ Str::limit($res->notes, 40) }}</p>
@@ -227,20 +244,25 @@
             @endif
         </div>
 
-        <!-- Two Column: Turnos + Notificaciones -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Turnos + Notificaciones -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
             <!-- Próximos Turnos -->
             <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary-container">event</span>
-                    <h3 class="font-bold text-on-surface">Próximos Turnos</h3>
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary-container">event</span>
+                        <h3 class="font-bold text-on-surface">Próximos Turnos</h3>
+                    </div>
+                    <a href="{{ route('empleado.turnos') }}" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                        Ver todos <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                    </a>
                 </div>
                 <div class="divide-y divide-gray-50">
-                    @forelse($turnos ?? [['dia' => 'Martes - Mañana', 'hora' => '08:00 AM — 04:00 PM'], ['dia' => 'Miércoles - Tarde', 'hora' => '10:00 AM — 06:00 PM']] as $turno)
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    @forelse($turnos as $turno)
+                    <a href="{{ route('empleado.turnos') }}" class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors block">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center shrink-0">
                                 <span class="material-symbols-outlined text-primary text-lg">calendar_today</span>
                             </div>
                             <div>
@@ -252,9 +274,9 @@
                             </div>
                         </div>
                         <span class="material-symbols-outlined text-gray-300 text-lg">chevron_right</span>
-                    </div>
+                    </a>
                     @empty
-                    <div class="flex flex-col items-center justify-center py-12 text-center px-6">
+                    <div class="flex flex-col items-center justify-center py-10 text-center px-6">
                         <span class="material-symbols-outlined text-4xl text-gray-300 mb-3">event_busy</span>
                         <p class="text-sm font-medium text-gray-400">Sin turnos programados</p>
                     </div>
@@ -266,14 +288,10 @@
             <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container">notifications_active</span>
-                    <h3 class="font-bold text-on-surface">Notificaciones</h3>
+                    <h3 class="font-bold text-on-surface">Notificaciones del Equipo</h3>
                 </div>
                 <div class="divide-y divide-gray-50">
-                    @forelse($notificaciones ?? [
-                        ['titulo' => 'Tu turno inicia en 30 minutos', 'mensaje' => 'Recuerda marcar tu entrada en el sistema biométrico.', 'icono' => 'alarm', 'color' => 'orange'],
-                        ['titulo' => 'Reunión programada a las 4:00 PM', 'mensaje' => 'Briefing diario sobre el nuevo menú de temporada con el Staff.', 'icono' => 'groups', 'color' => 'blue'],
-                        ['titulo' => 'Solicitud de permiso aprobada', 'mensaje' => 'Tu solicitud para el día 25 de mayo ha sido confirmada por RRHH.', 'icono' => 'check_circle', 'color' => 'emerald']
-                    ] as $notif)
+                    @forelse($notificaciones as $notif)
                     <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
                         <div class="flex items-start gap-3">
                             <div class="w-9 h-9 rounded-full bg-{{ $notif['color'] ?? 'orange' }}-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -286,7 +304,7 @@
                         </div>
                     </div>
                     @empty
-                    <div class="flex flex-col items-center justify-center py-12 text-center px-6">
+                    <div class="flex flex-col items-center justify-center py-10 text-center px-6">
                         <span class="material-symbols-outlined text-4xl text-gray-300 mb-3">notifications_off</span>
                         <p class="text-sm font-medium text-gray-400">Sin notificaciones</p>
                     </div>
@@ -296,62 +314,63 @@
         </div>
 
         <!-- Bottom Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-            <!-- Cambio de Turno CTA -->
-            <div class="bg-surface-container rounded-2xl p-8 border border-outline-variant/10 flex items-start gap-6">
-                <div class="w-14 h-14 bg-primary-fixed rounded-2xl flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-primary text-2xl">swap_horiz</span>
+            <a href="{{ route('empleado.turnos') }}" class="bg-surface-container rounded-2xl p-6 border border-outline-variant/10 flex items-start gap-5 hover:shadow-md transition-all group">
+                <div class="w-12 h-12 bg-primary-fixed rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-primary text-xl">swap_horiz</span>
                 </div>
                 <div>
-                    <h4 class="font-bold text-on-surface text-body-md mb-1">¿Necesitas cambiar un turno?</h4>
-                    <p class="text-sm text-on-surface-variant leading-relaxed">Solicita intercambios con tus compañeros directamente desde la plataforma de gestión.</p>
+                    <h4 class="font-bold text-on-surface text-sm mb-1">Ver y gestionar mis turnos</h4>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Revisa tu cronograma, horas y estadísticas de asistencia.</p>
                 </div>
-            </div>
+            </a>
 
-            <!-- Empleado del Mes -->
-            <div class="bg-gradient-to-br from-primary-container to-primary rounded-2xl p-8 text-white flex items-start gap-6 shadow-lg shadow-primary-container/20">
-                <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1">emoji_events</span>
+            <a href="{{ route('empleado.pagos') }}" class="bg-gradient-to-br from-primary-container to-primary rounded-2xl p-6 text-white flex items-start gap-5 shadow-lg shadow-primary-container/20 hover:opacity-95 transition-all group">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-white text-xl" style="font-variation-settings:'FILL' 1">payments</span>
                 </div>
                 <div>
-                    <h4 class="font-bold text-body-md mb-1">Empleado del Mes</h4>
-                    <p class="text-sm text-white/80 leading-relaxed mb-3">¡Felicidades! Has sido nominado por tu excelente desempeño en la estación de postres.</p>
-                    <a href="#" class="inline-block bg-white/20 backdrop-blur-sm text-white font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-lg hover:bg-white/30 transition-all">Ver Reconocimientos</a>
+                    <h4 class="font-bold text-sm mb-1">Consultar mis pagos</h4>
+                    <p class="text-sm text-white/80 leading-relaxed">Salario, historial de recibos y acumulado anual.</p>
                 </div>
-            </div>
+            </a>
         </div>
 
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-auto border-t border-outline-variant/30 py-8 px-6 bg-surface-container-low">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-body-sm text-on-surface-variant">© 2024 GoToEat Platform. Todos los derechos reservados.</p>
-            <p class="text-body-sm text-on-surface-variant">Versión del Panel: 4.2.1-stable</p>
+    <footer class="mt-auto border-t border-outline-variant/30 py-6 px-6 bg-surface-container-low">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+            <p class="text-xs text-on-surface-variant">© {{ date('Y') }} GoToEat. Todos los derechos reservados.</p>
+            <p class="text-xs text-on-surface-variant">Panel del Empleado</p>
         </div>
     </footer>
 </main>
 
 <!-- Bottom NavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 px-4 py-2 flex justify-around items-center z-[60]">
-    <a class="flex flex-col items-center gap-1 p-2 text-primary font-bold" href="{{ route('empleado.dashboard') }}">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 px-2 py-2 flex justify-around items-center z-[60]">
+    <a class="flex flex-col items-center gap-0.5 p-2 text-primary font-bold" href="{{ route('empleado.dashboard') }}">
+        <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1">dashboard</span>
         <span class="text-[10px]">Inicio</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.turnos') }}">
-        <span class="material-symbols-outlined">schedule</span>
+    <a class="flex flex-col items-center gap-0.5 p-2 text-on-surface-variant" href="{{ route('empleado.turnos') }}">
+        <span class="material-symbols-outlined text-[22px]">schedule</span>
         <span class="text-[10px]">Turnos</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.pagos') }}">
-        <span class="material-symbols-outlined">payments</span>
+    <a class="flex flex-col items-center gap-0.5 p-2 text-on-surface-variant" href="{{ route('empleado.pagos') }}">
+        <span class="material-symbols-outlined text-[22px]">payments</span>
         <span class="text-[10px]">Pagos</span>
     </a>
-    <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.perfil') }}">
-        <span class="material-symbols-outlined">person</span>
+    <a class="flex flex-col items-center gap-0.5 p-2 text-on-surface-variant" href="{{ route('empleado.perfil') }}">
+        <span class="material-symbols-outlined text-[22px]">person</span>
         <span class="text-[10px]">Perfil</span>
     </a>
+    <button onclick="document.getElementById('logout-form').submit()" class="flex flex-col items-center gap-0.5 p-2 text-error">
+        <span class="material-symbols-outlined text-[22px]">logout</span>
+        <span class="text-[10px]">Salir</span>
+    </button>
 </nav>
 
-<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
-</body></html>
+<form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+</body>
+</html>

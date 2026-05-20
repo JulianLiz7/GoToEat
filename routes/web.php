@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\AdminTablesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\Cliente\ClienteController;
 use App\Domains\Reservations\Models\Reservation;
 use App\Http\Controllers\OnboardingController;
@@ -128,10 +129,11 @@ Route::middleware('auth')->group(function () {
 
 // ── Panel de Empleado (Chef, Cajero, Mesero) ──────────────────────
 Route::middleware(['auth'])->prefix('empleado')->name('empleado.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'empleadoView'])->name('dashboard');
-    Route::get('/turnos', fn () => view('empleado.turnos'))->name('turnos');
-    Route::get('/pagos', fn () => view('empleado.pagos'))->name('pagos');
-    Route::get('/perfil', fn () => view('empleado.perfil'))->name('perfil');
+    Route::get('/dashboard', [EmpleadoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/turnos',    [EmpleadoController::class, 'turnos'])->name('turnos');
+    Route::get('/pagos',     [EmpleadoController::class, 'pagos'])->name('pagos');
+    Route::get('/perfil',    [EmpleadoController::class, 'perfil'])->name('perfil');
+    Route::patch('/perfil',  [EmpleadoController::class, 'perfilUpdate'])->name('perfil.update');
 });
 
 require __DIR__.'/auth.php';
