@@ -97,9 +97,10 @@
 <div class="space-y-1 relative">
 <label class="font-body text-label-caps text-on-surface-variant" for="password">Contraseña</label>
 <div class="relative">
-<input name="password" class="w-full px-6 py-4 bg-white border @error('password') border-error bg-error-container/20 @else border-slate-200 @enderror rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all placeholder:text-slate-400" id="password" placeholder="••••••••" type="password" required autocomplete="new-password"/>
-<button class="absolute right-md top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" type="button" onclick="const p = document.getElementById('password'); p.type = p.type === 'password' ? 'text' : 'password';">
-<span class="material-symbols-outlined">visibility</span>
+<input name="password" class="w-full px-6 py-4 pr-14 bg-white border @error('password') border-error bg-error-container/20 @else border-slate-200 @enderror rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all placeholder:text-slate-400" id="password" placeholder="••••••••" type="password" required autocomplete="new-password"/>
+<button type="button" tabindex="-1" onclick="togglePwd('password', this)"
+        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+    <span class="material-symbols-outlined text-[22px]">visibility</span>
 </button>
 </div>
 </div>
@@ -107,9 +108,10 @@
 <div class="space-y-1 relative">
 <label class="font-body text-label-caps text-on-surface-variant" for="password_confirmation">Confirmar contraseña</label>
 <div class="relative">
-<input name="password_confirmation" class="w-full px-6 py-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all placeholder:text-slate-400" id="password_confirmation" placeholder="••••••••" type="password" required autocomplete="new-password"/>
-<button class="absolute right-md top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" type="button" onclick="const p = document.getElementById('password_confirmation'); p.type = p.type === 'password' ? 'text' : 'password';">
-<span class="material-symbols-outlined">visibility</span>
+<input name="password_confirmation" class="w-full px-6 py-4 pr-14 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all placeholder:text-slate-400" id="password_confirmation" placeholder="••••••••" type="password" required autocomplete="new-password"/>
+<button type="button" tabindex="-1" onclick="togglePwd('password_confirmation', this)"
+        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+    <span class="material-symbols-outlined text-[22px]">visibility</span>
 </button>
 </div>
 </div>
@@ -212,4 +214,12 @@
 </div>
 </div>
 </footer>
+<script>
+function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const hidden = inp.type === 'password';
+    inp.type = hidden ? 'text' : 'password';
+    btn.querySelector('span').textContent = hidden ? 'visibility_off' : 'visibility';
+}
+</script>
 </body></html>

@@ -400,19 +400,37 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Contraseña actual</label>
-                                <input name="current_password" type="password" placeholder="••••••••"
-                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                <div class="relative">
+                                    <input id="s_current_password" name="current_password" type="password" placeholder="••••••••"
+                                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                    <button type="button" tabindex="-1" onclick="togglePwd('s_current_password', this)"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
+                                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                    </button>
+                                </div>
                                 @error('current_password')<p class="text-xs text-error mt-1">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Nueva contraseña</label>
-                                <input name="password" type="password" placeholder="Mínimo 8 caracteres"
-                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                <div class="relative">
+                                    <input id="s_password" name="password" type="password" placeholder="Mínimo 8 caracteres"
+                                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                    <button type="button" tabindex="-1" onclick="togglePwd('s_password', this)"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
+                                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Confirmar nueva contraseña</label>
-                                <input name="password_confirmation" type="password" placeholder="••••••••"
-                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                <div class="relative">
+                                    <input id="s_password_confirmation" name="password_confirmation" type="password" placeholder="••••••••"
+                                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+                                    <button type="button" tabindex="-1" onclick="togglePwd('s_password_confirmation', this)"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
+                                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -503,5 +521,16 @@
     </div>
 
 </form>
+
+@push('scripts')
+<script>
+function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const hidden = inp.type === 'password';
+    inp.type = hidden ? 'text' : 'password';
+    btn.querySelector('span').textContent = hidden ? 'visibility_off' : 'visibility';
+}
+</script>
+@endpush
 
 </x-admin-layout>

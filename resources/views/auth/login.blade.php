@@ -94,8 +94,12 @@
                             autocomplete="current-password"
                             required
                             placeholder="••••••••"
-                            class="w-full pl-[48px] pr-4 py-6 bg-surface-bright border @error('password') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
+                            class="w-full pl-[48px] pr-12 py-6 bg-surface-bright border @error('password') border-error @else border-outline-variant @enderror rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all outline-none text-body-md"
                         />
+                        <button type="button" tabindex="-1" onclick="togglePwd('password', this)"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none">
+                            <span class="material-symbols-outlined text-[22px]">visibility</span>
+                        </button>
                     </div>
                 </div>
 
@@ -161,5 +165,13 @@
         </div>
     </div>
 </main>
+<script>
+function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const hidden = inp.type === 'password';
+    inp.type = hidden ? 'text' : 'password';
+    btn.querySelector('span').textContent = hidden ? 'visibility_off' : 'visibility';
+}
+</script>
 </body>
 </html>
