@@ -1,10 +1,10 @@
 <x-admin-layout :restaurant="$restaurant" :stats="$stats">
-<x-slot name="title">Dashboard Operativo</x-slot>
+<x-slot name="title">Panel Operativo</x-slot>
 
 {{-- ── Encabezado de página ────────────────────────────────────── --}}
 <div class="mb-8 flex items-center justify-between gap-4 flex-wrap">
     <div>
-        <h2 class="text-3xl font-bold font-heading text-on-background">Dashboard Operativo</h2>
+        <h2 class="text-3xl font-bold font-heading text-on-background">Panel Operativo</h2>
         <p class="text-gray-500 mt-1">Resumen de rendimiento en tiempo real para <span class="font-semibold text-orange-500">{{ $restaurant->name }}</span>.</p>
     </div>
     <div class="flex items-center gap-2 shrink-0">

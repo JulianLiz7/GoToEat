@@ -1,5 +1,5 @@
 <x-admin-layout :restaurant="$restaurant">
-<x-slot name="title">AI Assistant</x-slot>
+<x-slot name="title">Asistente IA</x-slot>
 
 {{-- Layout de dos columnas: chat (izq) + contexto (der) --}}
 <div class="flex gap-6 h-[calc(100vh-8rem)]">
@@ -14,10 +14,10 @@
                     <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1">smart_toy</span>
                 </div>
                 <div>
-                    <h2 class="font-heading font-bold text-lg text-on-surface">GoToEat AI Assistant</h2>
+                    <h2 class="font-heading font-bold text-lg text-on-surface">Asistente IA GoToEat</h2>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-xs text-gray-500">Live &amp; connected to your data</span>
+                        <span class="text-xs text-gray-500">Conectado en tiempo real</span>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                             Soy tu asistente de IA. Puedo analizar tus ventas, inventario y propinas.
                             ¿En qué te ayudo hoy?</p>
                         </div>
-                        <span class="text-[10px] text-gray-400 font-medium px-1 uppercase tracking-wider">AI ASSISTANT • Ahora</span>
+                        <span class="text-[10px] text-gray-400 font-medium px-1 uppercase tracking-wider">ASISTENTE IA • Ahora</span>
                     </div>
                 </div>
 
@@ -65,7 +65,7 @@
                             </div>
                             @endforeach
                         </div>
-                        <span class="text-[10px] text-gray-400 font-medium px-1 uppercase tracking-wider">AI ASSISTANT • Alerta automática</span>
+                        <span class="text-[10px] text-gray-400 font-medium px-1 uppercase tracking-wider">ASISTENTE IA • Alerta automática</span>
                     </div>
                 </div>
                 @endif
@@ -116,7 +116,7 @@
                         </div>
                         @endif
                         <span class="text-[10px] text-gray-400 font-medium px-1 uppercase tracking-wider">
-                            AI ASSISTANT • {{ $conv->created_at->format('H:i') }}
+                            ASISTENTE IA • {{ $conv->created_at->format('H:i') }}
                         </span>
                     </div>
                 </div>

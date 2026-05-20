@@ -151,7 +151,7 @@
 </div>
 <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
 <span class="block font-bold text-primary-container text-lg">4.9/5</span>
-<span class="text-[10px] text-slate-400 font-bold uppercase">Rating</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase">Calificación</span>
 </div>
 </div>
 </div>
@@ -181,30 +181,30 @@
 <div>
 <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Producto</h4>
 <ul class="space-y-4 text-slate-400 font-body text-body-sm">
-<li><a class="hover:text-orange-400 transition-colors" href="#">Inventory</a></li>
-<li><a class="hover:text-orange-400 transition-colors" href="#">Menu</a></li>
-<li><a class="hover:text-orange-400 transition-colors" href="#">Staff</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Inventario</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Menú</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Personal</a></li>
 </ul>
 </div>
 <div>
 <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Compañía</h4>
 <ul class="space-y-4 text-slate-400 font-body text-body-sm">
-<li><a class="hover:text-orange-400 transition-colors" href="#">About</a></li>
-<li><a class="hover:text-orange-400 transition-colors" href="#">Careers</a></li>
-<li><a class="hover:text-orange-400 transition-colors" href="#">Contact</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Nosotros</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Trabaja con nosotros</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Contacto</a></li>
 </ul>
 </div>
 <div>
 <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Legal</h4>
 <ul class="space-y-4 text-slate-400 font-body text-body-sm">
-<li><a class="hover:text-orange-400 transition-colors" href="#">Privacy</a></li>
-<li><a class="hover:text-orange-400 transition-colors" href="#">Terms</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Privacidad</a></li>
+<li><a class="hover:text-orange-400 transition-colors" href="#">Términos</a></li>
 <li><a class="hover:text-orange-400 transition-colors" href="#">Cookies</a></li>
 </ul>
 </div>
 </div>
 <div class="mt-16 pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
-<p class="text-slate-500 font-body text-body-sm">© 2024 GoToEat. All rights reserved. Built for modern hospitality.</p>
+<p class="text-slate-500 font-body text-body-sm">© {{ date('Y') }} GoToEat. Todos los derechos reservados.</p>
 <div class="flex gap-6">
 <a class="text-slate-500 hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
 <a class="text-slate-500 hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>

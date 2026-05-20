@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<title>Dashboard Operativo — {{ $restaurant->name }}</title>
+<title>Panel Operativo — {{ $restaurant->name }}</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
     body { padding: 32px; font-size: 13px; color: #111; background: #fff; }
@@ -53,7 +53,7 @@
     <div>
         <h1>GoToEat</h1>
         <p style="font-size:14px;font-weight:700;margin-top:2px">{{ $restaurant->name }}</p>
-        <p style="font-size:11px;color:#9ca3af;margin-top:2px">Dashboard Operativo — Reporte Mensual</p>
+        <p style="font-size:11px;color:#9ca3af;margin-top:2px">Panel Operativo — Reporte Mensual</p>
     </div>
     <div class="meta">
         <p><strong>Período:</strong> {{ now()->locale('es')->isoFormat('MMMM YYYY') }}</p>

@@ -149,7 +149,7 @@
                                 {{ $plato->available ? 'true' : 'false' }},
                                 {{ $plato->is_featured ? 'true' : 'false' }}
                             )"
-                            class="p-1.5 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                            class="p-1.5 text-orange-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                     </button>
 

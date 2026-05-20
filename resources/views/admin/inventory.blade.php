@@ -260,7 +260,7 @@
                                         {{ $item->cost_price ?? 0 }},
                                         '{{ $item->status }}'
                                     )"
-                                    class="p-2 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                                    class="p-2 text-orange-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all">
                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                             </button>
 

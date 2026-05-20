@@ -10,7 +10,7 @@
 
 {{-- KPIs ──────────────────────────────────────────────── --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white p-5 rounded-2xl shadow-sm border-b-2 border-amber-400">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border-b-2 border-orange-400">
         <p class="text-xs text-gray-400 uppercase font-bold tracking-wide mb-1">Hoy</p>
         <p class="text-2xl font-black text-on-surface">{{ $todayReservations }}</p>
         <p class="text-xs text-gray-400 mt-1">reservas</p>
