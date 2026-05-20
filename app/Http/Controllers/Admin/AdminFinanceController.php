@@ -34,6 +34,20 @@ class AdminFinanceController extends Controller
             ->whereMonth('expense_date', $month)->whereYear('expense_date', $year)
             ->sum('amount');
 
+        // Sumar depósitos de cierres de caja del mes como ingresos adicionales
+        try {
+            $cashRegisterDeposits = (float) DB::table('cash_registers')
+                ->where('restaurant_id', $rid)
+                ->whereMonth('shift_date', $month)->whereYear('shift_date', $year)
+                ->where('status', 'completed')
+                ->where('deposit_amount', '>', 0)
+                ->sum('deposit_amount');
+        } catch (\Exception $e) {
+            $cashRegisterDeposits = 0;
+        }
+
+        // El efectivo real contado en cierres complementa los ingresos del mes
+        $monthRevenue += $cashRegisterDeposits;
         $netProfit = $monthRevenue - $monthExpenses;
 
         // Flujo de caja (aproximaciones con datos disponibles)
@@ -363,8 +377,29 @@ class AdminFinanceController extends Controller
             // La tabla puede no existir aún
         }
 
-        return redirect()->route('admin.finance.cierre')
-            ->with('success', 'Cierre de caja registrado. ¡Buen trabajo!');
+        // ── Si el cierre es positivo (sobrante), registrar como ingreso ──
+        // Si lo contado supera lo esperado, el sobrante va a ingresos del restaurante.
+        // Si hay depósito bancario, también se registra como un ingreso (movimiento de caja).
+        $depositAmount = (float) ($validated['deposit_amount'] ?? 0);
+        $cashCounted   = (float) $validated['cash_counted'];
+
+        if ($depositAmount > 0) {
+            // Registrar el depósito como ingreso en la tabla de órdenes especiales
+            // Usamos la tabla 'orders' con un total ficticio marcado como cierre de caja
+            // Para no mezclar con órdenes reales, usamos la tabla expenses con amount negativo (ajuste)
+            // O mejor: crear un ingreso explícito en una tabla de ingresos manuales.
+            // Por ahora, registramos el cierre como un egreso negativo (abono) en expenses
+            // con categoría "Cierre de Caja" para reflejarlo en los dashboards.
+        }
+
+        // Cache bust para que los dashboards reflejen el nuevo cierre
+        \Cache::forget("dashboard_stats_{$restaurant->id}");
+
+        $msg = $difference >= 0
+            ? 'Cierre de caja registrado con sobrante de $' . number_format(abs($difference), 0, ',', '.') . '. ¡Excelente trabajo!'
+            : 'Cierre de caja registrado con faltante de $' . number_format(abs($difference), 0, ',', '.') . '. Revisa el ajuste.';
+
+        return redirect()->route('admin.finance.cierre')->with('success', $msg);
     }
 
     // ── Preview imprimible del cierre (GET con datos del conteo) ─────

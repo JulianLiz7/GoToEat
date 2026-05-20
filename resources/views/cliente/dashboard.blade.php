@@ -344,11 +344,11 @@
 
                 {{-- Acciones --}}
                 <div class="px-4 pb-4 flex gap-2">
-                    <button onclick="verMenu({{ $rest->id }}, '{{ addslashes($rest->name) }}', '{{ $primary }}')"
-                            class="flex-1 py-2 rounded-xl border font-semibold text-xs transition-all hover:opacity-80 active:scale-[0.97]"
-                            style="border-color:{{ $primary }};color:{{ $primary }}">
+                    <a href="{{ route('restaurante.show', $rest) }}"
+                       class="flex-1 py-2 rounded-xl border font-semibold text-xs transition-all hover:opacity-80 active:scale-[0.97] text-center"
+                       style="border-color:{{ $primary }};color:{{ $primary }}">
                         Ver Menú
-                    </button>
+                    </a>
                     <button onclick="abrirReservaConRestaurante({{ $rest->id }}, '{{ addslashes($rest->name) }}')"
                             class="flex-1 py-2 rounded-xl text-white font-bold text-xs transition-all hover:opacity-90 active:scale-[0.97]"
                             style="background:{{ $primary }}">

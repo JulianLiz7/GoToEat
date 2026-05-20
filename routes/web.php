@@ -3,6 +3,7 @@
 use App\Domains\Auth\Controllers\Web\ProfileController;
 use App\Http\Controllers\Admin\AdminAIController;
 use App\Http\Controllers\Admin\AdminFinanceController;
+use App\Http\Controllers\Admin\AdminReservationsController;
 use App\Http\Controllers\Admin\AdminRestaurantSettingsController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminMenuController;
@@ -73,6 +74,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/finance/ajustes', [AdminFinanceController::class, 'ajustes'])->name('finance.ajustes');
     Route::get('/finance/export/csv', [AdminFinanceController::class, 'exportCsv'])->name('finance.export.csv');
     Route::get('/finance/export/pdf', [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');
+    // ── Reservas del restaurante (admin) ─────────────────────────
+    Route::get('/reservations',                    [AdminReservationsController::class, 'index'])->name('reservations');
+    Route::patch('/reservations/{reservation}/status', [AdminReservationsController::class, 'updateStatus'])->name('reservations.status');
+    Route::delete('/reservations/{reservation}',   [AdminReservationsController::class, 'destroy'])->name('reservations.destroy');
     Route::get('/export/dashboard/csv', [DashboardController::class, 'exportCsv'])->name('export.csv');
     Route::get('/export/dashboard/pdf', [DashboardController::class, 'exportPdf'])->name('export.pdf');
     Route::get('/ai', [AdminAIController::class, 'index'])->name('ai');
@@ -102,6 +107,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/perfil',               [ClienteController::class, 'updatePerfil'])->name('perfil.update');
     Route::post('/perfil/password',      [ClienteController::class, 'updatePassword'])->name('perfil.password');
 
+    // Página del restaurante (menú + carrito + reseñas)
+    Route::get('/restaurante/{restaurant}',         [ClienteController::class, 'restaurantePage'])->name('restaurante.show');
     // Menú JSON para modal de reserva
     Route::get('/restaurante/{restaurant}/menu',    [ClienteController::class, 'menuRestaurant'])->name('restaurante.menu');
     // Reseñas

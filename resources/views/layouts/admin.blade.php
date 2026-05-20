@@ -32,8 +32,9 @@
             ['route' => 'admin.inventory', 'icon' => 'inventory_2',      'label' => 'Inventario'],
             ['route' => 'admin.menu',      'icon' => 'restaurant_menu',  'label' => 'Menú'],
             ['route' => 'admin.staff',     'icon' => 'group',            'label' => 'Personal'],
-            ['route' => 'admin.tables',    'icon' => 'table_restaurant', 'label' => 'Mesas'],
-            ['route' => 'admin.finance',   'icon' => 'bar_chart',        'label' => 'Finanzas'],
+            ['route' => 'admin.tables',       'icon' => 'table_restaurant', 'label' => 'Mesas'],
+            ['route' => 'admin.reservations', 'icon' => 'event_seat',       'label' => 'Reservas'],
+            ['route' => 'admin.finance',      'icon' => 'bar_chart',        'label' => 'Finanzas'],
             ['route' => 'admin.ai',        'icon' => 'smart_toy',        'label' => 'AI Assistant'],
         ];
         @endphp

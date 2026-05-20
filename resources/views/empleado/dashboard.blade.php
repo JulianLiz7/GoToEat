@@ -134,6 +134,88 @@
             </div>
         </div>
 
+        {{-- ── Reservas del día (mesero) ──────────────────────────── --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 1">event_seat</span>
+                    <h3 class="font-bold text-on-surface">Reservas del Día</h3>
+                </div>
+                <span class="text-xs font-bold text-primary-container bg-primary-container/10 px-2.5 py-1 rounded-full">
+                    {{ ($todayReservations ?? collect())->count() }} reservas
+                </span>
+            </div>
+            @if(($todayReservations ?? collect())->isEmpty())
+            <div class="px-6 py-8 text-center text-gray-400 text-sm">
+                <span class="material-symbols-outlined text-3xl text-gray-200 block mb-2">calendar_today</span>
+                Sin reservas próximas asignadas.
+            </div>
+            @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 text-xs text-gray-400 uppercase tracking-wide">
+                        <tr>
+                            <th class="px-4 py-3">Cliente</th>
+                            <th class="px-4 py-3">Fecha & Hora</th>
+                            <th class="px-4 py-3 text-center">Pax</th>
+                            <th class="px-4 py-3">Pre-orden</th>
+                            <th class="px-4 py-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @foreach($todayReservations ?? [] as $res)
+                        @php
+                            $items   = $res->selected_items ?? [];
+                            $stColor = match($res->status) {
+                                'confirmed' => 'bg-emerald-100 text-emerald-700',
+                                'pending'   => 'bg-amber-100 text-amber-700',
+                                default     => 'bg-gray-100 text-gray-500',
+                            };
+                        @endphp
+                        <tr class="hover:bg-gray-50/50 transition-colors">
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-on-surface">{{ $res->user->name ?? '—' }}</p>
+                                @if($res->user->phone ?? null)
+                                <p class="text-xs text-gray-400">{{ $res->user->phone }}</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold">{{ $res->reservation_date->locale('es')->isoFormat('ddd D MMM') }}</p>
+                                <p class="text-xs text-gray-400">{{ substr($res->reservation_time, 0, 5) }}</p>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold">{{ $res->party_size }}</td>
+                            <td class="px-4 py-3">
+                                @if(count($items) > 0)
+                                <div class="space-y-0.5">
+                                    @foreach(array_slice($items, 0, 2) as $item)
+                                    <p class="text-xs">{{ $item['name'] ?? '' }} ×{{ $item['qty'] ?? 1 }}</p>
+                                    @endforeach
+                                    @if(count($items) > 2)
+                                    <p class="text-[11px] text-gray-400">+{{ count($items)-2 }} más</p>
+                                    @endif
+                                    <p class="text-xs font-bold text-primary-container mt-0.5">
+                                        ${{ number_format(collect($items)->sum(fn($i) => ($i['price']??0)*($i['qty']??1)), 0, ',', '.') }}
+                                    </p>
+                                </div>
+                                @elseif($res->notes)
+                                <p class="text-xs text-gray-400 italic">{{ Str::limit($res->notes, 40) }}</p>
+                                @else
+                                <span class="text-xs text-gray-300">Sin pre-orden</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $stColor }}">
+                                    {{ $res->statusLabel() }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+
         <!-- Two Column: Turnos + Notificaciones -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 

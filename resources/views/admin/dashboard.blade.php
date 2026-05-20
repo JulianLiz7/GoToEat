@@ -91,6 +91,22 @@
         <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-1">Propinas del mes</p>
         <p class="text-2xl font-bold font-heading text-purple-600">${{ number_format($stats['monthTips'], 0, ',', '.') }}</p>
     </div>
+
+    {{-- Reservas de hoy --}}
+    <div class="bg-white p-6 rounded-2xl shadow-sm shadow-gray-200/50 border-b-2 border-transparent hover:border-sky-500 hover:shadow-md transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-sky-50 text-sky-500 rounded-xl">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">event_seat</span>
+            </div>
+            <a href="{{ route('admin.reservations', ['status' => 'today']) }}"
+               class="text-xs font-bold bg-sky-50 text-sky-500 px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-sky-100 transition-colors">
+                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                Ver todas
+            </a>
+        </div>
+        <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-1">Reservas hoy</p>
+        <p class="text-2xl font-bold font-heading text-sky-600">{{ $stats['todayReservationsCount'] ?? 0 }}</p>
+    </div>
 </div>
 
 {{-- ── Gráficas ─────────────────────────────────────────────────── --}}

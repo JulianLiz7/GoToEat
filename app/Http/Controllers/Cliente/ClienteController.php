@@ -176,6 +176,40 @@ class ClienteController extends Controller
         return back()->with('success_password', 'Contraseña actualizada correctamente.');
     }
 
+    // ── Página del restaurante con menú + carrito ────────────────────
+    public function restaurantePage(Restaurant $restaurant)
+    {
+        abort_if($restaurant->status !== 'active', 404);
+
+        $menuByCategory = $restaurant->menuItems()
+            ->where('available', true)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category');
+
+        $featured = $restaurant->menuItems()
+            ->where('available', true)
+            ->where('is_featured', true)
+            ->take(6)
+            ->get();
+
+        $reviews = RestaurantReview::with('user')
+            ->where('restaurant_id', $restaurant->id)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $userReview = auth()->check()
+            ? RestaurantReview::where('user_id', auth()->id())
+                ->where('restaurant_id', $restaurant->id)->first()
+            : null;
+
+        return view('cliente.restaurante', compact(
+            'restaurant', 'menuByCategory', 'featured', 'reviews', 'userReview'
+        ));
+    }
+
     // ── Reseñas ──────────────────────────────────────────────────────
     public function storeReview(Request $request, Restaurant $restaurant)
     {
@@ -225,7 +259,7 @@ class ClienteController extends Controller
         $menu = $restaurant->menuItems()
             ->where('available', true)
             ->orderBy('category')
-            ->get(['id', 'name', 'description', 'price', 'category', 'image_path']);
+            ->get(['id', 'name', 'description', 'price', 'category', 'image', 'is_featured']);
 
         return response()->json([
             'restaurant' => $restaurant->only(['id', 'name', 'primary_color', 'logo_path']),

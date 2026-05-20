@@ -84,10 +84,22 @@ class DashboardController extends Controller
             ];
         }
 
+        // ── Reservas asignadas a este mesero (hoy y próximas) ────────
+        $todayReservations = \App\Domains\Reservations\Models\Reservation::with(['user', 'table'])
+            ->where('restaurant_id', $employee->restaurant_id)
+            ->where(fn ($q) => $q->where('waiter_id', $employee->id)
+                ->orWhereNull('waiter_id'))
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('reservation_date', '>=', now()->toDateString())
+            ->orderBy('reservation_date')
+            ->orderBy('reservation_time')
+            ->take(8)
+            ->get();
+
         return view('empleado.dashboard', compact(
             'cargo', 'badgeId', 'fechaIngreso', 'salarioBase',
             'horasHoy', 'horasTarget', 'horasPct', 'horasExtrasSemana', 'horasSemana',
-            'turnos', 'notificaciones', 'employee'
+            'turnos', 'notificaciones', 'employee', 'todayReservations'
         ));
     }
 
@@ -299,7 +311,30 @@ class DashboardController extends Controller
         $stats['activeStaff'] = $stats['staffCount'];
         $stats['shiftStaff'] = $stats['staffCount'];
         $stats['totalMenuItems'] = $stats['menuCount'];
+
+        // Sumar depósitos de cierres del mes a ingresos (cierre de caja → ingreso real)
+        try {
+            $cashRegisterDeposits = (float) \Illuminate\Support\Facades\DB::table('cash_registers')
+                ->where('restaurant_id', $rid)
+                ->whereMonth('shift_date', now()->month)
+                ->whereYear('shift_date', now()->year)
+                ->where('status', 'completed')
+                ->where('deposit_amount', '>', 0)
+                ->sum('deposit_amount');
+            $stats['monthRevenue'] = (float)($stats['monthRevenue'] ?? 0) + $cashRegisterDeposits;
+        } catch (\Exception $e) {}
+
         $stats['netProfit'] = $stats['monthRevenue'] - $stats['monthExpenses'];
+
+        // Reservas del día para el dashboard admin
+        try {
+            $stats['todayReservationsCount'] = \App\Domains\Reservations\Models\Reservation::where('restaurant_id', $rid)
+                ->whereDate('reservation_date', now()->toDateString())
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->count();
+        } catch (\Exception $e) {
+            $stats['todayReservationsCount'] = 0;
+        }
 
         return view('admin.dashboard', compact('restaurant', 'stats'));
     }
