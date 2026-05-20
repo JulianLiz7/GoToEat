@@ -63,6 +63,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/tables/{id}/liberar', [AdminTablesController::class, 'liberar'])->name('tables.liberar');
     Route::patch('/tables/{id}/estado', [AdminTablesController::class, 'updateStatus'])->name('tables.status');
     Route::patch('/tables/{id}/orden-estado', [AdminTablesController::class, 'updateOrderStatus'])->name('tables.order.status');
+    Route::post('/tables/{id}/assign-reservation', [AdminTablesController::class, 'assignReservation'])->name('tables.assign.reservation');
     // ── Finanzas (sub-panel propio) ───────────────────────────────
     Route::get('/finance', [AdminFinanceController::class, 'resumen'])->name('finance');
     Route::get('/finance/ingresos', [AdminFinanceController::class, 'ingresos'])->name('finance.ingresos');
@@ -74,8 +75,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/finance/ajustes', [AdminFinanceController::class, 'ajustes'])->name('finance.ajustes');
     Route::get('/finance/export/csv', [AdminFinanceController::class, 'exportCsv'])->name('finance.export.csv');
     Route::get('/finance/export/pdf', [AdminFinanceController::class, 'exportPdf'])->name('finance.export.pdf');
-    // ── Reservas del restaurante (admin) ─────────────────────────
-    Route::get('/reservations',                    [AdminReservationsController::class, 'index'])->name('reservations');
+    // ── Reservas (redirige al panel unificado de Mesas & Reservas) ──
+    Route::get('/reservations', fn() => redirect()->route('admin.tables', ['rstatus' => 'upcoming']))->name('reservations');
     Route::patch('/reservations/{reservation}/status', [AdminReservationsController::class, 'updateStatus'])->name('reservations.status');
     Route::delete('/reservations/{reservation}',   [AdminReservationsController::class, 'destroy'])->name('reservations.destroy');
     Route::get('/export/dashboard/csv', [DashboardController::class, 'exportCsv'])->name('export.csv');
@@ -100,6 +101,7 @@ Route::middleware('auth')->group(function () {
     // Reservas
     Route::get('/reservas',                                [ClienteController::class, 'reservas'])->name('reservas');
     Route::post('/reservas',                               [ClienteController::class, 'storeReservation'])->name('reservas.store');
+    Route::get('/reservas/{reservation}',                  [ClienteController::class, 'showReservation'])->name('reservas.show');
     Route::patch('/reservas/{reservation}/cancelar',       [ClienteController::class, 'cancelReservation'])->name('reservas.cancel');
 
     // Perfil
@@ -114,6 +116,9 @@ Route::middleware('auth')->group(function () {
     // Reseñas
     Route::post('/restaurante/{restaurant}/resena', [ClienteController::class, 'storeReview'])->name('restaurante.review');
     Route::get('/restaurante/{restaurant}/resenas', [ClienteController::class, 'reviews'])->name('restaurante.reviews');
+
+    // QR verification (accessible to admin & mesero too)
+    Route::get('/verificar/{token}', [ClienteController::class, 'verificarQr'])->name('reserva.verificar');
 
     // Breeze profile (admin use)
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');

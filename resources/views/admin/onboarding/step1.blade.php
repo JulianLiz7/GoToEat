@@ -117,7 +117,7 @@
                                 <select name="category" required
                                         class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container outline-none transition-all text-on-surface appearance-none bg-white">
                                     <option value="">Selecciona…</option>
-                                    @foreach(['Fine Dining','Casual Dining','Fast Food','Café / Bakery','Bar / Pub','Food Truck','Buffet'] as $cat)
+                                    @foreach(['Alta Cocina','Restaurante Casual','Comida Rápida','Café / Panadería','Bar / Pub','Food Truck','Buffet','Asadero','Marisquería','Pizzería'] as $cat)
                                     <option value="{{ $cat }}" {{ old('category', $data['category'] ?? '') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                                     @endforeach
                                 </select>

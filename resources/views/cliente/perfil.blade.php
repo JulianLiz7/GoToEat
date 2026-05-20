@@ -9,73 +9,80 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        body { background: #f0f2f7; }
+        .sidebar { background: linear-gradient(180deg, #111827 0%, #1a2332 100%); }
+        .sidebar-item { color: rgba(255,255,255,0.6); transition: all .2s; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .sidebar-item.active { background: rgba(249,115,22,0.15); color: #f97316; font-weight: 600; }
     </style>
 </head>
-<body class="bg-background text-on-surface antialiased font-body-md">
+<body class="font-body antialiased">
 
-<aside class="hidden md:flex flex-col h-screen w-64 bg-surface-container-low border-r border-outline-variant/20 fixed left-0 top-0 z-50 shadow-md">
-    <div class="px-6 py-6 border-b border-outline-variant/20">
+<aside class="sidebar hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 z-50 shadow-2xl">
+    <div class="px-6 pt-8 pb-6">
         <a href="{{ route('explorar') }}" class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center shadow-md">
-                <span class="material-symbols-outlined text-white text-[22px]" style="font-variation-settings:'FILL' 1">restaurant</span>
+            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-orange-900/30">
+                <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings:'FILL' 1">restaurant</span>
             </div>
             <div>
-                <p class="font-black text-xl text-primary leading-none">GoToEat</p>
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Gastronomía</p>
+                <p class="font-black text-xl text-white tracking-tight leading-none">GoTo<span class="text-primary">Eat</span></p>
+                <p class="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">Gastronomía</p>
             </div>
         </a>
     </div>
-    <nav class="flex-1 px-3 py-4 space-y-1">
-        @foreach([['explorar','explore','Explorar'],['reservas','calendar_month','Mis Reservas'],['perfil','person','Mi Perfil']] as [$r,$i,$l])
-        @php $a = request()->routeIs($r); @endphp
-        <a href="{{ route($r) }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $a ? 'bg-primary-container text-white font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' }}">
-            <span class="material-symbols-outlined text-[22px]" @if($a) style="font-variation-settings:'FILL' 1" @endif>{{ $i }}</span>
-            <span class="text-sm">{{ $l }}</span>
+    <nav class="flex-1 px-3 space-y-1">
+        <a href="{{ route('explorar') }}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl">
+            <span class="material-symbols-outlined text-[20px]">explore</span>
+            <span class="text-sm font-medium">Explorar</span>
         </a>
-        @endforeach
+        <a href="{{ route('reservas') }}" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl">
+            <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+            <span class="text-sm font-medium">Mis Reservas</span>
+        </a>
+        <a href="{{ route('perfil') }}" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl">
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">person</span>
+            <span class="text-sm font-medium">Mi Perfil</span>
+        </a>
     </nav>
-    <div class="px-3 py-4 border-t border-outline-variant/20 space-y-1">
-        <a href="{{ route('perfil') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-surface-container-high transition-all">
-            <img src="{{ auth()->user()->avatarUrl() }}" class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" alt=""/>
-            <div class="min-w-0">
-                <p class="text-sm font-semibold text-on-surface truncate">{{ auth()->user()->name }}</p>
-                <p class="text-[11px] text-on-surface-variant truncate">{{ auth()->user()->email }}</p>
-            </div>
-        </a>
+    <div class="px-4 py-6 border-t border-white/10">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-error hover:bg-red-50 transition-all text-sm">
-                <span class="material-symbols-outlined text-[20px]">logout</span>
+            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
                 Cerrar sesión
             </button>
         </form>
     </div>
 </aside>
 
-<main class="md:ml-64 min-h-screen flex flex-col pb-20 md:pb-0">
+<main class="md:ml-64 min-h-screen flex flex-col">
 
-    <header class="sticky top-0 z-40 glass-nav bg-surface/80 border-b border-outline-variant/20 shadow-sm">
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/60 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-            <h1 class="font-bold text-lg text-on-surface">Mi Perfil</h1>
-            <img src="{{ $user->avatarUrl() }}" class="w-9 h-9 rounded-full object-cover" alt=""/>
+            <h1 class="font-heading font-bold text-lg text-gray-900">Mi Perfil</h1>
+            @if($user->avatar)
+            <img src="{{ Storage::url($user->avatar) }}" class="w-9 h-9 rounded-full object-cover border-2 border-primary/20">
+            @else
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center text-white text-sm font-bold">
+                {{ strtoupper(substr($user->name,0,1)) }}
+            </div>
+            @endif
         </div>
     </header>
 
     @if(session('success'))
     <div class="max-w-4xl mx-auto px-4 md:px-8 pt-4 w-full">
-        <div class="p-4 bg-secondary/10 border border-secondary/20 rounded-xl flex items-center gap-3">
-            <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">check_circle</span>
-            <p class="text-sm font-semibold text-secondary">{{ session('success') }}</p>
+        <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+            <span class="material-symbols-outlined text-green-600" style="font-variation-settings:'FILL' 1">check_circle</span>
+            <p class="text-sm font-semibold text-green-700">{{ session('success') }}</p>
         </div>
     </div>
     @endif
     @if(session('success_password'))
     <div class="max-w-4xl mx-auto px-4 md:px-8 pt-4 w-full">
-        <div class="p-4 bg-secondary/10 border border-secondary/20 rounded-xl flex items-center gap-3">
-            <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">lock</span>
-            <p class="text-sm font-semibold text-secondary">{{ session('success_password') }}</p>
+        <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+            <span class="material-symbols-outlined text-green-600" style="font-variation-settings:'FILL' 1">lock</span>
+            <p class="text-sm font-semibold text-green-700">{{ session('success_password') }}</p>
         </div>
     </div>
     @endif
@@ -83,14 +90,20 @@
     <div class="max-w-4xl mx-auto px-4 md:px-8 py-8 w-full">
 
         {{-- Header de perfil --}}
-        <div class="bg-gradient-to-br from-primary-container to-primary rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+        <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
             <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 1px 1px,white 1px,transparent 0);background-size:28px 28px"></div>
             <div class="relative z-10 flex items-center gap-6">
                 {{-- Avatar clickeable --}}
                 <label for="avatarInput" class="cursor-pointer group relative shrink-0">
-                    <img src="{{ $user->avatarUrl() }}"
-                         class="w-20 h-20 rounded-2xl object-cover border-3 border-white/50 shadow-lg group-hover:opacity-80 transition-opacity"
+                    @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}"
+                         class="w-20 h-20 rounded-2xl object-cover border-2 border-white/50 shadow-lg group-hover:opacity-80 transition-opacity"
                          alt="{{ $user->name }}"/>
+                    @else
+                    <div class="w-20 h-20 rounded-2xl bg-white/30 flex items-center justify-center text-white text-3xl font-bold shadow-lg group-hover:opacity-80 transition-opacity">
+                        {{ strtoupper(substr($user->name,0,1)) }}
+                    </div>
+                    @endif
                     <div class="absolute inset-0 bg-black/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span class="material-symbols-outlined text-white text-[24px]">photo_camera</span>
                     </div>
@@ -265,10 +278,10 @@
     </div>
 </main>
 
-<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav bg-surface/90 border-t border-outline-variant/20 flex justify-around items-center py-2 z-50">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200/60 flex justify-around items-center py-2 z-50">
     @foreach([['explorar','explore','Explorar'],['reservas','calendar_month','Reservas'],['perfil','person','Perfil']] as [$r,$i,$l])
     @php $a = request()->routeIs($r); @endphp
-    <a href="{{ route($r) }}" class="flex flex-col items-center gap-0.5 px-4 py-1 {{ $a ? 'text-primary' : 'text-on-surface-variant' }}">
+    <a href="{{ route($r) }}" class="flex flex-col items-center gap-0.5 px-4 py-1 {{ $a ? 'text-primary' : 'text-gray-400' }}">
         <span class="material-symbols-outlined text-[22px]" @if($a) style="font-variation-settings:'FILL' 1" @endif>{{ $i }}</span>
         <span class="text-[10px] font-semibold">{{ $l }}</span>
     </a>

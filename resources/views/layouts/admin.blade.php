@@ -20,7 +20,7 @@
         </div>
         <div>
             <p class="text-2xl font-black text-orange-500 tracking-tight leading-none">GoToEat</p>
-            <p class="text-[10px] uppercase tracking-widest text-gray-400 mt-0.5">Restaurant Management</p>
+            <p class="text-[10px] uppercase tracking-widest text-gray-400 mt-0.5">Gestión de Restaurante</p>
         </div>
     </div>
 
@@ -28,20 +28,19 @@
     <nav class="flex-1 space-y-1">
         @php
         $navItems = [
-            ['route' => 'dashboard',       'icon' => 'dashboard',        'label' => 'Dashboard'],
+            ['route' => 'dashboard',       'icon' => 'dashboard',        'label' => 'Panel Principal'],
             ['route' => 'admin.inventory', 'icon' => 'inventory_2',      'label' => 'Inventario'],
             ['route' => 'admin.menu',      'icon' => 'restaurant_menu',  'label' => 'Menú'],
             ['route' => 'admin.staff',     'icon' => 'group',            'label' => 'Personal'],
-            ['route' => 'admin.tables',       'icon' => 'table_restaurant', 'label' => 'Mesas'],
-            ['route' => 'admin.reservations', 'icon' => 'event_seat',       'label' => 'Reservas'],
+            ['route' => 'admin.tables', 'icon' => 'table_restaurant', 'label' => 'Mesas & Reservas'],
             ['route' => 'admin.finance',      'icon' => 'bar_chart',        'label' => 'Finanzas'],
-            ['route' => 'admin.ai',        'icon' => 'smart_toy',        'label' => 'AI Assistant'],
+            ['route' => 'admin.ai',        'icon' => 'smart_toy',        'label' => 'Asistente IA'],
         ];
         @endphp
 
         @foreach ($navItems as $item)
             @if (Route::has($item['route']))
-            @php $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*'); @endphp
+            @php $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*') || ($item['route'] === 'admin.tables' && request()->routeIs('admin.reservations*')); @endphp
             <a href="{{ route($item['route']) }}"
                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]
                       {{ $active

@@ -452,10 +452,12 @@ function copiarTexto(elementId, btnId) {
                             <option value="Mesero">Mesero</option>
                             <option value="Chef">Chef</option>
                             <option value="Cajero">Cajero</option>
-                            <option value="Manager">Manager</option>
+                            <option value="Gerente">Gerente</option>
                             <option value="Auxiliar">Auxiliar de cocina</option>
-                            <option value="Bartender">Bartender</option>
+                            <option value="Barman">Barman</option>
+                            <option value="Barista">Barista</option>
                             <option value="Domiciliario">Domiciliario</option>
+                            <option value="Anfitrión">Anfitrión/a</option>
                         </select>
                     </div>
                     <div>

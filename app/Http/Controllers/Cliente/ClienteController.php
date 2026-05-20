@@ -9,6 +9,7 @@ use App\Domains\Restaurant\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ClienteController extends Controller
 {
@@ -101,7 +102,7 @@ class ClienteController extends Controller
             'selected_items'   => 'nullable|array',
         ]);
 
-        Reservation::create([
+        $reservation = Reservation::create([
             'user_id'          => auth()->id(),
             'restaurant_id'    => $validated['restaurant_id'],
             'reservation_date' => $validated['reservation_date'],
@@ -112,7 +113,35 @@ class ClienteController extends Controller
             'status'           => 'pending',
         ]);
 
-        return back()->with('success', '¡Reserva solicitada! El restaurante confirmará pronto.');
+        return redirect()->route('reservas.show', $reservation)->with('success', '¡Reserva solicitada! Guarda tu QR de acceso.');
+    }
+
+    public function showReservation(Reservation $reservation)
+    {
+        abort_if($reservation->user_id !== auth()->id(), 403);
+        $reservation->load('restaurant', 'waiter.user');
+
+        $verifyUrl = route('reserva.verificar', $reservation->qr_token);
+        $qrSvg = QrCode::format('svg')->size(200)->errorCorrection('H')->generate($verifyUrl);
+
+        return view('cliente.reserva-detalle', compact('reservation', 'qrSvg'));
+    }
+
+    public function verificarQr(string $token)
+    {
+        $reservation = Reservation::with(['user', 'restaurant', 'waiter.user'])
+            ->where('qr_token', $token)
+            ->firstOrFail();
+
+        // Allow admin/mesero to mark as confirmed from scanning
+        if (request()->isMethod('post') && auth()->user()?->hasAnyRole(['admin','mesero'])) {
+            if ($reservation->status === 'pending') {
+                $reservation->update(['status' => 'confirmed']);
+            }
+            return response()->json(['ok' => true, 'status' => $reservation->status]);
+        }
+
+        return view('cliente.qr-verificacion', compact('reservation'));
     }
 
     public function cancelReservation(Reservation $reservation)

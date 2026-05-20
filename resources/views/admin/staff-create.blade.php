@@ -3,17 +3,17 @@
 
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
-    <a href="{{ route('admin.staff') }}" class="hover:text-orange-500 transition-colors">Management</a>
+    <a href="{{ route('admin.staff') }}" class="hover:text-orange-500 transition-colors">Administración</a>
     <span class="material-symbols-outlined text-xs">chevron_right</span>
-    <a href="{{ route('admin.staff') }}" class="hover:text-orange-500 transition-colors">Staff List</a>
+    <a href="{{ route('admin.staff') }}" class="hover:text-orange-500 transition-colors">Personal</a>
     <span class="material-symbols-outlined text-xs">chevron_right</span>
-    <span class="text-orange-500 font-bold">Add Staff</span>
+    <span class="text-orange-500 font-bold">Agregar Empleado</span>
 </nav>
 
 <div class="max-w-3xl mx-auto">
 
     <div class="mb-8">
-        <h1 class="text-4xl font-black font-heading text-on-surface">Add Staff Member</h1>
+        <h1 class="text-4xl font-black font-heading text-on-surface">Agregar Miembro del Equipo</h1>
         <p class="text-gray-500 mt-1">Registra un nuevo miembro del equipo de trabajo.</p>
     </div>
 
@@ -25,7 +25,7 @@
                 <span class="material-symbols-outlined text-2xl">person_add</span>
             </div>
             <div>
-                <h2 class="font-bold text-lg font-heading">New Employee</h2>
+                <h2 class="font-bold text-lg font-heading">Nuevo Empleado</h2>
                 <p class="text-sm text-gray-400">Completa la información del empleado</p>
             </div>
         </div>
@@ -114,10 +114,12 @@
                         <option value="Chef">Chef</option>
                         <option value="Mesero">Mesero</option>
                         <option value="Cajero">Cajero</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Bartender">Bartender</option>
+                        <option value="Gerente">Gerente</option>
+                        <option value="Barista">Barista</option>
+                        <option value="Barman">Barman</option>
                         <option value="Auxiliar">Auxiliar de cocina</option>
                         <option value="Domiciliario">Domiciliario</option>
+                        <option value="Anfitrión">Anfitrión/a</option>
                     </select>
                 </div>
 

@@ -3,18 +3,18 @@
 
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
-    <a href="{{ route('admin.tables') }}" class="hover:text-orange-500 transition-colors">Management</a>
+    <a href="{{ route('admin.tables') }}" class="hover:text-orange-500 transition-colors">Administración</a>
     <span class="material-symbols-outlined text-xs">chevron_right</span>
-    <a href="{{ route('admin.tables') }}" class="hover:text-orange-500 transition-colors">Floor Plan</a>
+    <a href="{{ route('admin.tables') }}" class="hover:text-orange-500 transition-colors">Mesas & Reservas</a>
     <span class="material-symbols-outlined text-xs">chevron_right</span>
-    <span class="text-orange-500 font-bold">Add Table</span>
+    <span class="text-orange-500 font-bold">Nueva Mesa</span>
 </nav>
 
 <div class="max-w-2xl mx-auto">
 
     <div class="mb-8">
-        <h1 class="text-4xl font-black font-heading text-on-surface">Add New Table</h1>
-        <p class="text-gray-500 mt-1">Configure layout &amp; capacity for the new table.</p>
+        <h1 class="text-4xl font-black font-heading text-on-surface">Agregar Nueva Mesa</h1>
+        <p class="text-gray-500 mt-1">Configura la distribución y capacidad de la nueva mesa.</p>
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -25,7 +25,7 @@
                 <span class="material-symbols-outlined text-2xl">table_restaurant</span>
             </div>
             <div>
-                <h2 class="font-bold text-lg font-heading">New Table</h2>
+                <h2 class="font-bold text-lg font-heading">Nueva Mesa</h2>
                 <p class="text-sm text-gray-400">Define el número, zona y capacidad</p>
             </div>
         </div>
@@ -62,17 +62,19 @@
                         Zona
                     </label>
                     <input type="text" name="zone"
-                           placeholder="ej. Main Hall, Terrace, Bar, VIP Lounge"
+                           placeholder="ej. Salón Principal, Terraza, Bar, Salón VIP"
                            list="zonasSugeridas"
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm"/>
                     <datalist id="zonasSugeridas">
                         @foreach($existingZones as $z)
                         <option value="{{ $z }}">
                         @endforeach
-                        <option value="Main Hall">
-                        <option value="Terrace">
+                        <option value="Salón Principal">
+                        <option value="Terraza">
                         <option value="Bar">
-                        <option value="Private Lounge">
+                        <option value="Salón Privado">
+                        <option value="Exterior">
+                        <option value="Planta Alta">
                     </datalist>
                     <p class="text-[11px] text-gray-400 mt-1">Agrupa las mesas por zona del salón.</p>
                 </div>

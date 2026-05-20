@@ -2,7 +2,7 @@
 <html class="light" lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Dashboard de Empleado | GoToEat</title>
+<title>Panel del Empleado | GoToEat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,12 +15,12 @@
 <aside class="hidden md:flex flex-col h-full p-4 gap-2 bg-surface-container-low fixed left-0 top-0 w-64 z-[60] shadow-md">
     <div class="mb-10 px-2 py-4">
         <h1 class="font-heading text-h3 font-bold text-primary">GoTo<span class="text-primary-container">Eat</span></h1>
-        <p class="text-body-sm text-on-surface-variant uppercase tracking-widest text-[10px] font-bold mt-1">Admin Panel</p>
+        <p class="text-body-sm text-on-surface-variant uppercase tracking-widest text-[10px] font-bold mt-1">Panel del Empleado</p>
     </div>
     <nav class="flex-1 flex flex-col gap-2">
         <a class="flex items-center gap-4 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-transform hover:translate-x-1" href="{{ route('empleado.dashboard') }}">
             <span class="material-symbols-outlined">dashboard</span>
-            <span class="text-body-sm">Dashboard</span>
+            <span class="text-body-sm">Inicio</span>
         </a>
         <a class="flex items-center gap-4 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-transform hover:translate-x-1" href="{{ route('empleado.turnos') }}">
             <span class="material-symbols-outlined">schedule</span>
@@ -49,7 +49,7 @@
     <!-- Top Bar -->
     <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-6 py-4">
         <div class="flex items-center gap-4">
-            <h2 class="font-heading text-lg font-bold text-on-surface">Dashboard</h2>
+            <h2 class="font-heading text-lg font-bold text-on-surface">Inicio</h2>
         </div>
         <div class="flex items-center gap-4">
             <button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-90 relative">
@@ -160,6 +160,7 @@
                             <th class="px-4 py-3 text-center">Pax</th>
                             <th class="px-4 py-3">Pre-orden</th>
                             <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3 text-center">QR</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -207,6 +208,16 @@
                                 <span class="text-xs font-bold px-2.5 py-1 rounded-full {{ $stColor }}">
                                     {{ $res->statusLabel() }}
                                 </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                @if($res->qr_token)
+                                <a href="{{ route('reserva.verificar', $res->qr_token) }}" target="_blank"
+                                   class="inline-flex items-center justify-center w-8 h-8 bg-orange-50 hover:bg-orange-100 text-primary rounded-lg transition-colors" title="Verificar QR">
+                                    <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+                                </a>
+                                @else
+                                <span class="text-gray-300 text-xs">—</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -326,7 +337,7 @@
 <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 px-4 py-2 flex justify-around items-center z-[60]">
     <a class="flex flex-col items-center gap-1 p-2 text-primary font-bold" href="{{ route('empleado.dashboard') }}">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-        <span class="text-[10px]">Dashboard</span>
+        <span class="text-[10px]">Inicio</span>
     </a>
     <a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant" href="{{ route('empleado.turnos') }}">
         <span class="material-symbols-outlined">schedule</span>

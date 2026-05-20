@@ -8,6 +8,7 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Restaurant\Models\Restaurant;
 use App\Domains\Staff\Models\Employee;
 use App\Domains\Tables\Models\RestaurantTable;
+use Illuminate\Support\Str;
 
 class Reservation extends Model
 {
@@ -16,8 +17,17 @@ class Reservation extends Model
     protected $fillable = [
         'user_id', 'restaurant_id', 'table_id', 'waiter_id',
         'reservation_date', 'reservation_time', 'party_size',
-        'status', 'selected_items', 'notes',
+        'status', 'selected_items', 'notes', 'qr_token',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $reservation) {
+            if (empty($reservation->qr_token)) {
+                $reservation->qr_token = Str::random(40);
+            }
+        });
+    }
 
     protected $casts = [
         'reservation_date'  => 'date',

@@ -72,7 +72,7 @@
                     <th class="px-5 py-3 text-right">$ Estimado</th>
                     <th class="px-5 py-3">Mesero</th>
                     <th class="px-5 py-3">Estado</th>
-                    <th class="px-5 py-3 text-center">Acciones</th>
+                    <th class="px-5 py-3 text-center">QR / Acciones</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -207,6 +207,13 @@
                                     <span class="material-symbols-outlined text-[18px]">cancel</span>
                                 </button>
                             </form>
+                            @endif
+                            {{-- Verificar QR --}}
+                            @if($res->qr_token)
+                            <a href="{{ route('reserva.verificar', $res->qr_token) }}" target="_blank" title="Ver QR / Verificar"
+                               class="p-1.5 rounded-lg bg-orange-50 text-primary hover:bg-orange-100 transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+                            </a>
                             @endif
                             {{-- Detalle de pre-orden completa --}}
                             @if(count($items) > 0)

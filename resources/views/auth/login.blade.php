@@ -139,12 +139,12 @@
         <div class="mt-10 flex items-center justify-center gap-6 grayscale opacity-50">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-body-sm">verified_user</span>
-                <span class="font-body text-label-caps text-[10px]">Secure 256-bit SSL</span>
+                <span class="font-body text-label-caps text-[10px]">SSL 256 bits cifrado</span>
             </div>
             <div class="h-1 w-1 bg-outline-variant rounded-full"></div>
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-body-sm">shield</span>
-                <span class="font-body text-label-caps text-[10px]">GDPR Compliant</span>
+                <span class="font-body text-label-caps text-[10px]">Datos protegidos</span>
             </div>
         </div>
     </div>

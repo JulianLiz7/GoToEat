@@ -9,621 +9,581 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .cart-slide { transition: transform .3s cubic-bezier(.4,0,.2,1); }
-        .no-scrollbar::-webkit-scrollbar { display:none; }
-        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
-        [x-cloak] { display:none !important; }
+        body { background: #f0f2f7; }
+        .hero-cover { background-size: cover; background-position: center; }
+        .category-tab.active { background: #f97316; color: white; }
+        .category-tab { background: white; color: #6b7280; border: 1px solid #e5e7eb; transition: all .2s; }
+        .category-tab:hover { border-color: #f97316; color: #f97316; }
+        .menu-card { transition: transform .2s, box-shadow .2s; }
+        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px -4px rgba(0,0,0,.12); }
+        .cart-bump { animation: bump .25s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes bump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-background text-on-surface antialiased font-body-md">
+<body class="font-body antialiased"
+      x-data="{
+        cart: [],
+        activeCategory: '',
+        cartOpen: false,
+        reservaModal: false,
+        reviewModal: false,
+        cartBump: false,
+        addToCart(item) {
+            const idx = this.cart.findIndex(c => c.id === item.id);
+            if (idx >= 0) {
+                this.cart[idx].qty++;
+            } else {
+                this.cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+            }
+            this.cartBump = true; setTimeout(() => this.cartBump = false, 300);
+        },
+        removeFromCart(id) {
+            const idx = this.cart.findIndex(c => c.id === id);
+            if (idx >= 0) {
+                if (this.cart[idx].qty > 1) this.cart[idx].qty--;
+                else this.cart.splice(idx, 1);
+            }
+        },
+        qtyOf(id) { const i = this.cart.find(c => c.id === id); return i ? i.qty : 0; },
+        get cartCount() { return this.cart.reduce((s, i) => s + i.qty, 0); },
+        get cartTotal() { return this.cart.reduce((s, i) => s + (i.price * i.qty), 0); },
+      }">
 
-@php
-    $primary   = $restaurant->primary_color   ?? '#f97316';
-    $secondary = $restaurant->secondary_color ?? '#006c49';
-    $coverUrl  = $restaurant->cover_path  ? Storage::url($restaurant->cover_path)  : null;
-    $logoUrl   = $restaurant->logo_path   ? Storage::url($restaurant->logo_path)   : null;
-@endphp
+{{-- ══ HERO ─────────────────────────────────────────────────────── --}}
+<div class="relative h-72 md:h-96 hero-cover"
+     style="background-image: url('{{ $restaurant->cover_path ? Storage::url($restaurant->cover_path) : 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200' }}')">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20"></div>
 
-{{-- Navbar ──────────────────────────────────────────────────── --}}
-<header class="sticky top-0 z-40 glass-nav bg-surface/90 border-b border-outline-variant/20 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('explorar') }}"
-               class="p-2 rounded-xl hover:bg-surface-container transition-colors text-on-surface-variant">
-                <span class="material-symbols-outlined text-[22px]">arrow_back</span>
-            </a>
-            @if($logoUrl)
-            <img src="{{ $logoUrl }}" class="w-8 h-8 rounded-lg object-contain" alt="logo"/>
-            @endif
-            <p class="font-bold text-on-surface truncate">{{ $restaurant->name }}</p>
-        </div>
-        <div class="flex items-center gap-2">
-            @if($restaurant->avg_rating > 0)
-            <div class="hidden sm:flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px] text-amber-400" style="font-variation-settings:'FILL' 1">star</span>
-                <span class="text-sm font-bold text-on-surface">{{ number_format($restaurant->avg_rating,1) }}</span>
-                <span class="text-xs text-gray-400">({{ $restaurant->reviews_count }})</span>
-            </div>
-            @endif
-            @if($restaurant->price_range)
-            <span class="hidden sm:block text-xs font-bold text-gray-400 px-2 py-1 bg-surface-container rounded-full">
-                {{ $restaurant->price_range }}
-            </span>
-            @endif
-            <img src="{{ auth()->user()->avatarUrl() }}" class="w-8 h-8 rounded-full object-cover" alt=""/>
-        </div>
-    </div>
-</header>
-
-{{-- Flash --}}
-@if(session('success'))
-<div class="max-w-5xl mx-auto px-4 md:px-8 pt-3">
-    <div class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl flex items-center gap-2 text-sm text-secondary font-semibold">
-        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
-        {{ session('success') }}
-    </div>
-</div>
-@endif
-
-{{-- ══ MAIN con carrito Alpine.js ════════════════════════════ --}}
-<div x-data="{
-    cart: [],
-    cartOpen: false,
-    addItem(id, name, price, category) {
-        const idx = this.cart.findIndex(i => i.id === id);
-        if (idx >= 0) { this.cart[idx].qty++; }
-        else { this.cart.push({ id, name, price, category, qty: 1 }); }
-    },
-    removeItem(id) {
-        const idx = this.cart.findIndex(i => i.id === id);
-        if (idx < 0) return;
-        if (this.cart[idx].qty > 1) { this.cart[idx].qty--; }
-        else { this.cart.splice(idx, 1); }
-    },
-    getQty(id) { const i = this.cart.find(i => i.id === id); return i ? i.qty : 0; },
-    get total() { return this.cart.reduce((s,i) => s + i.price * i.qty, 0); },
-    get count() { return this.cart.reduce((s,i) => s + i.qty, 0); },
-    get cartJson() { return JSON.stringify(this.cart); },
-    formatCOP(n) { return '\$' + Math.round(n).toLocaleString('es-CO'); }
-}">
-
-<div class="max-w-5xl mx-auto px-4 md:px-8 pb-32 md:pb-12">
-
-    {{-- Hero ───────────────────────────────────────────────── --}}
-    <div class="relative rounded-2xl overflow-hidden mb-8 mt-4"
-         style="height: 220px; {{ $coverUrl ? 'background:url('.json_encode($coverUrl).') center/cover' : 'background-color:'.$primary.'20' }}">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-        <div class="absolute bottom-5 left-5 text-white">
-            <h1 class="font-black text-2xl md:text-3xl leading-tight">{{ $restaurant->name }}</h1>
-            <div class="flex flex-wrap items-center gap-3 mt-1.5 text-white/80 text-sm">
-                @if($restaurant->cuisine_type)
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">restaurant</span>
-                    {{ $restaurant->cuisine_type }}
-                </span>
-                @endif
-                @if($restaurant->address)
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">location_on</span>
-                    {{ Str::limit($restaurant->address, 40) }}
-                </span>
-                @endif
-                @if($restaurant->opening_hours)
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                    {{ $restaurant->opening_hours }}
-                </span>
-                @endif
-            </div>
-        </div>
-        @if($logoUrl)
-        <div class="absolute top-4 right-4">
-            <img src="{{ $logoUrl }}" class="w-14 h-14 rounded-xl object-contain bg-white/90 p-1 shadow-lg" alt="logo"/>
-        </div>
-        @endif
-    </div>
-
-    {{-- Acciones rápidas ────────────────────────────────────── --}}
-    <div class="flex gap-3 mb-8 flex-wrap">
-        @if($restaurant->phone)
-        <a href="tel:{{ $restaurant->phone }}"
-           class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-on-surface hover:border-primary-container hover:text-primary-container transition-all">
-            <span class="material-symbols-outlined text-[18px]">call</span>
-            {{ $restaurant->phone }}
+    {{-- Back button --}}
+    <div class="absolute top-4 left-4 right-4 flex items-center justify-between">
+        <a href="{{ route('explorar') }}"
+           class="flex items-center gap-2 bg-white/20 backdrop-blur hover:bg-white/30 text-white px-4 py-2 rounded-full text-sm font-medium transition-all">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Explorar
         </a>
-        @endif
         @if($restaurant->whatsapp)
-        <a href="https://wa.me/{{ preg_replace('/\D/','',$restaurant->whatsapp) }}" target="_blank"
-           class="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all">
+        <a href="https://wa.me/{{ preg_replace('/\D/','',$restaurant->whatsapp) }}"
+           target="_blank"
+           class="flex items-center gap-2 bg-green-500/80 backdrop-blur hover:bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-all">
             <span class="material-symbols-outlined text-[18px]">chat</span>
             WhatsApp
         </a>
         @endif
-        @if($restaurant->website)
-        <a href="{{ $restaurant->website }}" target="_blank"
-           class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold hover:border-primary-container hover:text-primary-container transition-all">
-            <span class="material-symbols-outlined text-[18px]">language</span>
-            Sitio web
-        </a>
-        @endif
-        <a href="#resenas"
-           class="flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-all">
-            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">star</span>
-            {{ $restaurant->reviews_count }} reseñas
-        </a>
     </div>
 
-    {{-- Promociones / Destacados ─────────────────────────────── --}}
-    @if($featured->isNotEmpty())
-    <section class="mb-10">
-        <h2 class="font-bold text-xl text-on-surface mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-[22px]" style="color:{{ $primary }};font-variation-settings:'FILL' 1">local_fire_department</span>
-            Promociones del Día
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            @foreach($featured as $item)
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow">
-                @if($item->image)
-                <div class="h-36 overflow-hidden">
-                    <img src="{{ Storage::url($item->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="{{ $item->name }}"/>
+    {{-- Restaurant info overlay --}}
+    <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+        <div class="flex items-end gap-4">
+            @if($restaurant->logo_path)
+            <img src="{{ Storage::url($restaurant->logo_path) }}" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-white/40 shadow-xl flex-shrink-0">
+            @else
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-white font-bold text-xl border-2 border-white/40 flex-shrink-0"
+                 style="background: {{ $restaurant->primary_color ?? '#f97316' }}">
+                {{ strtoupper(substr($restaurant->name, 0, 2)) }}
+            </div>
+            @endif
+            <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    @if($restaurant->cuisine_type)
+                    <span class="bg-white/20 backdrop-blur text-white text-xs px-3 py-1 rounded-full">{{ $restaurant->cuisine_type }}</span>
+                    @endif
+                    @if($restaurant->price_range)
+                    <span class="bg-white/20 backdrop-blur text-white text-xs px-3 py-1 rounded-full">{{ $restaurant->price_range }}</span>
+                    @endif
                 </div>
-                @else
-                <div class="h-24 flex items-center justify-center" style="background:{{ $primary }}15">
-                    <span class="material-symbols-outlined text-4xl" style="color:{{ $primary }};font-variation-settings:'FILL' 1">restaurant_menu</span>
+                <h1 class="font-heading text-2xl md:text-3xl font-bold text-white">{{ $restaurant->name }}</h1>
+                @if($restaurant->avg_rating)
+                <div class="flex items-center gap-2 mt-1">
+                    <div class="flex">
+                        @for($i=1; $i<=5; $i++)
+                        <span class="material-symbols-outlined text-[16px] {{ $i <= round($restaurant->avg_rating) ? 'text-yellow-400' : 'text-white/30' }}" style="font-variation-settings:'FILL' 1">star</span>
+                        @endfor
+                    </div>
+                    <span class="text-white/80 text-sm">{{ number_format($restaurant->avg_rating, 1) }}
+                        @if($restaurant->reviews_count) ({{ $restaurant->reviews_count }} reseñas) @endif
+                    </span>
                 </div>
                 @endif
-                <div class="p-4">
-                    <div class="flex items-start justify-between gap-2 mb-1">
-                        <div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full text-white mb-1 inline-block" style="background:{{ $primary }}">PROMO</span>
-                            <h3 class="font-bold text-sm text-on-surface">{{ $item->name }}</h3>
-                        </div>
-                        <p class="font-black text-base shrink-0" style="color:{{ $primary }}">${{ number_format($item->price, 0, ',', '.') }}</p>
-                    </div>
-                    @if($item->description)
-                    <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ $item->description }}</p>
-                    @endif
-                    <div class="flex items-center gap-2">
-                        <button @click="removeItem({{ $item->id }})" x-show="getQty({{ $item->id }}) > 0"
-                                class="w-8 h-8 rounded-xl border font-bold flex items-center justify-center transition-all hover:opacity-80"
-                                style="border-color:{{ $primary }};color:{{ $primary }}">−</button>
-                        <span x-show="getQty({{ $item->id }}) > 0"
-                              class="font-bold text-sm min-w-[20px] text-center" x-text="getQty({{ $item->id }})"></span>
-                        <button @click="addItem({{ $item->id }}, '{{ addslashes($item->name) }}', {{ $item->price }}, '{{ addslashes($item->category ?? 'General') }}')"
-                                class="flex-1 py-2 rounded-xl text-white font-bold text-sm transition-all active:scale-[0.97]"
-                                style="background:{{ $primary }}">
-                            <span x-text="getQty({{ $item->id }}) > 0 ? 'Agregar más' : 'Agregar'"></span>
-                        </button>
-                    </div>
-                </div>
             </div>
-            @endforeach
         </div>
-    </section>
-    @endif
+    </div>
+</div>
 
-    {{-- Menú completo por categoría ─────────────────────────── --}}
-    <section class="mb-10">
-        <h2 class="font-bold text-xl text-on-surface mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1;color:{{ $primary }}">restaurant_menu</span>
-            Menú
-        </h2>
+{{-- ══ MAIN CONTENT ──────────────────────────────────────────────── --}}
+<div class="max-w-7xl mx-auto px-4 md:px-6 py-8">
+    <div class="flex gap-8">
 
-        @if($menuByCategory->isEmpty())
-        <div class="py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-            <span class="material-symbols-outlined text-4xl text-gray-200 block mb-2">no_meals</span>
-            El restaurante aún no tiene ítems en su menú.
-        </div>
-        @else
-        {{-- Categorías nav --}}
-        <div class="flex gap-2 overflow-x-auto pb-2 mb-5 no-scrollbar">
-            @foreach($menuByCategory->keys() as $cat)
-            <a href="#cat-{{ Str::slug($cat) }}"
-               class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
-                {{ $cat ?? 'General' }}
-            </a>
-            @endforeach
-        </div>
+        {{-- ── LEFT: Menu ──────────────────────────────────────────── --}}
+        <div class="flex-1 min-w-0 space-y-8">
 
-        <div class="space-y-8">
-            @foreach($menuByCategory as $category => $items)
-            <div id="cat-{{ Str::slug($category) }}">
-                <h3 class="font-bold text-sm text-on-surface-variant uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="w-8 h-0.5 rounded-full inline-block" style="background:{{ $primary }}"></span>
-                    {{ $category ?? 'General' }}
-                </h3>
-                <div class="space-y-3">
-                    @foreach($items as $item)
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+            {{-- About --}}
+            @if($restaurant->description)
+            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                <p class="text-gray-600 text-sm leading-relaxed">{{ $restaurant->description }}</p>
+                @if($restaurant->opening_hours || $restaurant->website)
+                <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
+                    @if($restaurant->opening_hours)
+                    <span class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[14px]">schedule</span>
+                        {{ $restaurant->opening_hours }}
+                    </span>
+                    @endif
+                    @if($restaurant->website)
+                    <a href="{{ $restaurant->website }}" target="_blank" class="flex items-center gap-1.5 text-primary hover:underline">
+                        <span class="material-symbols-outlined text-[14px]">language</span>
+                        Sitio web
+                    </a>
+                    @endif
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Promoted / Featured items --}}
+            @if($featured->isNotEmpty())
+            <section>
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings:'FILL' 1">local_fire_department</span>
+                    <h2 class="font-heading text-lg font-bold text-gray-900">Destacados</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($featured as $item)
+                    <div class="menu-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                         @if($item->image)
-                        <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
-                            <img src="{{ Storage::url($item->image) }}" class="w-full h-full object-cover" alt="{{ $item->name }}"/>
+                        <div class="h-36 bg-gray-100 overflow-hidden">
+                            <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}" class="w-full h-full object-cover">
                         </div>
                         @else
-                        <div class="w-20 h-20 rounded-xl shrink-0 flex items-center justify-center" style="background:{{ $primary }}10">
-                            <span class="material-symbols-outlined text-3xl" style="color:{{ $primary }};font-variation-settings:'FILL' 0">restaurant_menu</span>
+                        <div class="h-36 bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-orange-200 text-[48px]">restaurant_menu</span>
                         </div>
                         @endif
-
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <h4 class="font-bold text-sm text-on-surface">{{ $item->name }}</h4>
-                                    @if($item->is_featured)
-                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style="background:{{ $primary }}">PROMO</span>
-                                    @endif
-                                </div>
-                                <p class="font-black text-base shrink-0" style="color:{{ $primary }}">${{ number_format($item->price, 0, ',', '.') }}</p>
+                        <div class="p-4">
+                            <div class="flex items-start justify-between gap-2 mb-1">
+                                <h3 class="font-semibold text-gray-900 text-sm leading-tight">{{ $item->name }}</h3>
+                                <span class="text-primary font-bold text-sm flex-shrink-0">${{ number_format($item->price, 0, ',', '.') }}</span>
                             </div>
                             @if($item->description)
-                            <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{{ $item->description }}</p>
+                            <p class="text-xs text-gray-500 line-clamp-2 mb-3">{{ $item->description }}</p>
                             @endif
-                            @if($item->prep_time)
-                            <p class="text-[11px] text-gray-300 mt-1 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[13px]">timer</span>
-                                {{ $item->prep_time }} min
-                            </p>
-                            @endif
-                        </div>
-
-                        {{-- Controles de carrito --}}
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button @click="removeItem({{ $item->id }})" x-show="getQty({{ $item->id }}) > 0"
-                                    class="w-8 h-8 rounded-xl border font-bold flex items-center justify-center transition-all hover:opacity-80 active:scale-90"
-                                    style="border-color:{{ $primary }};color:{{ $primary }}">−</button>
-                            <span x-show="getQty({{ $item->id }}) > 0"
-                                  class="font-bold text-sm min-w-[20px] text-center" x-text="getQty({{ $item->id }})"></span>
-                            <button @click="addItem({{ $item->id }}, '{{ addslashes($item->name) }}', {{ $item->price }}, '{{ addslashes($category ?? 'General') }}')"
-                                    class="w-9 h-9 rounded-xl text-white font-bold flex items-center justify-center transition-all hover:opacity-90 active:scale-90"
-                                    style="background:{{ $primary }}">+</button>
+                            <div class="flex items-center gap-2" x-data>
+                                <template x-if="$root.qtyOf({{ $item->id }}) > 0">
+                                    <div class="flex items-center gap-2 flex-1">
+                                        <button @click="$root.removeFromCart({{ $item->id }})"
+                                                class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-all">−</button>
+                                        <span class="font-bold text-gray-800 w-5 text-center text-sm" x-text="$root.qtyOf({{ $item->id }})"></span>
+                                        <button @click="$root.addToCart({ id: {{ $item->id }}, name: '{{ addslashes($item->name) }}', price: {{ $item->price }} })"
+                                                class="w-8 h-8 bg-primary hover:bg-orange-600 rounded-lg flex items-center justify-center font-bold text-white transition-all">+</button>
+                                    </div>
+                                </template>
+                                <template x-if="$root.qtyOf({{ $item->id }}) === 0">
+                                    <button @click="$root.addToCart({ id: {{ $item->id }}, name: '{{ addslashes($item->name) }}', price: {{ $item->price }} })"
+                                            class="flex-1 bg-primary hover:bg-orange-600 text-white text-xs font-semibold py-2 rounded-xl transition-all">
+                                        Agregar
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                     </div>
                     @endforeach
                 </div>
-            </div>
-            @endforeach
-        </div>
-        @endif
-    </section>
+            </section>
+            @endif
 
-    {{-- Reseñas ──────────────────────────────────────────────── --}}
-    <section id="resenas" class="mb-10">
-        <h2 class="font-bold text-xl text-on-surface mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-[22px] text-amber-400" style="font-variation-settings:'FILL' 1">star</span>
-            Reseñas y Calificaciones
-        </h2>
-
-        {{-- Resumen --}}
-        @if($restaurant->avg_rating > 0)
-        <div class="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
-            <div class="text-5xl font-black text-amber-500">{{ number_format($restaurant->avg_rating, 1) }}</div>
-            <div>
-                <div class="flex gap-0.5 mb-1">
-                    @for($s = 1; $s <= 5; $s++)
-                    <span class="material-symbols-outlined text-[22px] {{ $s <= round($restaurant->avg_rating) ? 'text-amber-400' : 'text-gray-200' }}"
-                          style="font-variation-settings:'FILL' {{ $s <= round($restaurant->avg_rating) ? 1 : 0 }}">star</span>
-                    @endfor
+            {{-- Full Menu by Category --}}
+            @if($menuByCategory->isNotEmpty())
+            <section id="menu">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-gray-600 text-[22px]" style="font-variation-settings:'FILL' 1">menu_book</span>
+                    <h2 class="font-heading text-lg font-bold text-gray-900">Menú Completo</h2>
                 </div>
-                <p class="text-sm text-gray-500">Basado en {{ $restaurant->reviews_count }} reseñas</p>
-            </div>
-        </div>
-        @endif
 
-        {{-- Escribir reseña --}}
-        @auth
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5">
-            <h3 class="font-bold text-sm text-on-surface mb-3">
-                {{ $userReview ? 'Tu reseña (editar)' : 'Comparte tu experiencia' }}
-            </h3>
-            <form method="POST" action="{{ route('restaurante.review', $restaurant) }}" class="space-y-3">
-                @csrf
-                {{-- Estrellas --}}
-                <div class="flex items-center gap-3">
-                    <span class="text-xs text-gray-400 font-semibold">Calificación:</span>
-                    <div class="flex gap-1" id="starRating">
-                        @for($s = 1; $s <= 5; $s++)
-                        <button type="button" onclick="setStar({{ $s }})" data-star="{{ $s }}"
-                                class="text-[28px] transition-colors {{ $userReview && $userReview->rating >= $s ? 'text-amber-400' : 'text-gray-200' }}"
-                                style="font-variation-settings:'FILL' {{ ($userReview && $userReview->rating >= $s) ? 1 : 0 }};line-height:1">
-                            <span class="material-symbols-outlined text-[28px]">star</span>
-                        </button>
-                        @endfor
+                {{-- Category tabs --}}
+                <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-5">
+                    <button @click="activeCategory = ''"
+                            :class="activeCategory === '' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-primary hover:text-primary'"
+                            class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all">
+                        Todos
+                    </button>
+                    @foreach($menuByCategory as $category => $items)
+                    <button @click="activeCategory = '{{ $category }}'"
+                            :class="activeCategory === '{{ $category }}' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-primary hover:text-primary'"
+                            class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all">
+                        {{ $category }}
+                    </button>
+                    @endforeach
+                </div>
+
+                {{-- Menu items --}}
+                @foreach($menuByCategory as $category => $items)
+                <div x-show="activeCategory === '' || activeCategory === '{{ $category }}'" class="mb-8">
+                    <h3 class="font-heading text-base font-bold text-gray-600 uppercase tracking-wider mb-3">{{ $category }}</h3>
+                    <div class="space-y-3">
+                        @foreach($items as $item)
+                        <div class="menu-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-4 items-center">
+                            @if($item->image)
+                            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                                <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}" class="w-full h-full object-cover">
+                            </div>
+                            @else
+                            <div class="w-16 h-16 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-orange-200 text-[28px]">restaurant_menu</span>
+                            </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <h4 class="font-semibold text-gray-900 text-sm">{{ $item->name }}</h4>
+                                    <span class="text-primary font-bold text-sm flex-shrink-0">${{ number_format($item->price, 0, ',', '.') }}</span>
+                                </div>
+                                @if($item->description)
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $item->description }}</p>
+                                @endif
+                            </div>
+                            <div class="flex-shrink-0" x-data>
+                                <template x-if="$root.qtyOf({{ $item->id }}) > 0">
+                                    <div class="flex items-center gap-1.5">
+                                        <button @click="$root.removeFromCart({{ $item->id }})"
+                                                class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold text-gray-600 text-sm transition-all">−</button>
+                                        <span class="w-4 text-center font-bold text-gray-800 text-sm" x-text="$root.qtyOf({{ $item->id }})"></span>
+                                        <button @click="$root.addToCart({ id: {{ $item->id }}, name: '{{ addslashes($item->name) }}', price: {{ $item->price }} })"
+                                                class="w-7 h-7 bg-primary hover:bg-orange-600 rounded-lg flex items-center justify-center font-bold text-white text-sm transition-all">+</button>
+                                    </div>
+                                </template>
+                                <template x-if="$root.qtyOf({{ $item->id }}) === 0">
+                                    <button @click="$root.addToCart({ id: {{ $item->id }}, name: '{{ addslashes($item->name) }}', price: {{ $item->price }} })"
+                                            class="w-7 h-7 bg-orange-50 hover:bg-primary hover:text-white rounded-lg flex items-center justify-center text-primary text-lg font-bold transition-all">+</button>
+                                </template>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
-                    <input id="ratingVal" name="rating" type="hidden" value="{{ $userReview?->rating ?? '' }}" required/>
                 </div>
-                <input name="title" type="text" placeholder="Título de tu reseña" maxlength="120"
-                       value="{{ $userReview?->title }}"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-300/30 focus:border-amber-400 outline-none transition-all"/>
-                <textarea name="body" rows="3" placeholder="Cuéntanos más sobre tu experiencia..." maxlength="1000"
-                          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-300/30 focus:border-amber-400 outline-none transition-all resize-none">{{ $userReview?->body }}</textarea>
-                <button type="submit"
-                        class="px-6 py-2.5 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.97] hover:opacity-90"
-                        style="background:{{ $primary }}">
-                    {{ $userReview ? 'Actualizar reseña' : 'Publicar reseña' }}
-                </button>
-            </form>
-        </div>
-        @endauth
+                @endforeach
+            </section>
+            @endif
 
-        {{-- Lista de reseñas --}}
-        @if($reviews->isEmpty())
-        <div class="py-10 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-            <span class="material-symbols-outlined text-4xl text-gray-200 block mb-2">rate_review</span>
-            Sé el primero en dejar una reseña.
+            {{-- Reviews --}}
+            <section id="resenas">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-yellow-400 text-[22px]" style="font-variation-settings:'FILL' 1">star</span>
+                        <h2 class="font-heading text-lg font-bold text-gray-900">Reseñas</h2>
+                    </div>
+                    <button @click="reviewModal = true"
+                            class="text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">rate_review</span>
+                        {{ $userReview ? 'Editar reseña' : 'Escribir reseña' }}
+                    </button>
+                </div>
+
+                @if($reviews->isEmpty())
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+                    <span class="material-symbols-outlined text-gray-300 text-[40px] mb-2 block">rate_review</span>
+                    <p class="text-sm text-gray-500">Sé el primero en dejar una reseña</p>
+                </div>
+                @else
+                <div class="space-y-3">
+                    @foreach($reviews as $review)
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-primary to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-semibold text-gray-900 text-sm">{{ $review->user->name }}</p>
+                                    <div class="flex">
+                                        @for($i=1; $i<=5; $i++)
+                                        <span class="material-symbols-outlined text-[14px] {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-200' }}" style="font-variation-settings:'FILL' 1">star</span>
+                                        @endfor
+                                    </div>
+                                </div>
+                                @if($review->title)
+                                <p class="font-medium text-gray-700 text-sm mt-0.5">{{ $review->title }}</p>
+                                @endif
+                                @if($review->body)
+                                <p class="text-gray-500 text-sm mt-1">{{ $review->body }}</p>
+                                @endif
+                                <p class="text-xs text-gray-400 mt-2">{{ $review->created_at->diffForHumans() }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </section>
         </div>
-        @else
-        <div class="space-y-4">
-            @foreach($reviews as $review)
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <div class="flex items-start justify-between gap-3 mb-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-primary-container/20 flex items-center justify-center font-bold text-sm text-primary-container shrink-0">
-                            {{ strtoupper(substr($review->user->name ?? 'U', 0, 1)) }}
+
+        {{-- ── RIGHT: Booking Widget ───────────────────────────────── --}}
+        <div id="reservar" class="hidden lg:block w-80 flex-shrink-0">
+            <div class="sticky top-6 space-y-4">
+
+                {{-- Cart Summary --}}
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" x-show="cart.length > 0" x-cloak>
+                    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+                            <span class="font-semibold text-gray-900 text-sm">Mi Selección</span>
+                        </div>
+                        <span class="text-xs text-gray-500" x-text="cartCount + ' ítem' + (cartCount !== 1 ? 's' : '')"></span>
+                    </div>
+                    <div class="p-4 space-y-2 max-h-48 overflow-y-auto">
+                        <template x-for="item in cart" :key="item.id">
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="flex-1 text-gray-700 truncate" x-text="item.name"></span>
+                                <span class="text-gray-400 text-xs" x-text="'×' + item.qty"></span>
+                                <span class="text-primary font-semibold" x-text="'$' + (item.price * item.qty).toLocaleString('es-CO')"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-700">Total estimado</span>
+                        <span class="font-bold text-primary" x-text="'$' + cartTotal.toLocaleString('es-CO')"></span>
+                    </div>
+                </div>
+
+                {{-- Reserve form --}}
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-gray-100">
+                        <h3 class="font-heading text-base font-bold text-gray-900">Hacer Reserva</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Confirma tu visita a {{ $restaurant->name }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('reservas.store') }}" class="p-4 space-y-3"
+                          @submit.prevent="
+                            $el.querySelectorAll('.cart-item-input').forEach(e => e.remove());
+                            cart.forEach((item, i) => {
+                                ['id','name','price','qty'].forEach(k => {
+                                    const inp = document.createElement('input');
+                                    inp.type = 'hidden';
+                                    inp.name = 'selected_items[' + i + '][' + k + ']';
+                                    inp.value = item[k];
+                                    inp.className = 'cart-item-input';
+                                    $el.appendChild(inp);
+                                });
+                            });
+                            $el.submit();
+                          ">
+                        @csrf
+                        <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Fecha</label>
+                            <input type="date" name="reservation_date" required
+                                   min="{{ now()->format('Y-m-d') }}"
+                                   class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 transition-all">
                         </div>
                         <div>
-                            <p class="font-semibold text-sm text-on-surface">{{ $review->user->name ?? 'Usuario' }}</p>
-                            <div class="flex gap-0.5">
-                                @for($s = 1; $s <= 5; $s++)
-                                <span class="material-symbols-outlined text-[14px] {{ $s <= $review->rating ? 'text-amber-400' : 'text-gray-200' }}"
-                                      style="font-variation-settings:'FILL' {{ $s <= $review->rating ? 1 : 0 }}">star</span>
-                                @endfor
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Hora</label>
+                            <input type="time" name="reservation_time" required
+                                   class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Personas</label>
+                            <div class="flex gap-1.5 flex-wrap">
+                                @foreach(range(1,8) as $n)
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="party_size" value="{{ $n }}" class="sr-only peer" {{ $n===2 ? 'checked' : '' }}>
+                                    <span class="w-9 h-9 rounded-xl border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white transition-all block">{{ $n }}</span>
+                                </label>
+                                @endforeach
                             </div>
                         </div>
-                    </div>
-                    <p class="text-xs text-gray-400 shrink-0">{{ $review->created_at->locale('es')->diffForHumans() }}</p>
-                </div>
-                @if($review->title)
-                <p class="font-semibold text-sm text-on-surface mb-1">{{ $review->title }}</p>
-                @endif
-                @if($review->body)
-                <p class="text-sm text-gray-600">{{ $review->body }}</p>
-                @endif
-            </div>
-            @endforeach
-        </div>
-        @endif
-    </section>
-</div>
-
-{{-- ══ CARRITO FLOTANTE ════════════════════════════════════════ --}}
-
-{{-- Badge del carrito (mobile) --}}
-<div x-show="count > 0" x-cloak
-     class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 md:hidden">
-    <button @click="cartOpen = true"
-            class="flex items-center gap-3 px-5 py-3 text-white rounded-2xl shadow-2xl font-bold text-sm"
-            style="background:{{ $primary }}">
-        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">shopping_cart</span>
-        <span x-text="count + ' ítem' + (count > 1 ? 's' : '')"></span>
-        <span class="font-black" x-text="formatCOP(total)"></span>
-    </button>
-</div>
-
-{{-- Panel carrito lateral ──────────────────────────────────── --}}
-<div x-show="cartOpen" x-cloak
-     class="fixed inset-0 z-[60] flex"
-     @click.self="cartOpen = false">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="cartOpen = false"></div>
-    <div class="ml-auto w-full max-w-sm bg-white h-full shadow-2xl flex flex-col relative z-10 cart-slide"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="translate-x-full"
-         x-transition:enter-end="translate-x-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="translate-x-0"
-         x-transition:leave-end="translate-x-full">
-
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-            <h3 class="font-bold text-on-surface flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px]" style="color:{{ $primary }};font-variation-settings:'FILL' 1">shopping_cart</span>
-                Mi Pedido
-            </h3>
-            <button @click="cartOpen = false" class="p-1.5 rounded-xl hover:bg-gray-100 transition-colors">
-                <span class="material-symbols-outlined text-[20px] text-gray-400">close</span>
-            </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto px-5 py-4">
-            <template x-if="cart.length === 0">
-                <div class="flex flex-col items-center justify-center h-40 text-gray-400 text-sm text-center">
-                    <span class="material-symbols-outlined text-4xl text-gray-200 mb-2">shopping_cart</span>
-                    <p>Tu pedido está vacío.</p>
-                    <p class="text-xs mt-1">Agrega ítems del menú.</p>
-                </div>
-            </template>
-            <template x-if="cart.length > 0">
-                <div class="space-y-3">
-                    <template x-for="item in cart" :key="item.id">
-                        <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-sm text-on-surface truncate" x-text="item.name"></p>
-                                <p class="text-xs text-gray-400" x-text="item.category"></p>
-                                <p class="text-xs font-bold mt-0.5" style="color:{{ $primary }}" x-text="formatCOP(item.price)"></p>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button @click="removeItem(item.id)"
-                                        class="w-7 h-7 rounded-lg border font-bold flex items-center justify-center text-sm transition-all"
-                                        style="border-color:{{ $primary }};color:{{ $primary }}">−</button>
-                                <span class="font-bold text-sm min-w-[20px] text-center" x-text="item.qty"></span>
-                                <button @click="addItem(item.id, item.name, item.price, item.category)"
-                                        class="w-7 h-7 rounded-lg text-white font-bold flex items-center justify-center text-sm transition-all"
-                                        style="background:{{ $primary }}">+</button>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Notas</label>
+                            <textarea name="notes" rows="2" placeholder="Alergias, ocasión especial…"
+                                      class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 resize-none transition-all"></textarea>
                         </div>
-                    </template>
+                        <button type="submit"
+                                class="w-full bg-primary hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-orange-200 active:scale-95 text-sm flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">event_available</span>
+                            Solicitar Reserva
+                        </button>
+                        <p class="text-xs text-gray-400 text-center">Recibirás un QR de confirmación</p>
+                    </form>
                 </div>
-            </template>
-        </div>
-
-        {{-- Resumen + Reservar --}}
-        <template x-if="cart.length > 0">
-            <div class="px-5 py-5 border-t border-gray-100 shrink-0 space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="font-semibold text-on-surface-variant text-sm">Total estimado</span>
-                    <span class="font-black text-lg" style="color:{{ $primary }}" x-text="formatCOP(total)"></span>
-                </div>
-                <p class="text-xs text-gray-400 -mt-2">El total final puede variar según disponibilidad.</p>
-                <button @click="cartOpen = false; document.getElementById('modalReservaCart').classList.remove('hidden')"
-                        class="w-full py-3.5 text-white rounded-xl font-black text-sm transition-all active:scale-[0.97] hover:opacity-90 shadow-lg flex items-center justify-center gap-2"
-                        style="background:{{ $primary }}">
-                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">event_available</span>
-                    Confirmar Reserva
-                </button>
-                <button @click="cart = []; cartOpen = false"
-                        class="w-full py-2.5 border border-gray-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors">
-                    Limpiar pedido
-                </button>
             </div>
-        </template>
+        </div>
     </div>
 </div>
 
-{{-- Botón carrito desktop --}}
-<div x-show="count > 0" x-cloak
-     class="fixed bottom-8 right-8 z-50 hidden md:block">
+{{-- ══ MOBILE CART FAB ─────────────────────────────────────────── --}}
+<div class="fixed bottom-6 right-4 z-40 lg:hidden" x-show="cart.length > 0" x-cloak>
     <button @click="cartOpen = true"
-            class="flex items-center gap-3 px-5 py-3.5 text-white rounded-2xl shadow-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.97]"
-            style="background:{{ $primary }}">
-        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">shopping_cart</span>
-        <span x-text="count + ' ítem' + (count > 1 ? 's' : '')"></span>
-        <span class="font-black" x-text="formatCOP(total)"></span>
+            class="flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-5 py-3.5 rounded-2xl shadow-xl shadow-orange-200 font-semibold text-sm transition-all active:scale-95"
+            :class="cartBump ? 'cart-bump' : ''">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">shopping_bag</span>
+        <span x-text="cartCount + ' ítem' + (cartCount !== 1 ? 's' : '')"></span>
+        <span class="bg-white/30 rounded-lg px-2 py-0.5 text-xs font-bold" x-text="'$' + cartTotal.toLocaleString('es-CO')"></span>
     </button>
 </div>
 
-</div>{{-- /x-data --}}
-
-{{-- ══ MODAL: Reserva con carrito ═════════════════════════════ --}}
-<div id="modalReservaCart"
-     class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
-     onclick="if(event.target===this)this.classList.add('hidden')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style="max-height:90vh;">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-            <h3 class="font-bold text-on-surface flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px] text-primary-container">calendar_add_on</span>
-                Confirmar Reserva
-            </h3>
-            <button onclick="document.getElementById('modalReservaCart').classList.add('hidden')"
-                    class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                <span class="material-symbols-outlined text-[20px] text-gray-400">close</span>
+{{-- ══ MOBILE CART DRAWER ───────────────────────────────────────── --}}
+<div x-show="cartOpen" x-cloak class="fixed inset-0 z-50 flex items-end">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cartOpen = false"></div>
+    <div class="relative bg-white w-full rounded-t-3xl shadow-2xl z-10 max-h-[85vh] flex flex-col">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="font-heading text-base font-bold text-gray-900">Mi Selección</h3>
+                <p class="text-xs text-gray-500" x-text="cartCount + ' ítem' + (cartCount !== 1 ? 's' : '')"></p>
+            </div>
+            <button @click="cartOpen = false" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-gray-500 text-[18px]">close</span>
             </button>
         </div>
-        <form method="POST" action="{{ route('reservas.store') }}" class="flex flex-col flex-1 overflow-hidden" id="formReservaCart">
+        <div class="flex-1 overflow-y-auto p-5 space-y-3">
+            <template x-for="item in cart" :key="item.id">
+                <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-gray-800 text-sm truncate" x-text="item.name"></p>
+                        <p class="text-xs text-primary font-bold" x-text="'$' + (item.price * item.qty).toLocaleString('es-CO')"></p>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button @click="removeFromCart(item.id)"
+                                class="w-7 h-7 bg-white border border-gray-200 rounded-lg flex items-center justify-center font-bold text-gray-600 text-sm transition-all">−</button>
+                        <span class="w-5 text-center font-bold text-gray-800 text-sm" x-text="item.qty"></span>
+                        <button @click="addToCart(item)"
+                                class="w-7 h-7 bg-primary rounded-lg flex items-center justify-center font-bold text-white text-sm transition-all">+</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="p-5 border-t border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <span class="font-semibold text-gray-700">Total estimado</span>
+                <span class="text-lg font-bold text-primary" x-text="'$' + cartTotal.toLocaleString('es-CO')"></span>
+            </div>
+            <button @click="cartOpen = false; reservaModal = true"
+                    class="w-full bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-orange-200 active:scale-95 text-sm">
+                Continuar con la reserva
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- ══ MOBILE RESERVE MODAL ─────────────────────────────────────── --}}
+<div x-show="reservaModal" x-cloak class="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="reservaModal = false"></div>
+    <div class="relative bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="font-heading text-base font-bold text-gray-900">Confirmar Reserva</h3>
+                <p class="text-xs text-gray-500">{{ $restaurant->name }}</p>
+            </div>
+            <button @click="reservaModal = false" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-gray-500 text-[18px]">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('reservas.store') }}" class="p-5 space-y-4"
+              @submit.prevent="
+                $el.querySelectorAll('.cart-item-input').forEach(e => e.remove());
+                cart.forEach((item, i) => {
+                    ['id','name','price','qty'].forEach(k => {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'selected_items[' + i + '][' + k + ']';
+                        inp.value = item[k];
+                        inp.className = 'cart-item-input';
+                        $el.appendChild(inp);
+                    });
+                });
+                $el.submit();
+              ">
             @csrf
             <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
-            <input id="cartDataInput" name="selected_items" type="hidden" value="[]">
-            <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
-                {{-- Resumen del pedido --}}
-                <div class="bg-orange-50 rounded-xl p-4 border border-orange-100">
-                    <p class="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Tu pedido — {{ $restaurant->name }}</p>
-                    <div id="cartSummaryModal" class="space-y-1 text-sm"></div>
-                    <div class="border-t border-orange-200 mt-2 pt-2 flex justify-between font-black" id="cartTotalModal"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Fecha *</label>
-                        <input name="reservation_date" type="date" required
-                               min="{{ now()->toDateString() }}"
-                               value="{{ old('reservation_date', now()->addDay()->toDateString()) }}"
-                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all"/>
+
+            @if($cart ?? false)
+            <div class="bg-orange-50 rounded-xl p-3 mb-2">
+                <p class="text-xs font-semibold text-orange-700 mb-1">Tu selección del menú</p>
+                <template x-for="item in cart" :key="item.id">
+                    <div class="flex justify-between text-xs text-gray-600">
+                        <span x-text="item.name + ' × ' + item.qty"></span>
+                        <span class="font-medium text-orange-600" x-text="'$' + (item.price * item.qty).toLocaleString('es-CO')"></span>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Hora *</label>
-                        <select name="reservation_time" required
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all">
-                            @foreach(['12:00','12:30','13:00','13:30','14:00','14:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00'] as $h)
-                            <option value="{{ $h }}">{{ $h }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                </template>
+            </div>
+            @endif
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Fecha</label>
+                    <input type="date" name="reservation_date" required min="{{ now()->format('Y-m-d') }}"
+                           class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Número de personas *</label>
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="var i=document.getElementById('psCart');i.value=Math.max(1,parseInt(i.value||2)-1)"
-                                class="w-10 h-10 rounded-xl bg-gray-100 font-bold text-lg hover:bg-gray-200 active:scale-90 transition-all">−</button>
-                        <input id="psCart" name="party_size" type="number" min="1" max="20" value="2" required
-                               class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center font-bold focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none"/>
-                        <button type="button" onclick="var i=document.getElementById('psCart');i.value=Math.min(20,parseInt(i.value||2)+1)"
-                                class="w-10 h-10 rounded-xl bg-gray-100 font-bold text-lg hover:bg-gray-200 active:scale-90 transition-all">+</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Notas adicionales</label>
-                    <textarea name="notes" rows="2" placeholder="Alergias, ocasión especial, preferencias..."
-                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none transition-all resize-none"></textarea>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Hora</label>
+                    <input type="time" name="reservation_time" required
+                           class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 transition-all">
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100 flex gap-3 shrink-0">
-                <button type="button" onclick="document.getElementById('modalReservaCart').classList.add('hidden')"
-                        class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">
-                    Cancelar
-                </button>
-                <button type="submit" id="btnConfirmReserva"
-                        class="flex-1 py-2.5 text-white rounded-xl text-sm font-black hover:opacity-90 active:scale-[0.97] transition-all shadow-sm"
-                        style="background:{{ $primary }}">
-                    Confirmar Reserva
-                </button>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-2">Personas</label>
+                <div class="flex flex-wrap gap-2">
+                    @foreach(range(1,8) as $n)
+                    <label class="cursor-pointer">
+                        <input type="radio" name="party_size" value="{{ $n }}" class="sr-only peer" {{ $n===2 ? 'checked' : '' }}>
+                        <span class="w-9 h-9 rounded-xl border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white transition-all block">{{ $n }}</span>
+                    </label>
+                    @endforeach
+                </div>
             </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Notas</label>
+                <textarea name="notes" rows="2" placeholder="Alergias, ocasión especial…"
+                          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 resize-none transition-all"></textarea>
+            </div>
+            <button type="submit"
+                    class="w-full bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-orange-200 active:scale-95 text-sm">
+                Solicitar Reserva y obtener QR
+            </button>
         </form>
     </div>
 </div>
 
-<script>
-// ── Estrellas de reseña ────────────────────────────────────────
-function setStar(val) {
-    document.getElementById('ratingVal').value = val;
-    document.querySelectorAll('#starRating button').forEach((btn, idx) => {
-        const filled = idx < val;
-        btn.style.fontVariationSettings = filled ? "'FILL' 1" : "'FILL' 0";
-        btn.className = btn.className.replace(/text-amber-400|text-gray-200/g, '');
-        btn.className += ' ' + (filled ? 'text-amber-400' : 'text-gray-200');
-    });
-}
+{{-- ══ REVIEW MODAL ─────────────────────────────────────────────── --}}
+<div x-show="reviewModal" x-cloak class="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="reviewModal = false"></div>
+    <div class="relative bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl z-10" x-data="{ rating: {{ $userReview?->rating ?? 0 }} }">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-heading text-base font-bold text-gray-900">{{ $userReview ? 'Editar' : 'Escribir' }} reseña</h3>
+            <button @click="reviewModal = false" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-gray-500 text-[18px]">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('restaurante.review', $restaurant) }}" class="p-5 space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-2">Puntuación</label>
+                <div class="flex gap-2">
+                    @foreach(range(1,5) as $star)
+                    <label class="cursor-pointer">
+                        <input type="radio" name="rating" value="{{ $star }}" class="sr-only peer" {{ ($userReview?->rating ?? 0) === $star ? 'checked' : '' }}
+                               x-model="rating">
+                        <span @click="rating = {{ $star }}"
+                              class="material-symbols-outlined text-[32px] transition-all"
+                              :style="rating >= {{ $star }} ? 'color: #f59e0b; font-variation-settings: FILL 1' : 'color: #d1d5db; font-variation-settings: FILL 0'">star</span>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Título <span class="font-normal text-gray-400">(opcional)</span></label>
+                <input type="text" name="title" value="{{ $userReview?->title }}" placeholder="Resumen de tu experiencia"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Comentario <span class="font-normal text-gray-400">(opcional)</span></label>
+                <textarea name="body" rows="3" placeholder="Cuéntanos tu experiencia…"
+                          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary bg-gray-50 resize-none transition-all">{{ $userReview?->body }}</textarea>
+            </div>
+            <button type="submit"
+                    class="w-full bg-primary hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-orange-200 active:scale-95 text-sm">
+                Publicar reseña
+            </button>
+        </form>
+    </div>
+</div>
 
-// ── Sincronizar carrito con el modal de reserva ───────────────
-// Escucha el clic en "Confirmar Reserva" para inyectar el carrito
-document.addEventListener('click', function(e) {
-    if (e.target.closest('#formReservaCart button[type=submit]')) {
-        // Obtener datos del carrito de Alpine.js
-        const alpineEl = document.querySelector('[x-data]');
-        if (alpineEl && alpineEl._x_dataStack) {
-            // Alpine.js v3
-            try {
-                const data = Alpine.evaluate(alpineEl, 'cart');
-                document.getElementById('cartDataInput').value = JSON.stringify(data);
-            } catch(err) {}
-        }
-    }
-});
-
-// Actualizar resumen del modal cuando se abre
-const cartModal = document.getElementById('modalReservaCart');
-const observer = new MutationObserver(() => {
-    if (!cartModal.classList.contains('hidden')) {
-        const alpineEl = document.querySelector('[x-data]');
-        if (!alpineEl) return;
-        try {
-            const cart  = Alpine.evaluate(alpineEl, 'cart');
-            const total = Alpine.evaluate(alpineEl, 'total');
-            document.getElementById('cartDataInput').value = JSON.stringify(cart);
-            const summaryEl = document.getElementById('cartSummaryModal');
-            const totalEl   = document.getElementById('cartTotalModal');
-            if (cart.length === 0) {
-                summaryEl.innerHTML = '<p class="text-gray-400 text-xs">Sin ítems en el pedido.</p>';
-                totalEl.innerHTML = '';
-            } else {
-                summaryEl.innerHTML = cart.map(i =>
-                    '<div class="flex justify-between"><span>' + i.name + ' ×' + i.qty + '</span>' +
-                    '<span class="font-bold">$' + Math.round(i.price * i.qty).toLocaleString('es-CO') + '</span></div>'
-                ).join('');
-                totalEl.innerHTML = '<span>Total estimado</span><span style="color:{{ $primary }}">$' + Math.round(total).toLocaleString('es-CO') + '</span>';
-            }
-        } catch(err) {}
-    }
-});
-if (cartModal) observer.observe(cartModal, { attributes: true, attributeFilter: ['class'] });
-</script>
-
+<style>.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}</style>
 </body>
 </html>

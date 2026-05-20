@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Domains\Reservations\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -29,50 +30,106 @@ class AdminTablesController extends Controller
         Cache::forget('dashboard_stats_' . $this->restaurant()->id);
     }
 
-    // ── Index ─────────────────────────────────────────────────────────
+    // ── Index (vista unificada Mesas + Reservas) ──────────────────────
     public function index(Request $request)
     {
         $restaurant = $this->restaurant();
+        $rid        = $restaurant->id;
         $zonaFiltro = $request->get('zona', '');
 
+        // Mesas
         $query = $restaurant->tables()->orderBy('zone')->orderBy('number');
         if ($zonaFiltro) {
             $query->where('zone', $zonaFiltro);
         }
         $tables = $query->get();
 
-        // Cargar orden activa por mesa (pending o preparing)
+        // Órdenes activas por mesa
         $activeOrders = DB::table('orders')
-            ->where('restaurant_id', $restaurant->id)
+            ->where('restaurant_id', $rid)
             ->whereIn('status', ['pending', 'preparing'])
             ->whereNotNull('table_id')
             ->get()
             ->keyBy('table_id');
 
-        // Cargar meseros del restaurante para el select
+        // Meseros
         $meseros = DB::table('employees')
             ->join('users', 'employees.user_id', '=', 'users.id')
-            ->where('employees.restaurant_id', $restaurant->id)
+            ->where('employees.restaurant_id', $rid)
             ->where('employees.status', 'active')
-            ->whereIn('employees.position', ['Mesero', 'mesero', 'Cajero', 'cajero', 'Manager', 'manager'])
             ->select('employees.id as employee_id', 'employees.user_id', 'employees.position', 'users.name')
             ->get();
-
-        // Si no hay meseros por posición, traer todos los activos
-        if ($meseros->isEmpty()) {
-            $meseros = DB::table('employees')
-                ->join('users', 'employees.user_id', '=', 'users.id')
-                ->where('employees.restaurant_id', $restaurant->id)
-                ->where('employees.status', 'active')
-                ->select('employees.id as employee_id', 'employees.user_id', 'employees.position', 'users.name')
-                ->get();
-        }
 
         $zonas = $restaurant->tables()
             ->distinct()->whereNotNull('zone')->orderBy('zone')->pluck('zone');
 
+        // ── Reservas (próximas y de hoy) ──────────────────────────────
+        $statusFiltro = $request->get('rstatus', 'upcoming');
+
+        $resQuery = Reservation::with(['user', 'waiter.user', 'table'])
+            ->where('restaurant_id', $rid);
+
+        if ($statusFiltro === 'upcoming') {
+            $resQuery->whereIn('status', ['pending', 'confirmed'])
+                     ->where('reservation_date', '>=', now()->toDateString())
+                     ->orderBy('reservation_date')->orderBy('reservation_time');
+        } elseif ($statusFiltro === 'today') {
+            $resQuery->whereDate('reservation_date', now()->toDateString())
+                     ->orderBy('reservation_time');
+        } elseif ($statusFiltro === 'all') {
+            $resQuery->orderByDesc('reservation_date')->orderByDesc('reservation_time');
+        } else {
+            $resQuery->where('status', $statusFiltro)
+                     ->orderByDesc('reservation_date');
+        }
+
+        $reservations     = $resQuery->paginate(25)->withQueryString();
+
+        // Reservas próximas agrupadas por tabla (para mostrar en el plano)
+        $reservationsByTable = Reservation::with('user')
+            ->where('restaurant_id', $rid)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('reservation_date', '>=', now()->toDateString())
+            ->whereNotNull('table_id')
+            ->orderBy('reservation_date')->orderBy('reservation_time')
+            ->get()
+            ->groupBy('table_id');
+
+        // Reservas pendientes sin mesa asignada
+        $unassigned = Reservation::with('user')
+            ->where('restaurant_id', $rid)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('reservation_date', '>=', now()->toDateString())
+            ->whereNull('table_id')
+            ->orderBy('reservation_date')->orderBy('reservation_time')
+            ->get();
+
+        // KPIs
+        $todayCount     = Reservation::where('restaurant_id', $rid)->whereDate('reservation_date', now())->count();
+        $pendingCount   = Reservation::where('restaurant_id', $rid)->where('status', 'pending')->count();
+        $confirmedCount = Reservation::where('restaurant_id', $rid)->where('status', 'confirmed')
+                                     ->where('reservation_date', '>=', now()->toDateString())->count();
+
+        $estimatedRevenue = Reservation::where('restaurant_id', $rid)
+            ->where('status', 'confirmed')
+            ->whereMonth('reservation_date', now()->month)
+            ->get()
+            ->sum(function ($r) {
+                if (!$r->selected_items) return 0;
+                return collect($r->selected_items)->sum(fn($i) => ($i['price'] ?? 0) * ($i['qty'] ?? $i['quantity'] ?? 1));
+            });
+
+        // Meseros para asignar en reservas
+        $waiters = DB::table('employees')
+            ->where('restaurant_id', $rid)->where('status', 'active')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->select('employees.id', 'users.name')
+            ->get();
+
         return view('admin.tables', compact(
-            'restaurant', 'tables', 'activeOrders', 'meseros', 'zonas', 'zonaFiltro'
+            'restaurant', 'tables', 'activeOrders', 'meseros', 'zonas', 'zonaFiltro',
+            'reservations', 'reservationsByTable', 'unassigned', 'statusFiltro',
+            'todayCount', 'pendingCount', 'confirmedCount', 'estimatedRevenue', 'waiters'
         ));
     }
 
@@ -96,7 +153,7 @@ class AdminTablesController extends Controller
         $this->restaurant()->tables()->create($data + ['status' => 'disponible']);
         $this->clearCache();
 
-        return redirect()->route('admin.tables')->with('success', "✓ Mesa {$data['number']} creada exitosamente.");
+        return redirect()->route('admin.tables')->with('success', "✓ Mesa {$data['number']} creada.");
     }
 
     // ── Update ────────────────────────────────────────────────────────
@@ -125,36 +182,47 @@ class AdminTablesController extends Controller
         return redirect()->route('admin.tables')->with('success', "✓ Mesa {$num} eliminada.");
     }
 
-    // ── Sentar cliente ────────────────────────────────────────────────
-    // Marca la mesa como ocupada y crea una orden pendiente
+    // ── Sentar cliente (sin reserva o con reserva ya confirmada) ──────
     public function sentar(Request $request, int $id)
     {
         $request->validate([
-            'party_size'    => 'required|integer|min:1|max:50',
-            'customer_name' => 'nullable|string|max:100',
-            'waiter_user_id'=> 'nullable|exists:users,id',
-            'notes'         => 'nullable|string|max:255',
+            'party_size'      => 'required|integer|min:1|max:50',
+            'customer_name'   => 'nullable|string|max:100',
+            'waiter_user_id'  => 'nullable|exists:users,id',
+            'notes'           => 'nullable|string|max:255',
+            'reservation_id'  => 'nullable|exists:reservations,id',
         ]);
 
         $restaurant = $this->restaurant();
         $table      = $this->table($id);
 
         $table->update([
-            'status'             => 'ocupada',
-            'party_size'         => $request->party_size,
-            'customer_name'      => $request->customer_name,
-            'reservation_notes'  => $request->notes,
-            'is_reserved'        => false,
+            'status'            => 'ocupada',
+            'party_size'        => $request->party_size,
+            'customer_name'     => $request->customer_name,
+            'reservation_notes' => $request->notes,
+            'is_reserved'       => false,
         ]);
 
-        // Crear orden en blanco para esta mesa
+        // Pre-cargar ítems de la reserva en la orden si viene de una reserva
+        $orderItems = [];
+        if ($request->reservation_id) {
+            $res = Reservation::find($request->reservation_id);
+            if ($res && $res->restaurant_id === $restaurant->id) {
+                $res->update(['status' => 'confirmed', 'table_id' => $id]);
+                if ($res->selected_items) {
+                    $orderItems = $res->selected_items;
+                }
+            }
+        }
+
         $restaurant->orders()->create([
             'table_id'  => $table->id,
             'waiter_id' => $request->waiter_user_id ?: null,
             'status'    => 'pending',
             'total'     => 0,
             'tips'      => 0,
-            'items'     => [],
+            'items'     => $orderItems,
         ]);
 
         $this->clearCache();
@@ -162,11 +230,12 @@ class AdminTablesController extends Controller
         return redirect()->route('admin.tables')->with('success', "✓ Mesa {$table->number}{$nombre} registrada como ocupada.");
     }
 
-    // ── Check In (reserva → ocupada) ──────────────────────────────────
+    // ── Check In (reserva llega → mesa ocupada) ───────────────────────
     public function checkIn(Request $request, int $id)
     {
         $request->validate([
             'waiter_user_id' => 'nullable|exists:users,id',
+            'reservation_id' => 'nullable|exists:reservations,id',
         ]);
 
         $restaurant = $this->restaurant();
@@ -177,30 +246,47 @@ class AdminTablesController extends Controller
             'is_reserved' => false,
         ]);
 
+        // Cargar ítems de pre-orden si hay reserva
+        $orderItems = [];
+        if ($request->reservation_id) {
+            $res = Reservation::find($request->reservation_id);
+            if ($res && $res->restaurant_id === $restaurant->id) {
+                $res->update(['status' => 'confirmed', 'table_id' => $id]);
+                if ($res->selected_items) {
+                    $orderItems = $res->selected_items;
+                }
+            }
+        }
+
         $restaurant->orders()->create([
             'table_id'  => $table->id,
             'waiter_id' => $request->waiter_user_id ?: null,
             'status'    => 'pending',
             'total'     => 0,
             'tips'      => 0,
-            'items'     => [],
+            'items'     => $orderItems,
         ]);
 
         $this->clearCache();
         return redirect()->route('admin.tables')->with('success', "✓ Check-in realizado para mesa {$table->number}.");
     }
 
-    // ── Liberar mesa ──────────────────────────────────────────────────
-    // Cierra la orden activa y deja la mesa disponible
+    // ── Liberar mesa (cierra orden + completa reserva vinculada) ──────
     public function liberar(int $id)
     {
         $restaurant = $this->restaurant();
         $table      = $this->table($id);
 
-        // Cerrar órdenes activas de esta mesa
+        // Cerrar órdenes activas
         $restaurant->orders()
             ->where('table_id', $table->id)
             ->whereIn('status', ['pending', 'preparing'])
+            ->update(['status' => 'completed']);
+
+        // Completar reserva vinculada a esta mesa si aún está activa
+        Reservation::where('table_id', $table->id)
+            ->where('restaurant_id', $restaurant->id)
+            ->whereIn('status', ['pending', 'confirmed'])
             ->update(['status' => 'completed']);
 
         $table->update([
@@ -212,10 +298,10 @@ class AdminTablesController extends Controller
         ]);
 
         $this->clearCache();
-        return redirect()->route('admin.tables')->with('success', "✓ Mesa {$table->number} liberada y disponible.");
+        return redirect()->route('admin.tables')->with('success', "✓ Mesa {$table->number} liberada.");
     }
 
-    // ── Cambiar estado de la orden activa de la mesa ─────────────────
+    // ── Cambiar estado de la orden activa ────────────────────────────
     public function updateOrderStatus(Request $request, int $id)
     {
         $request->validate(['status' => 'required|in:pending,preparing,ready,completed']);
@@ -223,28 +309,20 @@ class AdminTablesController extends Controller
         $restaurant = $this->restaurant();
         $table      = $this->table($id);
 
-        $updated = $restaurant->orders()
+        $restaurant->orders()
             ->where('table_id', $table->id)
             ->whereIn('status', ['pending', 'preparing', 'ready'])
             ->update(['status' => $request->status]);
 
-        if ($request->status === 'completed') {
-            // Solo cambia el estado de la orden, NO libera la mesa automáticamente
-            // El admin decide cuándo liberar (puede necesitar cobrar propinas, etc.)
-            $this->clearCache();
-            return redirect()->route('admin.tables')
-                ->with('success', "✓ Pedido de mesa {$table->number} marcado como completado. Cuando cobres, usa 'Liberar mesa'.");
-        }
-
-        $labels = ['pending' => 'pendiente', 'preparing' => 'en preparación', 'ready' => 'listo para servir'];
-        $label  = $labels[$request->status] ?? $request->status;
-
         $this->clearCache();
+
+        $labels = ['pending' => 'pendiente', 'preparing' => 'en preparación', 'ready' => 'listo para servir', 'completed' => 'completado'];
+        $label  = $labels[$request->status] ?? $request->status;
         return redirect()->route('admin.tables')
             ->with('success', "✓ Pedido de mesa {$table->number} marcado como {$label}.");
     }
 
-    // ── Cambiar estado / registrar reserva ───────────────────────────
+    // ── Cambiar estado / registrar reserva manual ────────────────────
     public function updateStatus(Request $request, int $id)
     {
         $data = $request->validate([
@@ -261,7 +339,6 @@ class AdminTablesController extends Controller
         if ($data['status'] === 'reservada') {
             $data['is_reserved'] = true;
         } elseif ($data['status'] === 'disponible') {
-            // Limpiar datos de reserva/ocupación al liberar manualmente
             $data['customer_name']     = null;
             $data['customer_phone']    = null;
             $data['party_size']        = null;
@@ -273,7 +350,41 @@ class AdminTablesController extends Controller
         $table->update($data);
         $this->clearCache();
 
-        $msgs = ['reservada' => '✓ Reserva registrada.', 'disponible' => '✓ Mesa marcada como disponible.'];
+        $msgs = ['reservada' => '✓ Mesa marcada como reservada.', 'disponible' => '✓ Mesa disponible.'];
         return redirect()->route('admin.tables')->with('success', $msgs[$data['status']] ?? '✓ Estado actualizado.');
+    }
+
+    // ── Asignar mesa a una reserva (y confirmarla) ────────────────────
+    public function assignReservation(Request $request, int $tableId)
+    {
+        $request->validate([
+            'reservation_id' => 'required|exists:reservations,id',
+        ]);
+
+        $restaurant = $this->restaurant();
+        $table      = $this->table($tableId);
+
+        $reservation = Reservation::where('id', $request->reservation_id)
+            ->where('restaurant_id', $restaurant->id)
+            ->firstOrFail();
+
+        // Actualizar reserva
+        $reservation->update([
+            'table_id' => $table->id,
+            'status'   => 'confirmed',
+        ]);
+
+        // Marcar la mesa como reservada con datos del cliente
+        $table->update([
+            'status'            => 'reservada',
+            'party_size'        => $reservation->party_size,
+            'customer_name'     => $reservation->user->name ?? null,
+            'reservation_notes' => $reservation->notes,
+            'is_reserved'       => true,
+        ]);
+
+        $this->clearCache();
+        return redirect()->route('admin.tables')
+            ->with('success', "✓ Reserva de {$reservation->user->name} asignada a Mesa {$table->number}.");
     }
 }

@@ -227,7 +227,7 @@
 <h4 class="font-bold text-body-md">Restaurantes</h4>
 <nav class="flex flex-col gap-2 text-slate-400 text-sm">
 <a class="hover:text-white transition-colors" href="#">Gestión Inventario</a>
-<a class="hover:text-white transition-colors" href="#">Staff Manager</a>
+<a class="hover:text-white transition-colors" href="#">Gestión de Personal</a>
 <a class="hover:text-white transition-colors" href="#">POS Cloud</a>
 </nav>
 </div>

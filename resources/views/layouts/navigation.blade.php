@@ -14,7 +14,7 @@
                         <a href="{{ route('dashboard') }}"
                            class="px-3 py-2 rounded-lg text-sm font-medium transition-all
                                   {{ request()->routeIs('dashboard') ? 'bg-orange-50 text-primary-container' : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface' }}">
-                            <span class="material-symbols-outlined text-base align-middle mr-1">dashboard</span>Dashboard
+                            <span class="material-symbols-outlined text-base align-middle mr-1">dashboard</span>Panel Principal
                         </a>
                         <span class="px-3 py-2 text-sm font-medium text-outline cursor-not-allowed" title="Próximamente">
                             <span class="material-symbols-outlined text-base align-middle mr-1">menu_book</span>Menú
@@ -100,7 +100,7 @@
         <div class="px-4 py-3 space-y-1">
             <a href="{{ route('dashboard') }}"
                class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-low">
-                <span class="material-symbols-outlined text-lg text-outline">dashboard</span>Dashboard
+                <span class="material-symbols-outlined text-lg text-outline">dashboard</span>Panel Principal
             </a>
             <a href="{{ route('profile.edit') }}"
                class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-low">

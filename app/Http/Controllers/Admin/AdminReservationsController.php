@@ -93,7 +93,41 @@ class AdminReservationsController extends Controller
             'table_id'  => 'nullable|exists:tables,id',
         ]);
 
-        $reservation->update(array_filter($validated));
+        $oldTableId = $reservation->table_id;
+        $reservation->update(array_filter($validated, fn($v) => $v !== null));
+
+        // Sync table status when reservation status changes
+        $newTableId = $validated['table_id'] ?? $oldTableId;
+
+        if ($newTableId) {
+            $table = $restaurant->tables()->find($newTableId);
+            if ($table) {
+                if ($validated['status'] === 'confirmed') {
+                    $table->update([
+                        'status'            => 'reservada',
+                        'party_size'        => $reservation->party_size,
+                        'customer_name'     => $reservation->user->name ?? null,
+                        'reservation_notes' => $reservation->notes,
+                        'is_reserved'       => true,
+                    ]);
+                } elseif (in_array($validated['status'], ['cancelled', 'completed'])) {
+                    // Only free the table if no other active reservation uses it
+                    $otherActive = Reservation::where('table_id', $newTableId)
+                        ->where('id', '!=', $reservation->id)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->exists();
+                    if (!$otherActive && $table->status === 'reservada') {
+                        $table->update([
+                            'status'            => 'disponible',
+                            'customer_name'     => null,
+                            'party_size'        => null,
+                            'reservation_notes' => null,
+                            'is_reserved'       => false,
+                        ]);
+                    }
+                }
+            }
+        }
 
         return back()->with('success', 'Reserva actualizada correctamente.');
     }
