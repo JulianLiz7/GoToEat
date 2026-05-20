@@ -196,7 +196,7 @@
                     ← Volver
                 </a>
                 <button type="submit"
-                        class="px-8 py-3 rounded-xl bg-primary-container text-white font-bold shadow-lg shadow-orange-200 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 text-sm">
+                        class="px-8 py-3 rounded-xl bg-primary text-white font-bold shadow-lg shadow-orange-200 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 text-sm">
                     <span class="material-symbols-outlined text-[18px]">person_add</span>
                     Agregar empleado
                 </button>

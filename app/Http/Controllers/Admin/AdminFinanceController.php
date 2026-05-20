@@ -383,13 +383,21 @@ class AdminFinanceController extends Controller
         $depositAmount = (float) ($validated['deposit_amount'] ?? 0);
         $cashCounted   = (float) $validated['cash_counted'];
 
-        if ($depositAmount > 0) {
-            // Registrar el depósito como ingreso en la tabla de órdenes especiales
-            // Usamos la tabla 'orders' con un total ficticio marcado como cierre de caja
-            // Para no mezclar con órdenes reales, usamos la tabla expenses con amount negativo (ajuste)
-            // O mejor: crear un ingreso explícito en una tabla de ingresos manuales.
-            // Por ahora, registramos el cierre como un egreso negativo (abono) en expenses
-            // con categoría "Cierre de Caja" para reflejarlo en los dashboards.
+        // Registrar cash_counted como ingreso del día en la tabla orders
+        // Así aparece en los dashboards de ingresos diarios, semanales y mensuales
+        if ($cashCounted > 0) {
+            DB::table('orders')->insert([
+                'restaurant_id' => $restaurant->id,
+                'table_id'      => null,
+                'waiter_id'     => null,
+                'status'        => 'completed',
+                'total'         => $cashCounted,
+                'tips'          => 0,
+                'items'         => json_encode([['name' => 'Cierre de Caja — ' . now()->format('d/m/Y'), 'qty' => 1, 'price' => $cashCounted]]),
+                'notes'         => 'Ingreso registrado desde cierre de caja. Depósito: $' . number_format($depositAmount, 0, ',', '.'),
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
         }
 
         // Cache bust para que los dashboards reflejen el nuevo cierre

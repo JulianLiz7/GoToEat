@@ -95,7 +95,7 @@
 </div>
 
 {{-- ── Distribución + Registrar ───────────────────────────── --}}
-<div class="grid grid-cols-1 md:grid-cols-5 gap-5 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-8 items-start">
     {{-- Donut --}}
     <div class="md:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-6">

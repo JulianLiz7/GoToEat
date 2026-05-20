@@ -602,8 +602,8 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
            @click="tab = 'reservas'"
            class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
                   {{ $statusFiltro === $val
-                     ? 'bg-primary-container text-white shadow-sm'
-                     : 'bg-white border border-gray-200 text-gray-500 hover:border-primary-container hover:text-primary-container' }}">
+                     ? 'bg-primary text-white shadow-sm'
+                     : 'bg-white border border-gray-200 text-gray-500 hover:border-primary hover:text-primary' }}">
             {{ $lbl }}
             @if($val === 'pending' && $pendingCount > 0)
             <span class="ml-1 bg-amber-500 text-white text-xs rounded-full px-1.5 py-0.5">{{ $pendingCount }}</span>

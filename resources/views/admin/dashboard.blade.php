@@ -16,7 +16,7 @@
             PDF
         </a>
         <a href="{{ route('admin.export.csv') }}"
-           class="flex items-center gap-2 px-4 py-2.5 bg-primary-container text-white rounded-xl shadow-sm shadow-orange-200
+           class="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl shadow-sm shadow-orange-200
                   font-bold text-sm hover:bg-primary hover:shadow-md active:scale-95 transition-all">
             <span class="material-symbols-outlined text-[18px]">table_chart</span>
             CSV

@@ -20,7 +20,7 @@
             Enviar aviso
         </button>
         <a href="{{ route('admin.staff.create') }}"
-           class="flex items-center gap-2 bg-primary-container text-white px-5 py-3 rounded-2xl font-bold
+           class="flex items-center gap-2 bg-primary text-white px-5 py-3 rounded-2xl font-bold
                   hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-200">
             <span class="material-symbols-outlined text-[18px]">person_add</span>
             Agregar empleado
@@ -394,7 +394,7 @@
 
         {{-- Botón de acción --}}
         <button type="button" onclick="cerrarModal('modalCredenciales')"
-                class="w-full py-4 rounded-2xl bg-primary-container text-white font-bold shadow-lg shadow-orange-200 hover:brightness-110 active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+                class="w-full py-4 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-orange-200 hover:brightness-110 active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
             <span class="material-symbols-outlined text-[18px]">check_circle</span>
             Entendido y Copiado
         </button>

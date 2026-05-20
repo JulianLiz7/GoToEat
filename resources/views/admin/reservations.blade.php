@@ -38,8 +38,8 @@
     <a href="{{ route('admin.reservations', ['status' => $val]) }}"
        class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
               {{ $status === $val
-                 ? 'bg-primary-container text-white shadow-sm'
-                 : 'bg-white border border-gray-200 text-gray-500 hover:border-primary-container hover:text-primary-container' }}">
+                 ? 'bg-primary text-white shadow-sm'
+                 : 'bg-white border border-gray-200 text-gray-500 hover:border-primary hover:text-primary' }}">
         {{ $lbl }}
     </a>
     @endforeach

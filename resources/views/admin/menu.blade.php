@@ -13,7 +13,7 @@
         <p class="text-gray-500 mt-1">Administra los platos y categorías de tu restaurante.</p>
     </div>
     <button onclick="abrirModalMenu('modalCrearPlato')"
-            class="flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-2xl font-bold
+            class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-2xl font-bold
                    hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-orange-200 shrink-0">
         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">add_circle</span>
         Crear nuevo plato
@@ -32,13 +32,13 @@
 <div class="flex gap-3 mb-8 overflow-x-auto pb-2">
     <a href="{{ route('admin.menu') }}"
        class="px-5 py-2 rounded-full font-bold text-sm whitespace-nowrap transition-all
-              {{ !$categoriaFiltro ? 'bg-primary-container text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400 hover:text-orange-500' }}">
+              {{ !$categoriaFiltro ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400 hover:text-orange-500' }}">
         Todos los platos
     </a>
     @foreach($todasCategorias as $cat)
     <a href="{{ route('admin.menu', ['categoria' => $cat]) }}"
        class="px-5 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all
-              {{ $categoriaFiltro === $cat ? 'bg-primary-container text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400 hover:text-orange-500' }}">
+              {{ $categoriaFiltro === $cat ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400 hover:text-orange-500' }}">
         {{ $cat }}
     </a>
     @endforeach
