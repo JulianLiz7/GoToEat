@@ -314,7 +314,7 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
                     @endif
                 </div>
 
-                {{-- Acciones según estado --}}
+                {{-- Acciones simplificadas en la tarjeta --}}
                 <div class="px-5 pb-5 space-y-2">
                     @if($mesa->status === 'disponible')
                     <button @click="sentarModal = true"
@@ -322,64 +322,25 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
                         <span class="material-symbols-outlined text-[18px]">person_add</span>
                         Sentar cliente
                     </button>
-
                     @elseif($mesa->status === 'reservada')
                     <button @click="checkInModal = true"
                             class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95">
                         <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">how_to_reg</span>
                         Registrar llegada
                     </button>
-
                     @elseif($mesa->status === 'ocupada')
-                    {{-- Actualizar orden --}}
-                    @if($orden)
-                    <div class="grid grid-cols-3 gap-1">
-                        @foreach(['preparing' => ['label'=>'Preparando','icon'=>'cooking'], 'ready' => ['label'=>'Listo','icon'=>'check_circle'], 'completed' => ['label'=>'Cobrado','icon'=>'payments']] as $st => $info)
-                        <form method="POST" action="{{ route('admin.tables.order.status', $mesa->id) }}">
-                            @csrf @method('PATCH')
-                            <input type="hidden" name="status" value="{{ $st }}">
-                            <button type="submit"
-                                    class="w-full text-center text-[10px] font-bold py-2 rounded-lg {{ $orden->status === $st ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-all"
-                                    title="{{ $info['label'] }}">
-                                {{ $info['label'] }}
-                            </button>
-                        </form>
-                        @endforeach
-                    </div>
-                    @endif
-                    {{-- Ver Recibo --}}
                     <a href="{{ route('admin.tables.recibo', $mesa->id) }}"
                        class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-sm shadow-orange-200">
                         <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">receipt_long</span>
                         Ver Recibo
                     </a>
-                    <form method="POST" action="{{ route('admin.tables.liberar', $mesa->id) }}">
-                        @csrf
-                        <button type="submit" onclick="return confirm('¿Liberar Mesa {{ $mesa->number }} sin registrar cobro?')"
-                                class="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95">
-                            <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
-                            Liberar sin cobrar
-                        </button>
-                    </form>
                     @endif
 
-                    {{-- Editar / Eliminar --}}
-                    <div class="flex gap-2 pt-1">
-                        <button @click="editModal = true"
-                                class="flex-1 flex items-center justify-center gap-1 text-xs text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 py-2 rounded-xl transition-colors">
-                            <span class="material-symbols-outlined text-[16px]">edit</span>
-                            Editar
-                        </button>
-                        <form method="POST" action="{{ route('admin.tables.destroy', $mesa->id) }}" class="flex-1"
-                              onsubmit="return confirm('¿Eliminar Mesa {{ $mesa->number }}? Esta acción no se puede deshacer.')">
-                            @csrf @method('DELETE')
-                            <button type="submit"
-                                    class="w-full flex items-center justify-center gap-1 text-xs text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 py-2 rounded-xl transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">delete</span>
-                                Eliminar
-                            </button>
-                        </form>
-                    </div>
+                    <button @click="editModal = true"
+                            class="w-full flex items-center justify-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 py-2.5 rounded-xl transition-colors font-semibold">
+                        <span class="material-symbols-outlined text-[18px]">tune</span>
+                        Gestionar mesa
+                    </button>
                 </div>
 
                 {{-- ── MODAL: Registro de llegada ─────────────────── --}}
@@ -546,44 +507,111 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
                 </div>
                 @endif
 
-                {{-- ── MODAL: Editar mesa ──────────────────────────── --}}
+                {{-- ── MODAL: Gestionar mesa (unificado) ───────────── --}}
                 <div x-show="editModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div class="absolute inset-0 bg-black/50" @click="editModal = false"></div>
-                    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm z-10 overflow-hidden">
-                        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-                            <h3 class="font-bold text-gray-900">Editar Mesa {{ $mesa->number }}</h3>
+                    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm z-10 overflow-hidden max-h-[92vh] overflow-y-auto">
+                        {{-- Header --}}
+                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full {{ $cfg['dotColor'] }}"></span>
+                                <h3 class="font-bold text-gray-900">Mesa {{ $mesa->number }} · {{ $cfg['label'] }}</h3>
+                            </div>
                             <button @click="editModal = false" class="text-gray-400 hover:text-gray-600">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
-                        <form method="POST" action="{{ route('admin.tables.update', $mesa->id) }}" class="p-6 space-y-4">
+
+                        {{-- Editar datos básicos --}}
+                        <form method="POST" action="{{ route('admin.tables.update', $mesa->id) }}" class="p-5 space-y-3 border-b border-gray-100">
                             @csrf @method('PUT')
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Número / nombre</label>
-                                <input type="text" name="number" value="{{ $mesa->number }}" required
-                                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Datos de la mesa</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">Número / nombre</label>
+                                    <input type="text" name="number" value="{{ $mesa->number }}" required
+                                           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">Capacidad</label>
+                                    <input type="number" name="capacity" value="{{ $mesa->capacity }}" min="1" max="50" required
+                                           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Capacidad</label>
-                                <input type="number" name="capacity" value="{{ $mesa->capacity }}" min="1" max="50" required
-                                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Zona</label>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1">Zona</label>
                                 <input type="text" name="zone" value="{{ $mesa->zone }}" placeholder="Ej: Terraza, Salón principal…"
-                                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
+                                       class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none">
                             </div>
-                            <div class="flex gap-3 pt-2">
-                                <button type="button" @click="editModal = false"
-                                        class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600">
-                                    Cancelar
-                                </button>
-                                <button type="submit"
-                                        class="flex-1 py-2.5 bg-on-surface text-white rounded-xl text-sm font-bold">
-                                    Guardar
-                                </button>
-                            </div>
+                            <button type="submit"
+                                    class="w-full py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-sm font-bold transition-all">
+                                Guardar cambios
+                            </button>
                         </form>
+
+                        {{-- Estado de la orden (solo ocupada) --}}
+                        @if($mesa->status === 'ocupada' && $orden)
+                        <div class="p-5 border-b border-gray-100 space-y-3">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Estado del pedido</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach(['preparing' => ['label'=>'Preparando','icon'=>'cooking','color'=>'amber'], 'ready' => ['label'=>'Listo','icon'=>'check_circle','color'=>'emerald'], 'completed' => ['label'=>'Cobrado','icon'=>'payments','color'=>'blue']] as $st => $info)
+                                <form method="POST" action="{{ route('admin.tables.order.status', $mesa->id) }}">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="{{ $st }}">
+                                    <button type="submit"
+                                            class="w-full flex flex-col items-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition-all
+                                                   {{ $orden->status === $st
+                                                      ? 'bg-'.$info['color'].'-500 text-white shadow-sm'
+                                                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200' }}">
+                                        <span class="material-symbols-outlined text-[16px]"
+                                              style="{{ $orden->status === $st ? 'font-variation-settings:FILL 1' : '' }}">{{ $info['icon'] }}</span>
+                                        {{ $info['label'] }}
+                                    </button>
+                                </form>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Acciones de disponibilidad --}}
+                        @if($mesa->status !== 'disponible')
+                        <div class="p-5 border-b border-gray-100 space-y-2">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Disponibilidad</p>
+                            @if($mesa->status === 'ocupada')
+                            <form method="POST" action="{{ route('admin.tables.liberar', $mesa->id) }}">
+                                @csrf
+                                <button type="submit" onclick="return confirm('¿Liberar Mesa {{ $mesa->number }} sin registrar cobro?')"
+                                        class="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl text-sm font-bold transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
+                                    Liberar sin cobrar
+                                </button>
+                            </form>
+                            @else
+                            <form method="POST" action="{{ route('admin.tables.status', $mesa->id) }}">
+                                @csrf @method('PATCH')
+                                <input type="hidden" name="status" value="disponible">
+                                <button type="submit"
+                                        class="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+                                    Marcar como disponible
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+                        @endif
+
+                        {{-- Eliminar --}}
+                        <div class="p-5">
+                            <form method="POST" action="{{ route('admin.tables.destroy', $mesa->id) }}"
+                                  onsubmit="return confirm('¿Eliminar Mesa {{ $mesa->number }}? Esta acción no se puede deshacer.')">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="w-full flex items-center justify-center gap-2 text-sm text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 py-2.5 rounded-xl transition-colors font-semibold">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    Eliminar mesa
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
