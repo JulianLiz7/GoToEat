@@ -142,8 +142,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
+<div class="mb-8">
     {{-- Bar Chart: Ingresos vs Egresos --}}
     <div class="bg-white p-7 rounded-2xl shadow-sm shadow-gray-200/50">
         <div class="flex justify-between items-center mb-6">
@@ -156,20 +155,6 @@
         </div>
         <div class="relative h-48">
             <canvas id="barChart"></canvas>
-        </div>
-    </div>
-
-    {{-- Line Chart: Órdenes por día --}}
-    <div class="bg-white p-7 rounded-2xl shadow-sm shadow-gray-200/50">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-bold font-heading">Órdenes por Día</h3>
-            <div class="flex items-center gap-2 text-xs">
-                <span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>
-                <span class="text-gray-500">Pedidos</span>
-            </div>
-        </div>
-        <div class="relative h-48">
-            <canvas id="lineChart"></canvas>
         </div>
     </div>
 </div>
@@ -458,45 +443,6 @@ new Chart(barCtx, {
                 grid: { color: '#f3f4f6' },
                 border: { display: false },
                 ticks: { callback: v => '$' + v.toLocaleString() }
-            }
-        }
-    }
-});
-
-// ── Line Chart: Órdenes por día ───────────────────────────────────
-const lineCtx = document.getElementById('lineChart');
-new Chart(lineCtx, {
-    type: 'line',
-    data: {
-        labels: @json($stats['chartLabels']->values()),
-        datasets: [{
-            label: 'Pedidos',
-            data: @json($stats['dailyOrders']->values()),
-            borderColor: '#f97316',
-            backgroundColor: 'rgba(249,115,22,0.08)',
-            borderWidth: 3,
-            pointBackgroundColor: '#f97316',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: true,
-            tension: 0.4,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: {
-                grid: { display: false },
-                border: { display: false },
-                ticks: { maxTicksLimit: 5, font: { size: 11 } }
-            },
-            y: {
-                grid: { color: '#f3f4f6' },
-                border: { display: false },
-                ticks: { stepSize: 1, font: { size: 11 } },
-                beginAtZero: true,
             }
         }
     }
