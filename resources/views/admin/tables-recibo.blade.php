@@ -62,31 +62,39 @@
             <div class="space-y-3 mb-6">
                 {{-- Encabezado de tabla --}}
                 <div class="grid grid-cols-12 text-xs font-bold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100">
-                    <div class="col-span-6">Ítem</div>
-                    <div class="col-span-2 text-center">Cant.</div>
-                    <div class="col-span-2 text-right">P. Unit.</div>
+                    <div class="col-span-5">Plato</div>
+                    <div class="col-span-3">Tipo</div>
+                    <div class="col-span-1 text-center">Cant.</div>
+                    <div class="col-span-1 text-right">P/u</div>
                     <div class="col-span-2 text-right">Subtotal</div>
                 </div>
 
                 @php $subtotalCalc = 0; @endphp
                 @foreach($items as $item)
                 @php
-                    $qty      = $item['qty'] ?? $item['quantity'] ?? 1;
-                    $price    = $item['price'] ?? 0;
+                    $qty       = $item['qty'] ?? 1;
+                    $price     = $item['price'] ?? 0;
                     $lineTotal = $price * $qty;
                     $subtotalCalc += $lineTotal;
+                    $category  = $item['category'] ?? null;
                 @endphp
-                <div class="grid grid-cols-12 items-center py-2.5 border-b border-gray-50 hover:bg-gray-50/50 rounded-lg transition-colors">
-                    <div class="col-span-6">
-                        <p class="font-semibold text-on-surface text-sm">{{ $item['name'] ?? 'Ítem sin nombre' }}</p>
-                        @if(!empty($item['category']))
-                        <p class="text-xs text-gray-400">{{ $item['category'] }}</p>
+                <div class="grid grid-cols-12 items-center py-3 border-b border-gray-50 hover:bg-orange-50/30 rounded-lg transition-colors">
+                    <div class="col-span-5">
+                        <p class="font-semibold text-on-surface text-sm">{{ $item['name'] ?? 'Ítem' }}</p>
+                    </div>
+                    <div class="col-span-3">
+                        @if($category)
+                        <span class="inline-block bg-orange-50 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                            {{ $category }}
+                        </span>
+                        @else
+                        <span class="text-xs text-gray-300">—</span>
                         @endif
                     </div>
-                    <div class="col-span-2 text-center">
+                    <div class="col-span-1 text-center">
                         <span class="text-sm font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">×{{ $qty }}</span>
                     </div>
-                    <div class="col-span-2 text-right text-sm text-gray-500">
+                    <div class="col-span-1 text-right text-sm text-gray-500">
                         ${{ number_format($price, 0, ',', '.') }}
                     </div>
                     <div class="col-span-2 text-right font-bold text-on-surface text-sm">

@@ -351,7 +351,7 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
                     <a href="{{ route('admin.tables.recibo', $mesa->id) }}"
                        class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-sm shadow-orange-200">
                         <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">receipt_long</span>
-                        Ver Recibo / Cerrar Cuenta
+                        Ver Recibo
                     </a>
                     <form method="POST" action="{{ route('admin.tables.liberar', $mesa->id) }}">
                         @csrf

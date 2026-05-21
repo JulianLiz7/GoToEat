@@ -406,9 +406,28 @@ class AdminTablesController extends Controller
                 ->with('error', "No hay orden activa para Mesa {$table->number}.");
         }
 
-        // Calcular totales desde los ítems
-        $items    = $order->items ?? [];
-        $subtotal = collect($items)->sum(fn($i) => ($i['price'] ?? 0) * ($i['qty'] ?? $i['quantity'] ?? 1));
+        // Enriquecer ítems con datos del menú (categoría + precio oficial)
+        $rawItems = $order->items ?? [];
+        $menuIds  = array_filter(array_column($rawItems, 'id'));
+        $menuData = DB::table('menu_items')
+            ->whereIn('id', $menuIds)
+            ->get(['id', 'name', 'category', 'price', 'image'])
+            ->keyBy('id');
+
+        $items = collect($rawItems)->map(function ($item) use ($menuData) {
+            $id      = $item['id'] ?? null;
+            $menu    = $id ? $menuData->get($id) : null;
+            return [
+                'id'       => $id,
+                'name'     => $menu->name    ?? $item['name']  ?? 'Ítem',
+                'category' => $menu->category ?? $item['category'] ?? null,
+                'price'    => $menu->price    ?? $item['price'] ?? 0,
+                'qty'      => $item['qty']    ?? $item['quantity'] ?? 1,
+                'image'    => $menu->image    ?? null,
+            ];
+        })->toArray();
+
+        $subtotal = collect($items)->sum(fn($i) => $i['price'] * $i['qty']);
 
         // Mesero asignado
         $waiter  = null;
@@ -462,8 +481,13 @@ class AdminTablesController extends Controller
         }
 
         $tipAmount = (float) ($request->tip_amount ?? 0);
-        $items     = $order->items ?? [];
-        $subtotal  = collect($items)->sum(fn($i) => ($i['price'] ?? 0) * ($i['qty'] ?? $i['quantity'] ?? 1));
+        $rawItems  = $order->items ?? [];
+        $menuIds   = array_filter(array_column($rawItems, 'id'));
+        $menuData  = DB::table('menu_items')->whereIn('id', $menuIds)->get(['id','price'])->keyBy('id');
+        $subtotal  = collect($rawItems)->sum(function ($i) use ($menuData) {
+            $price = ($menuData->get($i['id'] ?? null)->price ?? $i['price'] ?? 0);
+            return $price * ($i['qty'] ?? $i['quantity'] ?? 1);
+        });
         $total     = $subtotal + $tipAmount;
 
         // Registrar propina en la tabla tips (→ nómina del mesero)
