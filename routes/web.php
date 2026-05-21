@@ -65,6 +65,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::patch('/tables/{id}/estado', [AdminTablesController::class, 'updateStatus'])->name('tables.status');
     Route::patch('/tables/{id}/orden-estado', [AdminTablesController::class, 'updateOrderStatus'])->name('tables.order.status');
     Route::post('/tables/{id}/assign-reservation', [AdminTablesController::class, 'assignReservation'])->name('tables.assign.reservation');
+    Route::get('/tables/{id}/recibo',              [AdminTablesController::class, 'recibo'])->name('tables.recibo');
+    Route::post('/tables/{id}/cerrar',             [AdminTablesController::class, 'cerrarCuenta'])->name('tables.cerrar');
     // ── Finanzas (sub-panel propio) ───────────────────────────────
     Route::get('/finance', [AdminFinanceController::class, 'resumen'])->name('finance');
     Route::get('/finance/ingresos', [AdminFinanceController::class, 'ingresos'])->name('finance.ingresos');

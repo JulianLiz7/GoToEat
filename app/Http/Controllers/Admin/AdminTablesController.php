@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Domains\Reservations\Models\Reservation;
+use App\Domains\Finance\Models\Tip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -386,5 +387,120 @@ class AdminTablesController extends Controller
         $this->clearCache();
         return redirect()->route('admin.tables')
             ->with('success', "✓ Reserva de {$reservation->user->name} asignada a Mesa {$table->number}.");
+    }
+
+    // ── Recibo / Factura de mesa ──────────────────────────────────────
+    public function recibo(int $id)
+    {
+        $restaurant = $this->restaurant();
+        $table      = $this->table($id);
+
+        $order = $restaurant->orders()
+            ->where('table_id', $table->id)
+            ->whereIn('status', ['pending', 'preparing', 'ready', 'completed'])
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('admin.tables')
+                ->with('error', "No hay orden activa para Mesa {$table->number}.");
+        }
+
+        // Calcular totales desde los ítems
+        $items    = $order->items ?? [];
+        $subtotal = collect($items)->sum(fn($i) => ($i['price'] ?? 0) * ($i['qty'] ?? $i['quantity'] ?? 1));
+
+        // Mesero asignado
+        $waiter  = null;
+        $meseros = collect();
+        if ($order->waiter_id) {
+            $waiter = DB::table('employees')
+                ->join('users', 'employees.user_id', '=', 'users.id')
+                ->where('users.id', $order->waiter_id)
+                ->where('employees.restaurant_id', $restaurant->id)
+                ->select('employees.id as employee_id', 'employees.user_id', 'employees.position', 'users.name')
+                ->first();
+        }
+        $meseros = DB::table('employees')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->where('employees.restaurant_id', $restaurant->id)
+            ->where('employees.status', 'active')
+            ->select('employees.id as employee_id', 'employees.user_id', 'employees.position', 'users.name')
+            ->get();
+
+        // Propina previa si ya se registró
+        $tipRecord = DB::table('tips')
+            ->where('order_id', $order->id)
+            ->where('restaurant_id', $restaurant->id)
+            ->first();
+
+        return view('admin.tables-recibo', compact(
+            'restaurant', 'table', 'order', 'items', 'subtotal', 'waiter', 'meseros', 'tipRecord'
+        ));
+    }
+
+    // ── Cerrar cuenta con propina ─────────────────────────────────────
+    public function cerrarCuenta(Request $request, int $id)
+    {
+        $request->validate([
+            'tip_amount'     => 'nullable|numeric|min:0',
+            'tip_employee_id'=> 'nullable|exists:employees,id',
+            'payment_method' => 'required|in:efectivo,tarjeta,transferencia',
+        ]);
+
+        $restaurant = $this->restaurant();
+        $table      = $this->table($id);
+
+        $order = $restaurant->orders()
+            ->where('table_id', $table->id)
+            ->whereIn('status', ['pending', 'preparing', 'ready'])
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('admin.tables')->with('error', 'No hay orden activa.');
+        }
+
+        $tipAmount = (float) ($request->tip_amount ?? 0);
+        $items     = $order->items ?? [];
+        $subtotal  = collect($items)->sum(fn($i) => ($i['price'] ?? 0) * ($i['qty'] ?? $i['quantity'] ?? 1));
+        $total     = $subtotal + $tipAmount;
+
+        // Registrar propina en la tabla tips (→ nómina del mesero)
+        if ($tipAmount > 0 && $request->tip_employee_id) {
+            Tip::create([
+                'restaurant_id'  => $restaurant->id,
+                'order_id'       => $order->id,
+                'employee_id'    => $request->tip_employee_id,
+                'amount'         => $tipAmount,
+                'date'           => now()->toDateString(),
+                'payment_method' => $request->payment_method,
+            ]);
+        }
+
+        // Cerrar la orden
+        $order->update([
+            'status' => 'completed',
+            'total'  => $subtotal,
+            'tips'   => $tipAmount,
+        ]);
+
+        // Liberar la mesa
+        $table->update([
+            'status'            => 'disponible',
+            'customer_name'     => null,
+            'party_size'        => null,
+            'reservation_notes' => null,
+            'is_reserved'       => false,
+        ]);
+
+        $this->clearCache();
+
+        $msg = "✓ Mesa {$table->number} cerrada. Total: $" . number_format($total, 0, ',', '.');
+        if ($tipAmount > 0) {
+            $msg .= " (Propina: $" . number_format($tipAmount, 0, ',', '.') . " registrada en nómina)";
+        }
+
+        return redirect()->route('admin.tables')->with('success', $msg);
     }
 }

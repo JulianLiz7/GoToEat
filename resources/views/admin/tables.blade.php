@@ -347,12 +347,18 @@ $capacityPct   = $total > 0 ? round(($ocupadas / $total) * 100) : 0;
                         @endforeach
                     </div>
                     @endif
+                    {{-- Ver Recibo --}}
+                    <a href="{{ route('admin.tables.recibo', $mesa->id) }}"
+                       class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-sm shadow-orange-200">
+                        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">receipt_long</span>
+                        Ver Recibo / Cerrar Cuenta
+                    </a>
                     <form method="POST" action="{{ route('admin.tables.liberar', $mesa->id) }}">
                         @csrf
-                        <button type="submit" onclick="return confirm('¿Liberar Mesa {{ $mesa->number }}?')"
+                        <button type="submit" onclick="return confirm('¿Liberar Mesa {{ $mesa->number }} sin registrar cobro?')"
                                 class="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95">
                             <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
-                            Liberar mesa
+                            Liberar sin cobrar
                         </button>
                     </form>
                     @endif
