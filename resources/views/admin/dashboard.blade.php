@@ -110,9 +110,8 @@
 </div>
 
 {{-- ── Gráficas ─────────────────────────────────────────────────── --}}
-{{-- ══ SALES DYNAMICS — Gráfico premium ═══════════════════════════ --}}
-<div class="mb-6 rounded-3xl overflow-hidden shadow-xl"
-     style="background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);"
+{{-- ══ DINÁMICA DE VENTAS ══════════════════════════════════════════ --}}
+<div class="mb-6 bg-white rounded-2xl shadow-sm shadow-gray-200/50 overflow-hidden"
      x-data="{
          mode: 'daily',
          setMode(m) {
@@ -122,20 +121,20 @@
      }">
     <div class="px-7 pt-6 pb-2 flex items-center justify-between">
         <div>
-            <p class="text-[11px] font-bold uppercase tracking-widest text-white/40 mb-1">Dinámica de Ventas</p>
-            <h3 class="text-xl font-bold text-white">Sales Dynamics</h3>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Análisis Temporal</p>
+            <h3 class="text-xl font-bold font-heading text-on-background">Dinámica de Ventas</h3>
         </div>
-        <div class="flex gap-1 bg-white/10 rounded-xl p-1">
+        <div class="flex gap-1 bg-gray-100 rounded-xl p-1">
             @foreach(['hourly' => 'Por Hora', 'daily' => 'Diario', 'monthly' => 'Semanal'] as $key => $label)
             <button @click="setMode('{{ $key }}')"
-                    :class="mode === '{{ $key }}' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/60 hover:text-white'"
+                    :class="mode === '{{ $key }}' ? 'bg-primary text-white shadow-sm shadow-orange-200' : 'text-gray-500 hover:text-gray-700'"
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
                 {{ $label }}
             </button>
             @endforeach
         </div>
     </div>
-    <div class="px-4 pb-4">
+    <div class="px-4 pb-5">
         <div class="relative h-52">
             <canvas id="salesDynamicsChart"></canvas>
         </div>
@@ -345,12 +344,12 @@ window.renderSalesDynamics = function(mode) {
             datasets: [{
                 label: d.label,
                 data: d.data,
-                borderColor: '#a78bfa',
+                borderColor: '#f97316',
                 borderWidth: 2.5,
                 pointRadius: 0,
                 pointHoverRadius: 5,
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: '#a78bfa',
+                pointHoverBorderColor: '#f97316',
                 pointHoverBorderWidth: 2,
                 fill: true,
                 tension: 0.45,
@@ -359,9 +358,9 @@ window.renderSalesDynamics = function(mode) {
                     const {ctx: c, chartArea} = chart;
                     if (!chartArea) return 'transparent';
                     const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    gradient.addColorStop(0, 'rgba(167,139,250,0.35)');
-                    gradient.addColorStop(0.6, 'rgba(167,139,250,0.08)');
-                    gradient.addColorStop(1, 'rgba(167,139,250,0)');
+                    gradient.addColorStop(0, 'rgba(249,115,22,0.25)');
+                    gradient.addColorStop(0.6, 'rgba(249,115,22,0.06)');
+                    gradient.addColorStop(1, 'rgba(249,115,22,0)');
                     return gradient;
                 },
             }]
@@ -373,12 +372,11 @@ window.renderSalesDynamics = function(mode) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: '#fff',
+                    borderColor: '#f3f4f6',
                     borderWidth: 1,
-                    titleColor: '#fff',
-                    bodyColor: '#a78bfa',
+                    titleColor: '#111827',
+                    bodyColor: '#f97316',
                     padding: 10,
                     callbacks: {
                         label: ctx => mode === 'monthly'
@@ -389,15 +387,15 @@ window.renderSalesDynamics = function(mode) {
             },
             scales: {
                 x: {
-                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+                    grid: { display: false },
                     border: { display: false },
-                    ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, maxTicksLimit: 8 }
+                    ticks: { color: '#9ca3af', font: { size: 10 }, maxTicksLimit: 8 }
                 },
                 y: {
-                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+                    grid: { color: '#f3f4f6' },
                     border: { display: false },
                     ticks: {
-                        color: 'rgba(255,255,255,0.35)',
+                        color: '#9ca3af',
                         font: { size: 10 },
                         callback: v => mode === 'monthly' ? v : '$' + (v/1000).toFixed(0) + 'k'
                     }
