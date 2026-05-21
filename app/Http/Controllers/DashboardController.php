@@ -217,6 +217,17 @@ class DashboardController extends Controller
             $dailyOrders = $chartDays->map(fn ($d) => (int) ($dailyOrdersRaw[$d->toDateString()] ?? 0));
             $chartLabels = $chartDays->map(fn ($d) => $d->format('d M'));
 
+            // ── Query 7b: Datos por hora (hoy) para gráfico Sales Dynamics ──
+            $hourlyRaw = DB::table('orders')
+                ->where('restaurant_id', $rid)
+                ->whereDate('created_at', $now->toDateString())
+                ->selectRaw('HOUR(created_at) AS hr, SUM(total) AS revenue, COUNT(*) AS orders')
+                ->groupBy('hr')
+                ->pluck('revenue', 'hr');
+
+            $hourlyRevenue = collect(range(0, 23))->map(fn ($h) => (float) ($hourlyRaw[$h] ?? 0));
+            $hourlyLabels  = collect(range(0, 23))->map(fn ($h) => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00');
+
             // ── Query 8: Últimos 5 pedidos ────────────────────────────
             $recentOrders = DB::table('orders')
                 ->where('restaurant_id', $rid)
@@ -299,7 +310,8 @@ class DashboardController extends Controller
                 'tableCounts', 'staffCount', 'menuCount', 'lowStockCount',
                 'weeklyRevenue', 'weeklyExpenses', 'weekLabels',
                 'dailyOrders', 'chartLabels', 'recentOrders',
-                'categoryDistribution'
+                'categoryDistribution',
+                'hourlyRevenue', 'hourlyLabels'
             );
         });
 

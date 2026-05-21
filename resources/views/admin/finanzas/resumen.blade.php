@@ -238,7 +238,6 @@
 </div>
 
 <script>
-<script>
 const weekLabels     = @json($weekLabels->values());
 const weeklyIngresos = @json($weeklyIngresos->values());
 const weeklyEgresos  = @json($weeklyEgresos->values());

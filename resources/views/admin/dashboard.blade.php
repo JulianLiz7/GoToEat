@@ -110,33 +110,65 @@
 </div>
 
 {{-- ── Gráficas ─────────────────────────────────────────────────── --}}
+{{-- ══ SALES DYNAMICS — Gráfico premium ═══════════════════════════ --}}
+<div class="mb-6 rounded-3xl overflow-hidden shadow-xl"
+     style="background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);"
+     x-data="{
+         mode: 'daily',
+         setMode(m) {
+             this.mode = m;
+             window.renderSalesDynamics(m);
+         }
+     }">
+    <div class="px-7 pt-6 pb-2 flex items-center justify-between">
+        <div>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-white/40 mb-1">Dinámica de Ventas</p>
+            <h3 class="text-xl font-bold text-white">Sales Dynamics</h3>
+        </div>
+        <div class="flex gap-1 bg-white/10 rounded-xl p-1">
+            @foreach(['hourly' => 'Por Hora', 'daily' => 'Diario', 'monthly' => 'Semanal'] as $key => $label)
+            <button @click="setMode('{{ $key }}')"
+                    :class="mode === '{{ $key }}' ? 'bg-white text-gray-900 shadow-sm' : 'text-white/60 hover:text-white'"
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                {{ $label }}
+            </button>
+            @endforeach
+        </div>
+    </div>
+    <div class="px-4 pb-4">
+        <div class="relative h-52">
+            <canvas id="salesDynamicsChart"></canvas>
+        </div>
+    </div>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
     {{-- Bar Chart: Ingresos vs Egresos --}}
-    <div class="bg-white p-8 rounded-2xl shadow-sm shadow-gray-200/50">
+    <div class="bg-white p-7 rounded-2xl shadow-sm shadow-gray-200/50">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold font-heading">Ingresos vs Egresos</h3>
+            <h3 class="text-lg font-bold font-heading">Ingresos vs Egresos</h3>
             <span class="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1.5 rounded-full">Últimos 7 días</span>
         </div>
         <div class="flex gap-4 mb-4 text-xs">
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-orange-500 inline-block"></span>Ingresos</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-400 inline-block"></span>Egresos</span>
         </div>
-        <div class="relative h-56">
+        <div class="relative h-48">
             <canvas id="barChart"></canvas>
         </div>
     </div>
 
     {{-- Line Chart: Órdenes por día --}}
-    <div class="bg-white p-8 rounded-2xl shadow-sm shadow-gray-200/50">
+    <div class="bg-white p-7 rounded-2xl shadow-sm shadow-gray-200/50">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold font-heading">Órdenes por Día</h3>
+            <h3 class="text-lg font-bold font-heading">Órdenes por Día</h3>
             <div class="flex items-center gap-2 text-xs">
                 <span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>
                 <span class="text-gray-500">Pedidos</span>
             </div>
         </div>
-        <div class="relative h-56">
+        <div class="relative h-48">
             <canvas id="lineChart"></canvas>
         </div>
     </div>
@@ -293,6 +325,106 @@
 
 @push('scripts')
 <script>
+// ══ SALES DYNAMICS CHART ═════════════════════════════════════════
+const sdData = {
+    hourly:  {
+        labels: @json($stats['hourlyLabels']->values()),
+        data:   @json($stats['hourlyRevenue']->values()),
+        label:  'Ingresos por hora (hoy)'
+    },
+    daily: {
+        labels: @json($stats['weekLabels']->values()),
+        data:   @json($stats['weeklyRevenue']->values()),
+        label:  'Ingresos diarios'
+    },
+    monthly: {
+        labels: @json($stats['chartLabels']->values()),
+        data:   @json($stats['dailyOrders']->values()),
+        label:  'Pedidos (13 días)'
+    }
+};
+
+let sdChart = null;
+
+window.renderSalesDynamics = function(mode) {
+    const d = sdData[mode] || sdData.daily;
+    const ctx = document.getElementById('salesDynamicsChart');
+    if (!ctx) return;
+
+    if (sdChart) { sdChart.destroy(); sdChart = null; }
+
+    sdChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                label: d.label,
+                data: d.data,
+                borderColor: '#a78bfa',
+                borderWidth: 2.5,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#a78bfa',
+                pointHoverBorderWidth: 2,
+                fill: true,
+                tension: 0.45,
+                backgroundColor: function(ctx) {
+                    const chart = ctx.chart;
+                    const {ctx: c, chartArea} = chart;
+                    if (!chartArea) return 'transparent';
+                    const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(167,139,250,0.35)');
+                    gradient.addColorStop(0.6, 'rgba(167,139,250,0.08)');
+                    gradient.addColorStop(1, 'rgba(167,139,250,0)');
+                    return gradient;
+                },
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    titleColor: '#fff',
+                    bodyColor: '#a78bfa',
+                    padding: 10,
+                    callbacks: {
+                        label: ctx => mode === 'monthly'
+                            ? ctx.parsed.y + ' pedidos'
+                            : '$' + ctx.parsed.y.toLocaleString('es-CO')
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+                    border: { display: false },
+                    ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, maxTicksLimit: 8 }
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+                    border: { display: false },
+                    ticks: {
+                        color: 'rgba(255,255,255,0.35)',
+                        font: { size: 10 },
+                        callback: v => mode === 'monthly' ? v : '$' + (v/1000).toFixed(0) + 'k'
+                    }
+                }
+            },
+            animation: { duration: 600, easing: 'easeInOutCubic' }
+        }
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => renderSalesDynamics('daily'));
+
 // ── Bar Chart: Ingresos vs Egresos ────────────────────────────────
 const barCtx = document.getElementById('barChart');
 new Chart(barCtx, {
