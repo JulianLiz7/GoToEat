@@ -1,9 +1,22 @@
 <x-admin-layout :restaurant="$restaurant">
 <x-slot name="title">Recibo — Mesa {{ $table->number }}</x-slot>
 
+@php
+$cartInitial = collect($items)->map(function($i) {
+    return [
+        'id'       => $i['id'] ?? null,
+        'name'     => $i['name'] ?? '',
+        'category' => $i['category'] ?? null,
+        'price'    => (float)($i['price'] ?? 0),
+        'qty'      => (int)($i['qty'] ?? 1),
+    ];
+})->values()->all();
+$menuOpenInit = count($items) === 0 ? 'true' : 'false';
+@endphp
+
 <div class="max-w-4xl mx-auto" x-data="{
-    cart: @json(collect($items)->map(fn($i) => ['id'=>$i['id'],'name'=>$i['name'],'category'=>$i['category']??null,'price'=>$i['price'],'qty'=>$i['qty']])->values()->all()),
-    menuOpen: {{ count($items) === 0 ? 'true' : 'false' }},
+    cart: {{ json_encode($cartInitial) }},
+    menuOpen: {{ $menuOpenInit }},
     addItem(item) {
         const idx = this.cart.findIndex(c => c.id === item.id);
         if (idx >= 0) { this.cart[idx].qty++; }
