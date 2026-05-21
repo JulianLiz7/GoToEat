@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="light">
 <head>
     <meta charset="utf-8"/>
@@ -78,7 +78,7 @@
                     </div>
                     <div class="h-px bg-primary-container flex-grow mx-3 mb-5"></div>
                     <div class="flex flex-col items-center gap-1.5">
-                        <div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-sm active-step-shadow">3</div>
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm active-step-shadow">3</div>
                         <span class="text-xs font-bold text-primary-container uppercase tracking-wider">Equipo</span>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
                                 Omitir este paso
                             </a>
                             <button type="submit"
-                                    class="inline-flex items-center gap-2 bg-primary-container text-white px-7 py-3 rounded-xl font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20">
+                                    class="inline-flex items-center gap-2 bg-primary text-white px-7 py-3 rounded-xl font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20">
                                 <span class="material-symbols-outlined text-lg">rocket_launch</span>
                                 Crear mi restaurante
                             </button>

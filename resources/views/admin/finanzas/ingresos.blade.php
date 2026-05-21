@@ -1,4 +1,4 @@
-<x-finance-layout :restaurant="$restaurant">
+﻿<x-finance-layout :restaurant="$restaurant">
 <x-slot name="title">Ingresos</x-slot>
 <x-slot name="subtitle">Detalle de ventas y tendencias</x-slot>
 
@@ -129,7 +129,7 @@
             <span class="text-xs font-normal text-gray-400 ml-1">({{ $orders->total() }} registros)</span>
         </h3>
         <a href="{{ route('admin.finance.export.csv') }}"
-           class="flex items-center gap-2 px-3 py-1.5 bg-primary-container text-white rounded-lg text-xs font-bold hover:bg-primary transition-colors shadow-sm">
+           class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary transition-colors shadow-sm">
             <span class="material-symbols-outlined text-[16px]">download</span>
             Exportar CSV
         </a>
@@ -190,7 +190,7 @@
 
             @foreach($orders->getUrlRange(max(1,$orders->currentPage()-1), min($orders->lastPage(),$orders->currentPage()+1)) as $page => $url)
                 @if($page == $orders->currentPage())
-                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-container text-white font-bold text-sm">{{ $page }}</span>
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm">{{ $page }}</span>
                 @else
                     <a href="{{ $url }}" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-sm hover:bg-gray-100 transition-colors">{{ $page }}</a>
                 @endif

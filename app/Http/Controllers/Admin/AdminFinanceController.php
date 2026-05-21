@@ -393,8 +393,9 @@ class AdminFinanceController extends Controller
                 'status'        => 'completed',
                 'total'         => $cashCounted,
                 'tips'          => 0,
-                'items'         => json_encode([['name' => 'Cierre de Caja — ' . now()->format('d/m/Y'), 'qty' => 1, 'price' => $cashCounted]]),
-                'notes'         => 'Ingreso registrado desde cierre de caja. Depósito: $' . number_format($depositAmount, 0, ',', '.'),
+                'items'         => json_encode([
+                    ['name' => 'Cierre de Caja — ' . now()->format('d/m/Y'), 'qty' => 1, 'price' => $cashCounted]
+                ]),
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);

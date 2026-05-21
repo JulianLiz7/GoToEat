@@ -1,4 +1,4 @@
-<x-finance-layout :restaurant="$restaurant">
+﻿<x-finance-layout :restaurant="$restaurant">
 <x-slot name="title">Cierre de Caja</x-slot>
 <x-slot name="subtitle">{{ now()->format('d/m/Y') }} — {{ auth()->user()->name }}</x-slot>
 
@@ -43,7 +43,7 @@
     <div class="flex flex-col items-center gap-2 flex-1 relative z-10">
         <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
              :class="{
-                'bg-primary-container text-white shadow-orange-200': step >= {{ $s }},
+                'bg-primary text-white shadow-orange-200': step >= {{ $s }},
                 'bg-gray-100 text-gray-400 border-2 border-gray-200': step < {{ $s }}
              }">
             <template x-if="step > {{ $s }}">
@@ -81,13 +81,13 @@
                                 <div class="w-16 text-right font-bold text-primary text-sm shrink-0" x-text="d.label"></div>
                                 <div class="flex-1 flex items-center gap-2">
                                     <button type="button" @click="d.qty = Math.max(0, (parseInt(d.qty)||0) - 1)"
-                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary-container hover:text-white hover:border-primary-container transition-all active:scale-90">
+                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90">
                                         <span class="material-symbols-outlined text-[16px]">remove</span>
                                     </button>
                                     <input type="number" x-model.number="d.qty" min="0"
                                            class="flex-1 h-8 bg-white border border-gray-200 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none"/>
                                     <button type="button" @click="d.qty = (parseInt(d.qty)||0) + 1"
-                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary-container hover:text-white hover:border-primary-container transition-all active:scale-90">
+                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90">
                                         <span class="material-symbols-outlined text-[16px]">add</span>
                                     </button>
                                 </div>
@@ -107,13 +107,13 @@
                                 <div class="w-16 text-right font-bold text-primary text-sm shrink-0" x-text="d.label"></div>
                                 <div class="flex-1 flex items-center gap-2">
                                     <button type="button" @click="d.qty = Math.max(0, (parseInt(d.qty)||0) - 1)"
-                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary-container hover:text-white hover:border-primary-container transition-all active:scale-90">
+                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90">
                                         <span class="material-symbols-outlined text-[16px]">remove</span>
                                     </button>
                                     <input type="number" x-model.number="d.qty" min="0"
                                            class="flex-1 h-8 bg-white border border-gray-200 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-primary-container outline-none"/>
                                     <button type="button" @click="d.qty = (parseInt(d.qty)||0) + 1"
-                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary-container hover:text-white hover:border-primary-container transition-all active:scale-90">
+                                            class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-90">
                                         <span class="material-symbols-outlined text-[16px]">add</span>
                                     </button>
                                 </div>
@@ -174,7 +174,7 @@
             @endif
 
             <button @click="step = 2"
-                    class="w-full py-3.5 bg-primary-container text-white rounded-xl font-bold text-sm
+                    class="w-full py-3.5 bg-primary text-white rounded-xl font-bold text-sm
                            hover:bg-primary active:scale-[0.97] transition-all shadow-md shadow-orange-200 flex items-center justify-center gap-2">
                 Continuar a Conciliación
                 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -295,7 +295,7 @@
 
             <div class="flex flex-col gap-3">
                 <button @click="step = 3"
-                        class="w-full py-3.5 bg-primary-container text-white rounded-xl font-bold text-sm
+                        class="w-full py-3.5 bg-primary text-white rounded-xl font-bold text-sm
                                hover:bg-primary active:scale-[0.97] transition-all shadow-md shadow-orange-200 flex items-center justify-center gap-2">
                     Continuar a Finalización
                     <span class="material-symbols-outlined text-[18px]">arrow_forward</span>

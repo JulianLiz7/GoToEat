@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="light">
 <head>
     <meta charset="utf-8"/>
@@ -116,7 +116,7 @@
 
     {{-- CTA principal --}}
     <a href="{{ route('dashboard') }}"
-       class="fade-up delay-4 inline-flex items-center gap-2 bg-primary-container text-white px-10 py-4 rounded-2xl font-bold text-base hover:opacity-90 active:scale-[0.98] transition-all shadow-xl shadow-orange-500/25">
+       class="fade-up delay-4 inline-flex items-center gap-2 bg-primary text-white px-10 py-4 rounded-2xl font-bold text-base hover:opacity-90 active:scale-[0.98] transition-all shadow-xl shadow-orange-500/25">
         <span class="material-symbols-outlined text-xl">dashboard</span>
         Ir a mi panel de control
     </a>

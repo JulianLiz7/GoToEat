@@ -1,4 +1,4 @@
-<x-finance-layout :restaurant="$restaurant">
+﻿<x-finance-layout :restaurant="$restaurant">
 <x-slot name="title">Gastos</x-slot>
 <x-slot name="subtitle">Egresos y presupuesto mensual</x-slot>
 
@@ -9,7 +9,7 @@
         <p class="text-on-surface-variant text-sm mt-1">Registra y categoriza todos los egresos del restaurante.</p>
     </div>
     <button onclick="document.getElementById('modalGasto').classList.remove('hidden')"
-            class="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white rounded-xl font-semibold text-sm
+            class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold text-sm
                    hover:bg-primary active:scale-[0.97] transition-all shadow-sm shadow-orange-200">
         <span class="material-symbols-outlined text-[18px]">add</span>
         Registrar Gasto
@@ -309,7 +309,7 @@
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="flex-1 py-2.5 bg-primary-container text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm">
+                        class="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm">
                     Registrar
                 </button>
             </div>
@@ -414,7 +414,7 @@
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="flex-1 py-2.5 bg-primary-container text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm flex items-center justify-center gap-2">
+                        class="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary active:scale-[0.97] transition-all shadow-sm flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">upload</span>
                     Subir
                 </button>
