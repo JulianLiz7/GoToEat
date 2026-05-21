@@ -6,8 +6,8 @@
     <p class="text-gray-500 mt-1 text-sm">Personaliza la información y apariencia que verán tus comensales.</p>
 </div>
 
-<form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data"
-      x-data="{
+{{-- WRAPPER con Alpine.js (separa el state del form para evitar formularios anidados) --}}
+<div x-data="{
           tab: '{{ session('tab', 'info') }}',
           primary: '{{ $restaurant->primary_color ?? '#f97316' }}',
           secondary: '{{ $restaurant->secondary_color ?? '#006c49' }}',
@@ -23,6 +23,9 @@
               if (file) this.coverPreview = URL.createObjectURL(file);
           }
       }">
+
+{{-- FORM PRINCIPAL: info + apariencia + contacto (sin anidamiento) --}}
+<form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" id="mainSettingsForm">
     @csrf
 
     {{-- Tabs ──────────────────────────────────────────────────── --}}
@@ -369,7 +372,31 @@
         </div>
     </div>
 
-    {{-- ══ TAB: Mi Perfil ══════════════════════════════════════════ --}}
+    {{-- Botón guardar del form principal (solo tabs info/apariencia/contacto) --}}
+    <div class="mt-8 flex items-center justify-between bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100"
+         x-show="tab !== 'perfil'">
+        @if(session('success') && !session('tab'))
+        <div class="flex items-center gap-2 text-secondary">
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+            <span class="font-semibold text-sm">{{ session('success') }}</span>
+        </div>
+        @else
+        <p class="text-sm text-gray-400">Los cambios se reflejan inmediatamente en tu restaurante.</p>
+        @endif
+        <button type="submit"
+                class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm
+                       hover:bg-orange-600 active:scale-[0.97] transition-all shadow-md shadow-orange-200">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Guardar Cambios
+        </button>
+    </div>
+
+</form>
+{{-- FIN FORM PRINCIPAL --}}
+
+{{-- ══ TAB: Mi Perfil — FORM SEPARADO (evita anidamiento de formularios) ══ --}}
+<form method="POST" action="{{ route('admin.settings.profile.update') }}" id="profileForm">
+    @csrf
     <div x-show="tab === 'perfil'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {{-- Datos personales --}}
@@ -378,8 +405,7 @@
                     <span class="material-symbols-outlined text-primary-container text-[22px]">manage_accounts</span>
                     Datos del Usuario Administrador
                 </h3>
-                <form method="POST" action="{{ route('admin.settings.profile.update') }}" class="space-y-4">
-                    @csrf
+                <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Nombre completo *</label>
                         <input name="name" type="text" required value="{{ old('name', auth()->user()->name) }}"
@@ -437,13 +463,13 @@
 
                     <div class="pt-2">
                         <button type="submit"
-                                class="flex items-center gap-2 px-6 py-2.5 bg-primary-container text-white rounded-xl font-bold text-sm
-                                       hover:bg-primary active:scale-[0.97] transition-all shadow-sm shadow-orange-200">
+                                class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm
+                                       hover:bg-orange-600 active:scale-[0.97] transition-all shadow-sm shadow-orange-200">
                             <span class="material-symbols-outlined text-[18px]">save</span>
                             Guardar Perfil
                         </button>
                     </div>
-                </form>
+                </div>{{-- fin datos personales div --}}
             </div>
 
             {{-- Info cuenta --}}
@@ -500,27 +526,16 @@
         </div>
     </div>
 
-    {{-- Botón guardar (oculto en pestaña Mi Perfil que tiene su propio form) --}}
-    <div class="mt-8 flex items-center justify-between bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100"
-         x-show="tab !== 'perfil'">
-        @if(session('success'))
-        <div class="flex items-center gap-2 text-secondary">
-            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">check_circle</span>
-            <span class="font-semibold text-sm">{{ session('success') }}</span>
-        </div>
-        @else
-        <p class="text-sm text-gray-400">Los cambios se reflejan inmediatamente en el perfil de tu restaurante.</p>
-        @endif
-
-        <button type="submit"
-                class="flex items-center gap-2 px-6 py-2.5 bg-primary-container text-white rounded-xl font-bold text-sm
-                       hover:bg-primary active:scale-[0.97] transition-all shadow-md shadow-orange-200">
-            <span class="material-symbols-outlined text-[18px]">save</span>
-            Guardar Cambios
-        </button>
+    {{-- Mensaje de éxito del perfil --}}
+    @if(session('success') && session('tab') === 'perfil')
+    <div class="mt-4 flex items-center gap-2 text-secondary p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+        <span class="font-semibold text-sm">{{ session('success') }}</span>
     </div>
+    @endif
 
-</form>
+</form>{{-- FIN FORM PERFIL --}}
+</div>{{-- FIN WRAPPER Alpine.js --}}
 
 @push('scripts')
 <script>
