@@ -75,14 +75,7 @@
 {{-- ══ TOPBAR ═══════════════════════════════════════════════════ --}}
 <header class="fixed top-0 z-40 border-b border-gray-100 bg-white/80 backdrop-blur-md flex justify-between items-center h-16 px-8 shadow-sm"
         style="left:16rem;right:0;">
-    <div class="flex items-center gap-4">
-        <div class="relative group w-72">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px] group-focus-within:text-orange-500 transition-colors">search</span>
-            <input class="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-full text-sm focus:ring-2 focus:ring-orange-500/20"
-                   placeholder="Buscar en el panel..."
-                   type="text"/>
-        </div>
-    </div>
+    <div></div>
     <div class="flex items-center gap-4">
         {{-- Alerta stock bajo --}}
         @if(isset($stats['lowStockCount']) && $stats['lowStockCount'] > 0)
