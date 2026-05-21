@@ -38,26 +38,99 @@ class ProcessAIAnalysis implements ShouldQueue
 
         try {
             $restaurant = $this->conversation->restaurant;
+            $now = now();
 
-            // 1. Recopilar contexto real de la base de datos
+            // ── Inventario ────────────────────────────────────────────
             $inventoryItems = $restaurant->inventoryItems()->get();
-            $inventoryText = $inventoryItems->isEmpty() ? 'Inventario vacío.' : $inventoryItems->map(function ($i) {
-                return "{$i->name}: {$i->quantity} {$i->unit} (Min: {$i->min_stock})";
-            })->implode(', ');
+            $inventoryText = $inventoryItems->isEmpty()
+                ? 'Inventario vacío.'
+                : $inventoryItems->map(fn($i) => "{$i->name}: {$i->quantity} {$i->unit} (mínimo: {$i->min_stock})")->implode('; ');
 
+            $lowStock = $inventoryItems->filter(fn($i) => $i->quantity <= $i->min_stock);
+            $lowStockText = $lowStock->isEmpty()
+                ? 'Ninguno.'
+                : $lowStock->map(fn($i) => "{$i->name} ({$i->quantity} {$i->unit})")->implode(', ');
+
+            // ── Personal ──────────────────────────────────────────────
             $staffCount = $restaurant->employees()->count();
-            $tablesCount = $restaurant->tables()->count();
 
-            // 2. Construir el System Prompt
-            $systemPrompt = "Eres el asistente experto de IA (AI Assistant) para el gerente del restaurante '{$restaurant->name}'.
-Te integras directamente en su panel de administración.
-Debes responder de forma profesional, clara, amigable y muy concisa.
-Aquí tienes los datos en tiempo real de tu restaurante para que puedas responder:
-- Mesas registradas: {$tablesCount}
+            // ── Mesas ─────────────────────────────────────────────────
+            $tables = $restaurant->tables()->get();
+            $tablesCount = $tables->count();
+            $availableTables = $tables->where('status', 'disponible')->count();
+            $occupiedTables  = $tables->where('status', 'ocupada')->count();
+
+            // ── Órdenes del mes ───────────────────────────────────────
+            $monthOrders = $restaurant->orders()
+                ->whereMonth('created_at', $now->month)
+                ->whereYear('created_at', $now->year)
+                ->get();
+            $monthRevenue  = $monthOrders->sum('total');
+            $monthCount    = $monthOrders->count();
+            $avgTicket     = $monthCount > 0 ? round($monthRevenue / $monthCount) : 0;
+
+            // Órdenes de hoy
+            $todayOrders   = $restaurant->orders()->whereDate('created_at', $now->toDateString())->get();
+            $todayRevenue  = $todayOrders->sum('total');
+            $todayCount    = $todayOrders->count();
+
+            // ── Egresos del mes ───────────────────────────────────────
+            $monthExpenses = $restaurant->expenses()
+                ->whereMonth('date', $now->month)
+                ->whereYear('date', $now->year)
+                ->sum('amount');
+
+            // ── Reservas ──────────────────────────────────────────────
+            $todayReservations = $restaurant->reservations()
+                ->whereDate('reservation_date', $now->toDateString())
+                ->count();
+            $pendingReservations = $restaurant->reservations()
+                ->where('status', 'pending')
+                ->count();
+
+            // ── Menú ──────────────────────────────────────────────────
+            $menuItems = $restaurant->menuItems()->where('available', true)->get();
+            $menuText  = $menuItems->isEmpty()
+                ? 'Sin platos en el menú.'
+                : $menuItems->map(fn($m) => "{$m->name} (\${$m->price})")->implode(', ');
+
+            // ── System Prompt ─────────────────────────────────────────
+            $systemPrompt = "Eres el asistente experto de IA para el gerente del restaurante '{$restaurant->name}'.
+Respondes de forma profesional, amigable y concisa en español.
+Usa los datos en tiempo real que te proporciono para responder con precisión.
+
+=== DATOS DEL RESTAURANTE ===
+
+FINANZAS (mes actual, {$now->translatedFormat('F Y')}):
+- Ingresos del mes: \${$monthRevenue}
+- Egresos del mes: \${$monthExpenses}
+- Profit neto: \$" . ($monthRevenue - $monthExpenses) . "
+- Órdenes este mes: {$monthCount}
+- Ticket promedio: \${$avgTicket}
+
+HOY ({$now->translatedFormat('d \\de F')}):
+- Ingresos hoy: \${$todayRevenue}
+- Órdenes hoy: {$todayCount}
+- Reservas hoy: {$todayReservations}
+- Reservas pendientes: {$pendingReservations}
+
+OPERACIONES:
+- Mesas totales: {$tablesCount}
+- Mesas disponibles: {$availableTables}
+- Mesas ocupadas: {$occupiedTables}
 - Empleados registrados: {$staffCount}
-- Inventario actual: {$inventoryText}
 
-Cuando el gerente te haga una pregunta, responde usando SOLO esta información. Si te pregunta algo fuera de contexto o que no está en los datos, dile amablemente que como asistente de restaurante, solo tienes acceso a los datos del sistema.";
+INVENTARIO:
+- Items en stock bajo: {$lowStockText}
+- Inventario completo: {$inventoryText}
+
+MENÚ ACTIVO:
+{$menuText}
+
+=== FIN DE DATOS ===
+
+Responde usando estos datos. Si la pregunta no tiene relación con el restaurante, indícalo brevemente.";
+
 
             // 3. Hacer la petición a Gemini API
             $response = Http::timeout(45)
