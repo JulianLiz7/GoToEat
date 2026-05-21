@@ -23,7 +23,7 @@ class ProcessAIAnalysis implements ShouldQueue
 
     public function handle(): void
     {
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.api_key');
 
         if (! $apiKey) {
             $this->conversation->update([
