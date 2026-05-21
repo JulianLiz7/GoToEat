@@ -1,7 +1,21 @@
 <x-admin-layout :restaurant="$restaurant">
 <x-slot name="title">Recibo — Mesa {{ $table->number }}</x-slot>
 
-<div class="max-w-2xl mx-auto">
+<div class="max-w-4xl mx-auto" x-data="{
+    cart: @json(collect($items)->map(fn($i) => ['id'=>$i['id'],'name'=>$i['name'],'category'=>$i['category']??null,'price'=>$i['price'],'qty'=>$i['qty']])->values()->all()),
+    menuOpen: {{ count($items) === 0 ? 'true' : 'false' }},
+    addItem(item) {
+        const idx = this.cart.findIndex(c => c.id === item.id);
+        if (idx >= 0) { this.cart[idx].qty++; }
+        else { this.cart.push({ id: item.id, name: item.name, category: item.category, price: parseFloat(item.price), qty: 1 }); }
+    },
+    removeItem(id) {
+        const idx = this.cart.findIndex(c => c.id === id);
+        if (idx >= 0) { if (this.cart[idx].qty > 1) this.cart[idx].qty--; else this.cart.splice(idx, 1); }
+    },
+    qtyOf(id) { const i = this.cart.find(c => c.id === id); return i ? i.qty : 0; },
+    get subtotal() { return this.cart.reduce((s,i) => s + i.price * i.qty, 0); }
+}">
 
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
@@ -10,7 +24,105 @@
         <span class="text-orange-500 font-bold">Recibo — Mesa {{ $table->number }}</span>
     </nav>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    {{-- ══ SELECCIÓN DE PLATOS DEL MENÚ ══════════════════════════════ --}}
+    @if($menuByCategory->isNotEmpty() && in_array($order->status, ['pending','preparing','ready']))
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-5">
+        <button type="button" @click="menuOpen = !menuOpen"
+                class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings:'FILL' 1">restaurant_menu</span>
+                <div class="text-left">
+                    <h3 class="font-bold text-on-surface">Seleccionar Platos del Menú</h3>
+                    <p class="text-xs text-gray-400">
+                        <span x-text="cart.length > 0 ? cart.reduce((s,i)=>s+i.qty,0) + ' ítem(s) seleccionado(s)' : 'Agrega platos al pedido'"></span>
+                    </p>
+                </div>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 transition-transform" :class="menuOpen ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <div x-show="menuOpen" x-cloak class="border-t border-gray-100">
+            {{-- Resumen del carrito actual --}}
+            <div x-show="cart.length > 0" class="px-6 py-3 bg-orange-50 border-b border-orange-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">shopping_bag</span>
+                    <span class="text-sm font-semibold text-primary" x-text="'Pedido: ' + cart.reduce((s,i)=>s+i.qty,0) + ' ítem(s)'"></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-primary" x-text="'$' + subtotal.toLocaleString('es-CO')"></span>
+                    <form method="POST" action="{{ route('admin.tables.recibo.items', $table->id) }}"
+                          id="saveItemsForm" @submit.prevent="
+                            $el.querySelectorAll('.dyn-input').forEach(e=>e.remove());
+                            cart.forEach((item,i) => {
+                                ['id','name','category','price','qty'].forEach(k => {
+                                    const inp = document.createElement('input');
+                                    inp.type='hidden'; inp.name='items['+i+']['+k+']';
+                                    inp.value=item[k]??''; inp.className='dyn-input';
+                                    $el.appendChild(inp);
+                                });
+                            });
+                            $el.submit();
+                          ">
+                        @csrf
+                        <button type="submit"
+                                class="bg-primary hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all active:scale-95 shadow-sm shadow-orange-200">
+                            Guardar pedido
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Lista de menú por categoría --}}
+            <div class="max-h-96 overflow-y-auto p-4 space-y-5">
+                @foreach($menuByCategory as $category => $menuItems)
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
+                        <span class="flex-1 h-px bg-gray-100"></span>
+                        {{ $category }}
+                        <span class="flex-1 h-px bg-gray-100"></span>
+                    </p>
+                    <div class="space-y-2">
+                        @foreach($menuItems as $menuItem)
+                        <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-all"
+                             x-data="{ item: { id: {{ $menuItem->id }}, name: '{{ addslashes($menuItem->name) }}', category: '{{ $menuItem->category }}', price: {{ $menuItem->price }} } }">
+                            @if($menuItem->image)
+                            <img src="{{ Storage::url($menuItem->image) }}" alt="{{ $menuItem->name }}"
+                                 class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+                            @else
+                            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-orange-200 text-[22px]">restaurant_menu</span>
+                            </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-sm text-on-surface truncate">{{ $menuItem->name }}</p>
+                                <p class="text-xs font-bold text-primary">${{ number_format($menuItem->price, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <template x-if="qtyOf(item.id) > 0">
+                                    <div class="flex items-center gap-1.5">
+                                        <button @click="removeItem(item.id)" type="button"
+                                                class="w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold text-gray-600 text-sm transition-all">−</button>
+                                        <span class="w-5 text-center font-bold text-sm text-gray-800" x-text="qtyOf(item.id)"></span>
+                                        <button @click="addItem(item)" type="button"
+                                                class="w-7 h-7 bg-primary hover:bg-orange-600 rounded-lg flex items-center justify-center font-bold text-white text-sm transition-all">+</button>
+                                    </div>
+                                </template>
+                                <template x-if="qtyOf(item.id) === 0">
+                                    <button @click="addItem(item)" type="button"
+                                            class="w-7 h-7 bg-orange-50 hover:bg-primary hover:text-white rounded-lg flex items-center justify-center text-primary text-lg font-bold transition-all">+</button>
+                                </template>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden" id="reciboCard">
 
         {{-- Header --}}
         <div class="bg-on-surface text-white px-8 py-6">
@@ -267,15 +379,24 @@
 </div>
 
 <script>
-const subtotal = {{ $subtotal }};
+// El subtotal se toma del estado Alpine del carrito
 const tipInput = document.querySelector('input[name="tip_amount"]');
 const totalDisplay = document.getElementById('totalDisplay');
 const tipDisplay = document.getElementById('tipDisplay');
 
+function getSubtotal() {
+    const header = document.querySelector('[x-data]');
+    if (header && header._x_dataStack) {
+        try { return header._x_dataStack[0].subtotal || {{ $subtotal }}; } catch(e) {}
+    }
+    return {{ $subtotal }};
+}
+
 if (tipInput) {
     tipInput.addEventListener('input', function() {
         const tip = parseFloat(this.value) || 0;
-        const total = subtotal + tip;
+        const sub = getSubtotal();
+        const total = sub + tip;
         totalDisplay.textContent = '$' + total.toLocaleString('es-CO');
         tipDisplay.textContent = '+ Propina: $' + tip.toLocaleString('es-CO');
     });

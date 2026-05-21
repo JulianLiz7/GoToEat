@@ -241,9 +241,10 @@
                             <th class="px-4 py-3">Cliente</th>
                             <th class="px-4 py-3">Fecha & Hora</th>
                             <th class="px-4 py-3 text-center">Pax</th>
+                            <th class="px-4 py-3">Mesa</th>
                             <th class="px-4 py-3">Pre-orden</th>
                             <th class="px-4 py-3">Estado</th>
-                            <th class="px-4 py-3 text-center">QR</th>
+                            <th class="px-4 py-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -269,6 +270,17 @@
                             </td>
                             <td class="px-4 py-3 text-center font-bold">{{ $res->party_size }}</td>
                             <td class="px-4 py-3">
+                                @if($res->table)
+                                <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-xl">
+                                    <span class="material-symbols-outlined text-[13px]">table_restaurant</span>
+                                    Mesa {{ $res->table->number }}
+                                    @if($res->table->zone) · {{ $res->table->zone }} @endif
+                                </span>
+                                @else
+                                <span class="text-xs text-gray-300">Sin asignar</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
                                 @if(count($items) > 0)
                                 <div class="space-y-0.5">
                                     @foreach(array_slice($items, 0, 2) as $item)
@@ -290,14 +302,20 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                @if($res->qr_token)
-                                <a href="{{ route('reserva.verificar', $res->qr_token) }}" target="_blank"
-                                   class="inline-flex items-center justify-center w-8 h-8 bg-orange-50 hover:bg-orange-100 text-primary rounded-lg transition-colors" title="Verificar QR">
-                                    <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
-                                </a>
-                                @else
-                                <span class="text-gray-300 text-xs">—</span>
-                                @endif
+                                <div class="flex items-center justify-center gap-1.5">
+                                    @if($res->qr_token)
+                                    <a href="{{ route('reserva.verificar', $res->qr_token) }}" target="_blank"
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-orange-50 hover:bg-orange-100 text-primary rounded-lg transition-colors" title="Verificar QR">
+                                        <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+                                    </a>
+                                    @endif
+                                    @if($res->table_id)
+                                    <a href="{{ route('empleado.mesa.recibo', $res->table_id) }}"
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-primary hover:bg-orange-600 text-white rounded-lg transition-colors" title="Ver Recibo">
+                                        <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endforeach

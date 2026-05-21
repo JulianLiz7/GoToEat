@@ -392,7 +392,21 @@ class AdminTablesController extends Controller
     // ── Recibo / Factura de mesa ──────────────────────────────────────
     public function recibo(int $id)
     {
-        $restaurant = $this->restaurant();
+        // Admin or mesero/employee can access this
+        $user = auth()->user();
+        if ($user->hasAnyRole(['mesero', 'chef', 'cajero'])) {
+            // Employee: find the restaurant they belong to
+            $restaurant = DB::table('employees')
+                ->join('restaurants', 'employees.restaurant_id', '=', 'restaurants.id')
+                ->where('employees.user_id', $user->id)
+                ->select('restaurants.*')
+                ->first();
+            if (!$restaurant) abort(403);
+            // Convert to Eloquent model
+            $restaurant = \App\Domains\Restaurant\Models\Restaurant::find($restaurant->id);
+        } else {
+            $restaurant = $this->restaurant();
+        }
         $table      = $this->table($id);
 
         $order = $restaurant->orders()
@@ -453,9 +467,79 @@ class AdminTablesController extends Controller
             ->where('restaurant_id', $restaurant->id)
             ->first();
 
+        // Menú del restaurante para selección de platos
+        $menuByCategory = DB::table('menu_items')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('available', true)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category');
+
         return view('admin.tables-recibo', compact(
-            'restaurant', 'table', 'order', 'items', 'subtotal', 'waiter', 'meseros', 'tipRecord'
+            'restaurant', 'table', 'order', 'items', 'subtotal',
+            'waiter', 'meseros', 'tipRecord', 'menuByCategory'
         ));
+    }
+
+    // ── Actualizar ítems del recibo desde selección de menú ──────────
+    public function updateReciboItems(Request $request, int $id)
+    {
+        $request->validate([
+            'items'   => 'nullable|array',
+            'items.*.id'    => 'required|integer',
+            'items.*.qty'   => 'required|integer|min:1',
+        ]);
+
+        $restaurant = auth()->user()->hasAnyRole(['mesero','chef','cajero'])
+            ? \App\Domains\Restaurant\Models\Restaurant::find(
+                DB::table('employees')->where('user_id', auth()->id())->value('restaurant_id')
+            )
+            : $this->restaurant();
+
+        $table = $this->table($id);
+
+        $order = $restaurant->orders()
+            ->where('table_id', $table->id)
+            ->whereIn('status', ['pending', 'preparing', 'ready'])
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return back()->with('error', 'No hay orden activa.');
+        }
+
+        // Enriquecer ítems con precios reales del menú
+        $sentItems  = $request->input('items', []);
+        $menuIds    = array_column($sentItems, 'id');
+        $menuItems  = DB::table('menu_items')->whereIn('id', $menuIds)->get()->keyBy('id');
+
+        $enriched = [];
+        $subtotal = 0;
+        foreach ($sentItems as $item) {
+            $menu  = $menuItems->get($item['id'] ?? null);
+            if (!$menu) continue;
+            $qty   = (int) ($item['qty'] ?? 1);
+            $price = (float) $menu->price;
+            $enriched[] = [
+                'id'       => $menu->id,
+                'name'     => $menu->name,
+                'category' => $menu->category,
+                'price'    => $price,
+                'qty'      => $qty,
+            ];
+            $subtotal += $price * $qty;
+        }
+
+        $order->update([
+            'items' => $enriched,
+            'total' => $subtotal,
+        ]);
+
+        $this->clearCache();
+
+        return redirect()->route('admin.tables.recibo', $id)
+            ->with('success', '✓ Pedido actualizado con ' . count($enriched) . ' ítem(s). Total: $' . number_format($subtotal, 0, ',', '.'));
     }
 
     // ── Cerrar cuenta con propina ─────────────────────────────────────

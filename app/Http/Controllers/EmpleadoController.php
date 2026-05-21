@@ -71,7 +71,7 @@ class EmpleadoController extends Controller
             ]];
         }
 
-        $todayReservations = Reservation::with(['user', 'table'])
+        $todayReservations = Reservation::with(['user', 'table', 'restaurant'])
             ->where('restaurant_id', $employee->restaurant_id)
             ->where(fn ($q) => $q->where('waiter_id', $employee->id)->orWhereNull('waiter_id'))
             ->whereIn('status', ['pending', 'confirmed'])

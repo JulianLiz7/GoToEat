@@ -66,6 +66,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::patch('/tables/{id}/orden-estado', [AdminTablesController::class, 'updateOrderStatus'])->name('tables.order.status');
     Route::post('/tables/{id}/assign-reservation', [AdminTablesController::class, 'assignReservation'])->name('tables.assign.reservation');
     Route::get('/tables/{id}/recibo',              [AdminTablesController::class, 'recibo'])->name('tables.recibo');
+    Route::post('/tables/{id}/recibo/items',       [AdminTablesController::class, 'updateReciboItems'])->name('tables.recibo.items');
     Route::post('/tables/{id}/cerrar',             [AdminTablesController::class, 'cerrarCuenta'])->name('tables.cerrar');
     // ── Finanzas (sub-panel propio) ───────────────────────────────
     Route::get('/finance', [AdminFinanceController::class, 'resumen'])->name('finance');
@@ -133,6 +134,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->prefix('empleado')->name('empleado.')->group(function () {
     Route::get('/dashboard',       [EmpleadoController::class, 'dashboard'])->name('dashboard');
     Route::get('/notificaciones',  [EmpleadoController::class, 'notificacionesJson'])->name('notificaciones');
+    Route::get('/mesa/{id}/recibo',[AdminTablesController::class, 'recibo'])->name('mesa.recibo');
     Route::get('/turnos',          [EmpleadoController::class, 'turnos'])->name('turnos');
     Route::get('/pagos',           [EmpleadoController::class, 'pagos'])->name('pagos');
     Route::get('/perfil',          [EmpleadoController::class, 'perfil'])->name('perfil');
