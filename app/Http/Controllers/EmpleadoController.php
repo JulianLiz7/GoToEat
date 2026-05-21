@@ -86,6 +86,32 @@ class EmpleadoController extends Controller
         ));
     }
 
+    public function notificacionesJson()
+    {
+        $employee = $this->getEmployee();
+        if (! $employee) return response()->json(['count' => 0, 'items' => []]);
+
+        $notifications = StaffNotification::where('restaurant_id', $employee->restaurant_id)
+            ->active()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($n) => [
+                'id'      => $n->id,
+                'titulo'  => $n->title,
+                'mensaje' => $n->message,
+                'tipo'    => $n->type,
+                'icono'   => $n->type === 'urgente' ? 'alarm' : ($n->type === 'aviso' ? 'campaign' : 'info'),
+                'color'   => $n->type === 'urgente' ? 'red' : ($n->type === 'aviso' ? 'amber' : 'blue'),
+                'tiempo'  => $n->created_at->diffForHumans(),
+            ]);
+
+        return response()->json([
+            'count' => $notifications->count(),
+            'items' => $notifications,
+        ]);
+    }
+
     public function turnos()
     {
         $employee = $this->getEmployee();

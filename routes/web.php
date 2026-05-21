@@ -131,11 +131,12 @@ Route::middleware('auth')->group(function () {
 
 // ── Panel de Empleado (Chef, Cajero, Mesero) ──────────────────────
 Route::middleware(['auth'])->prefix('empleado')->name('empleado.')->group(function () {
-    Route::get('/dashboard', [EmpleadoController::class, 'dashboard'])->name('dashboard');
-    Route::get('/turnos',    [EmpleadoController::class, 'turnos'])->name('turnos');
-    Route::get('/pagos',     [EmpleadoController::class, 'pagos'])->name('pagos');
-    Route::get('/perfil',    [EmpleadoController::class, 'perfil'])->name('perfil');
-    Route::patch('/perfil',  [EmpleadoController::class, 'perfilUpdate'])->name('perfil.update');
+    Route::get('/dashboard',       [EmpleadoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/notificaciones',  [EmpleadoController::class, 'notificacionesJson'])->name('notificaciones');
+    Route::get('/turnos',          [EmpleadoController::class, 'turnos'])->name('turnos');
+    Route::get('/pagos',           [EmpleadoController::class, 'pagos'])->name('pagos');
+    Route::get('/perfil',          [EmpleadoController::class, 'perfil'])->name('perfil');
+    Route::patch('/perfil',        [EmpleadoController::class, 'perfilUpdate'])->name('perfil.update');
 });
 
 require __DIR__.'/auth.php';

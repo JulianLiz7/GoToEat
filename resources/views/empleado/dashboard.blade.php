@@ -58,19 +58,82 @@
 <main class="md:ml-64 flex flex-col min-h-screen pb-20 md:pb-0">
 
     <!-- Top Bar -->
-    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-6 py-4">
+    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center w-full px-6 py-4"
+            x-data="notifPoller({{ count($notificaciones) }}, '{{ route('empleado.notificaciones') }}')"
+            x-init="init()">
         <div>
             <h2 class="font-heading text-lg font-bold text-on-surface">Bienvenido, {{ explode(' ', auth()->user()->name)[0] }}</h2>
             <p class="text-xs text-on-surface-variant">{{ now()->locale('es')->isoFormat('dddd, D [de] MMMM YYYY') }}</p>
         </div>
         <div class="flex items-center gap-3">
+            {{-- Campana de notificaciones con badge --}}
+            <button @click="panelOpen = !panelOpen" class="relative p-2 rounded-xl hover:bg-surface-container-high transition-all">
+                <span class="material-symbols-outlined text-on-surface-variant text-2xl"
+                      :style="count > 0 ? 'font-variation-settings:FILL 1' : ''"
+                      :class="count > 0 ? 'text-primary' : ''">notifications</span>
+                <template x-if="count > 0">
+                    <span class="absolute top-1 right-1 w-5 h-5 bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white"
+                          x-text="count > 9 ? '9+' : count"></span>
+                </template>
+            </button>
+
             <a href="{{ route('empleado.perfil') }}" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-xl hover:bg-surface-container-high transition-all">
                 <div class="w-8 h-8 bg-primary-container rounded-full flex items-center justify-center text-white font-bold text-sm">
                     {{ strtoupper(substr(auth()->user()->name ?? 'E', 0, 1)) }}
                 </div>
                 <span class="text-sm font-medium text-on-surface hidden sm:block">{{ explode(' ', auth()->user()->name)[0] }}</span>
-                <span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
             </a>
+        </div>
+
+        {{-- Panel desplegable de notificaciones --}}
+        <div x-show="panelOpen" x-cloak @click.outside="panelOpen = false"
+             class="absolute top-full right-4 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1">notifications_active</span>
+                    <span class="font-bold text-sm text-on-surface">Avisos del equipo</span>
+                    <span x-show="count > 0" class="bg-error text-white text-[10px] font-black px-1.5 py-0.5 rounded-full" x-text="count"></span>
+                </div>
+                <button @click="panelOpen = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+            <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                <template x-if="items.length === 0">
+                    <div class="py-8 text-center text-gray-400 text-sm">Sin avisos activos</div>
+                </template>
+                <template x-for="n in items" :key="n.id">
+                    <div class="px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
+                                 :class="`bg-${n.color}-50`">
+                                <span class="material-symbols-outlined text-sm"
+                                      :class="`text-${n.color}-500`"
+                                      style="font-variation-settings:'FILL' 1"
+                                      x-text="n.icono"></span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-on-surface truncate" x-text="n.titulo"></p>
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2" x-text="n.mensaje"></p>
+                                <p class="text-[10px] text-gray-400 mt-1" x-text="n.tiempo"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        {{-- Toast de nueva notificación --}}
+        <div x-show="toast" x-cloak x-transition
+             class="fixed bottom-6 right-6 z-[100] bg-on-surface text-white rounded-2xl shadow-2xl px-5 py-4 flex items-start gap-3 max-w-sm">
+            <span class="material-symbols-outlined text-primary text-[22px] shrink-0" style="font-variation-settings:'FILL' 1">notification_important</span>
+            <div>
+                <p class="font-bold text-sm" x-text="toastMsg.titulo"></p>
+                <p class="text-xs text-gray-300 mt-0.5" x-text="toastMsg.mensaje"></p>
+            </div>
+            <button @click="toast = false" class="shrink-0 text-gray-400 hover:text-white ml-2">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
         </div>
     </header>
 
@@ -284,18 +347,25 @@
                 </div>
             </div>
 
-            <!-- Notificaciones -->
-            <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary-container">notifications_active</span>
-                    <h3 class="font-bold text-on-surface">Notificaciones del Equipo</h3>
+            <!-- Notificaciones (sincronizado con el poller) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden"
+                 x-data="{ get notifs() { return document.querySelector('header').__x && document.querySelector('header').__x.$data ? document.querySelector('header').__x.$data.items : [] } }">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">notifications_active</span>
+                        <h3 class="font-bold text-on-surface">Notificaciones del Equipo</h3>
+                    </div>
+                    <span class="text-xs text-gray-400">Actualiza cada 30s</span>
                 </div>
                 <div class="divide-y divide-gray-50">
                     @forelse($notificaciones as $notif)
                     <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
                         <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-full bg-{{ $notif['color'] ?? 'orange' }}-50 flex items-center justify-center shrink-0 mt-0.5">
-                                <span class="material-symbols-outlined text-{{ $notif['color'] ?? 'orange' }}-500 text-lg">{{ $notif['icono'] ?? 'notifications' }}</span>
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5
+                                {{ $notif['color'] === 'orange' ? 'bg-orange-50' : ($notif['color'] === 'blue' ? 'bg-blue-50' : 'bg-emerald-50') }}">
+                                <span class="material-symbols-outlined text-lg
+                                    {{ $notif['color'] === 'orange' ? 'text-orange-500' : ($notif['color'] === 'blue' ? 'text-blue-500' : 'text-emerald-500') }}"
+                                      style="font-variation-settings:'FILL' 1">{{ $notif['icono'] ?? 'notifications' }}</span>
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-on-surface">{{ $notif['titulo'] }}</p>
@@ -306,7 +376,7 @@
                     @empty
                     <div class="flex flex-col items-center justify-center py-10 text-center px-6">
                         <span class="material-symbols-outlined text-4xl text-gray-300 mb-3">notifications_off</span>
-                        <p class="text-sm font-medium text-gray-400">Sin notificaciones</p>
+                        <p class="text-sm font-medium text-gray-400">Sin avisos del equipo</p>
                     </div>
                     @endforelse
                 </div>
@@ -372,5 +442,49 @@
 </nav>
 
 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+
+<script>
+function notifPoller(initialCount, url) {
+    return {
+        count: initialCount,
+        items: [],
+        panelOpen: false,
+        toast: false,
+        toastMsg: { titulo: '', mensaje: '' },
+        _prevCount: initialCount,
+        _timer: null,
+
+        init() {
+            this.fetchNotifs();
+            this._timer = setInterval(() => this.fetchNotifs(), 30000);
+        },
+
+        async fetchNotifs() {
+            try {
+                const res = await fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+                const newCount = data.count ?? 0;
+                this.items = data.items ?? [];
+
+                if (newCount > this._prevCount && this._prevCount >= 0) {
+                    const newest = this.items[0];
+                    if (newest) {
+                        this.toastMsg = { titulo: newest.titulo, mensaje: newest.mensaje };
+                        this.toast = true;
+                        setTimeout(() => this.toast = false, 6000);
+                    }
+                }
+
+                this._prevCount = newCount;
+                this.count = newCount;
+            } catch (e) {
+                // silenciar errores de red
+            }
+        }
+    };
+}
+</script>
 </body>
 </html>
